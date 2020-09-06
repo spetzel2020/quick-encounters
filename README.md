@@ -1,6 +1,6 @@
 # Quick Encounters
 
-* **Author**: Spetezel#0103
+* **Author**: Spetzel#0103
 * **Version**: 0.1.0
 * **Foundry VTT Compatibility**: 0.6.5+
 * **System Compatibility (If applicable)**: N/A
