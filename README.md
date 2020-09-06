@@ -7,11 +7,11 @@
 * **Translation Support**: en
 
 
-##Description
+## Description
 
 Quick Encounters keeps your [Foundry VTT](https://foundryvtt.com/) map clean and your encounters simple in heavily populated dungeons. Drag your Hostile tokens to the map and select them. Then press the Quick Encounters button and your tokens and their positions are saved into a custom Journal Entry, shown by a single map pin on the Scene map.
 
-To run your Quick Encounter, simply double-click the map pin and click the "Add to Combat Tracker" button; all your saved tokens will be positioned on the map and added to the combat tracker, ready to fight! [Foundry VTT](https://foundryvtt.com/)
+To run your Quick Encounter, simply double-click the map pin and click the "Add to Combat Tracker" button; all your saved tokens will be positioned on the map and added to the combat tracker, ready to fight!
 
 Quick Encounters brings the functionality of Fantasy Grounds "Encounters" to Foundry.
 
