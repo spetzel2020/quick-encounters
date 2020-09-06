@@ -19,7 +19,7 @@ Quick Encounters brings the functionality of Fantasy Grounds "Encounters" to Fou
 
 1. Go to the "Add-on Modules" tab in Foundry Setup
 2. Click "Install Module" and paste this link: `https://raw.githubusercontent.com/opus1217/quick-encounters/master/module.json`
-3. Open your world and go to Settings>Manage Modules and enable Quick encounterScene
+3. Open your world and go to Settings>Manage Modules and enable Quick Encounters
 
 ## Using Quick Encounters
 1. Drag your Hostile tokens to the map and select them
