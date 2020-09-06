@@ -1,7 +1,7 @@
 # Quick Encounters
 
 * **Author**: Spetzel#0103
-* **Version**: 0.1.0
+* **Version**: 0.1.1
 * **Foundry VTT Compatibility**: 0.6.5+
 * **System Compatibility (If applicable)**: N/A
 * **Translation Support**: en
@@ -18,7 +18,7 @@ Quick Encounters brings the functionality of Fantasy Grounds "Encounters" to Fou
 ## Install
 
 1. Go to the "Add-on Modules" tab in Foundry Setup
-2. Click "Install Module" and paste this link: `https://raw.githubusercontent.com/<user>/<project>/master/module.json`
+2. Click "Install Module" and paste this link: `https://raw.githubusercontent.com/opus1217/quick-encounters/master/module.json`
 3. Open your world and go to Settings>Manage Modules and enable Quick encounterScene
 
 ## Using Quick Encounters
