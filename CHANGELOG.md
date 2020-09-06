@@ -1,7 +1,8 @@
 # Changelog
 
-## 0.1.1 Clean-up for Foundry package referencing
+## 0.1.2 Clean-up for Foundry package referencing
 
+## 0.1.1 Clean-up for Foundry package referencing
 
 ## 0.1.0 Basic Working Version
 Delete Map Note if you delete the Quick Encounters Journal Entry
