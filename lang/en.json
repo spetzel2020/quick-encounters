@@ -1,0 +1,13 @@
+{
+    "QE.Version" : "0.1.0",
+  "QE.Title": "Quick Encounters",
+  "QE.Description": "Pin your Encounters to the Scene or in the Journal and run them with one click!",
+  "QE.id": "quick-encounters",
+  "QE.CONTENT.AddADescription" : "<i>Add a description of the quick encounter for you or your players:</i>",
+  "QE.CONTENT.Instructions" : "When you close this Journal Entry, the selected tokens will be replaced with a single Encounter icon on the scene. When you want to run the Quick Encounter, double-click the skull icon and then press the Add to Combat Tracker button.",
+  "QE.BUTTON.AddToCombatTracker" : "Add Quick Encounter to Combat Tracker",
+  "QE.BUTTON.CreateEncounterJournal" : "Save tokens to Quick Encounter Journal",
+  "QE.BUTTON.SaveEncounterMapNote" : "Save Quick Encounter Map Note",
+  "QE.NOTE.ConfigTitle" : "Quick Encounter Pin Configuration",
+  "QE.ERROR.SelectTokens" : "Please place and select tokens before using the Quick Encounters button"
+}

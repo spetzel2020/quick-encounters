@@ -1,0 +1,89 @@
+<form autocomplete="off" onsubmit="event.preventDefault();">
+
+    <div class="form-group">
+        <label>{{ localize "ENTITY.JournalEntry" }}</label>
+        <div class="form-fields">
+            <select name="entryId">
+                {{#select entryId}}
+                <option value=""></option>
+                {{#each entries}}
+                <option value="{{this._id}}">{{this.name}}</option>
+                {{/each}}
+                {{/select}}
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>{{ localize "NOTE.TextLabel" }}</label>
+        <div class="form-fields">
+            <input type="text" name="text" value="{{object.text}}" placeholder="{{entryName}}"/>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>{{ localize "XCoord" }}</label>
+        <div class="form-fields">
+            <input type="text" name="x" placeholder="X" value="{{numberFormat object.x decimals=2}}" data-dtype="Number"/>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>{{ localize "YCoord" }}</label>
+        <div class="form-fields">
+            <input type="text" name="y" placeholder="Y" value="{{numberFormat object.y decimals=2}}" data-dtype="Number"/>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>{{ localize "NOTE.EntryIcon" }}</label>
+        <div class="form-fields">
+            <select name="icon">
+                {{#select object.icon}}
+                {{#each entryIcons as |icon name|}}
+                <option value="{{icon}}">{{name}}</option>
+                {{/each}}
+                {{/select}}
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>{{ localize "NOTE.IconSize" }} ({{localize "Pixels"}})</label>
+        <div class="form-fields">
+            <input type="text" name="iconSize" value="{{object.iconSize}}" data-dtype="Number"/>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>{{ localize "NOTE.IconTint" }}</label>
+        <div class="form-fields">
+            <input class="color" type="text" name="iconTint" value="{{object.iconTint}}"/>
+            <input type="color" value="{{object.iconTint}}" data-edit="iconTint"/>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>{{ localize "NOTE.FontSize" }}</label>
+        <div class="form-fields">
+            <input type="text" name="fontSize" value="{{object.fontSize}}" data-dtype="Number"/>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>{{ localize "NOTE.AnchorPoint" }}</label>
+        <div class="form-fields">
+            <select name="textAnchor" data-dtype="Number">
+                {{#select object.textAnchor}}
+                {{#each textAnchors as |v k|}}
+                <option value="{{k}}">{{v}}</option>
+                {{/each}}
+                {{/select}}
+            </select>
+        </div>
+    </div>
+
+    <button type="submit" name="submit">
+        <i class="far fa-save"></i> {{ localize "NOTE.Update" }}
+    </button>
+</form>
