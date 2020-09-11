@@ -1,5 +1,11 @@
 import {MODULE_NAME} from './QuickEncounter.js';
 
+//Expand the available list of Note icons
+const moreNoteIcons = {
+    "Combat" : "icons/svg/combat.svg"
+}
+Object.assign(CONFIG.JournalEntry.noteIcons, moreNoteIcons);
+
 
 /*
 Extend the placeable Map Note - select the desired tokens and then tap the Quick Encounters button
@@ -9,7 +15,15 @@ Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tra
 
 
 */
-
+export class EncounterNoteConfig extends NoteConfig {
+    /** @override  */
+    static get defaultOptions() {
+    	  const options = super.defaultOptions;
+    	  options.id = "encounter-note-config";
+          options.title = game.i18n.localize("QE.NOTE.ConfigTitle");
+    	  return options;
+    }
+}
 
 export class EncounterNote{
     static async create(journalEntry, noteAnchor) {
@@ -19,7 +33,7 @@ export class EncounterNote{
               entryId: journalEntry.id,
               x: noteAnchor.x,
               y: noteAnchor.y,
-              icon: CONFIG.JournalEntry.noteIcons.Skull,
+              icon: CONFIG.JournalEntry.noteIcons.Sword,
               iconSize: 80,
               iconTint: "#FF0000",  //Red
               //Don't specify the name so it inherits from the Journal
@@ -37,12 +51,6 @@ export class EncounterNote{
         return newNote;
 
     }
-
-    static findByJournalEntry(journalEntryID) {
-        return
-    }
-
-
 
 /*
   constructor(tokens, ...args) {
@@ -80,15 +88,7 @@ export class EncounterNote{
 
 }
 
-export class EncounterNoteConfig extends NoteConfig {
-    /** @override  */
-    static get defaultOptions() {
-    	  const options = super.defaultOptions;
-    	  options.id = "encounter-note-config";
-          options.title = game.i18n.localize("QE.NOTE.ConfigTitle");
-    	  return options;
-    }
-}
+
 
 Hooks.on(`renderEncounterNoteConfig`, async (noteConfig, html, data) => {
     const saveEncounterMapNote = game.i18n.localize("QE.BUTTON.SaveEncounterMapNote");

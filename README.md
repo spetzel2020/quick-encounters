@@ -1,7 +1,7 @@
 # Quick Encounters
 
 * **Author**: Spetzel#0103
-* **Version**: 0.1.2
+* **Version**: 0.2.0
 * **Foundry VTT Compatibility**: 0.6.5+
 * **System Compatibility (If applicable)**: N/A
 * **Translation Support**: en
