@@ -2,11 +2,13 @@ import {MODULE_NAME} from './QuickEncounter.js';
 import {EncounterNote} from './EncounterNote.js';
 
 
+
 /*
 Extend the placeable Map Note - select the desired tokens and then tap the Quick Encounters button
 Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tracker when you open the note?
 31-Aug-2020   Created
 2-Sep-2020      Make EncounterJournalSheet the default sheet for JournalEntry
+UNUSED RIGHT NOW
 
 */
 
