@@ -1,9 +1,8 @@
 import {EncounterNote} from './EncounterNote.js';
 
 export const MODULE_NAME = "quick-encounters";
-
-const SCENE_ID_FLAG_KEY = "sceneID";
-const TOKENS_FLAG_KEY = "tokens";
+export const SCENE_ID_FLAG_KEY = "sceneID";
+export const TOKENS_FLAG_KEY = "tokens";
 
 /*
 27-Aug-2020     Created
@@ -16,13 +15,16 @@ const TOKENS_FLAG_KEY = "tokens";
                 Add imports from foundry.js to improve linting
                 NOTE: We search the candidate Journal Entries on the fly (in the future, potentially even without opening them)
                 An alternative would be to hook on renderJournalSheet and flag it there if it has Actors; might be marginally faster
-
-
+12-Sep-2020     create() deletes the token from the canvas, not just the token
+                runFromJournal doesn't create a token, just puts the tokenData in the Journal
+                (and then the create() creates the tokens from the Journal)
+                Split createCombat into createTokens and createCombat so that Method 1 and Method 2 are more modular
+13-Sep-2020     Slightly adjust the position of the dropped tokens around the base corner of the map Note
 */
 
 
 
-class QuickEncounter {
+export class QuickEncounter {
     static init() {
         game.settings.register(MODULE_NAME, "quickEncountersVersion", {
           name: "Quick Encounters Version",
@@ -77,9 +79,9 @@ class QuickEncounter {
 
     static createOrRun() {
         //Method 1: Get the selected tokens and the scene
-        const selectedTokens = Array.from(canvas.tokens.controlled);
-        if (selectedTokens && selectedTokens.length) {
-            QuickEncounter.create(selectedTokens);
+        const controlledTokens = Array.from(canvas.tokens.controlled);
+        if (controlledTokens && controlledTokens.length) {
+            QuickEncounter.create(controlledTokens);
         } else {
             //Method 2: Check for an open Journal with a map note
             const candidateJournalEntry = QuickEncounter.findCandidateJournalEntry();
@@ -134,35 +136,50 @@ class QuickEncounter {
             }
 
             //Now check that the Journal Entry has embedded Actors
-            return {ejEntry: candidateJournal, mapNote : mapNote, embeddedActors : embeddedActors};
+            return {qeJournalEntry: candidateJournal, mapNote : mapNote, embeddedActors : embeddedActors};
         }
     }
 
-    static async runFromJournal({ejEntry, mapNote, embeddedActors}) {
+    static async runFromJournal({qeJournalEntry, mapNote, embeddedActors}) {
         // This version takes any open Journal with embedded Actors and turns them into tokens at the Journal Entry's map note position
-        if (!ejEntry || !mapNote || !embeddedActors.length) {return;}
+        if (!qeJournalEntry || !mapNote || !embeddedActors.length) {return;}
         //Future might be able to handle not having a mapNote
 
         const x = mapNote.data.x;
         const y = mapNote.data.y;
         canvas.tokens.activate();
+        const controlledTokensData = [];
         for (let eActor of embeddedActors) {
-            const numActors = eActor.numActors;
+            let numActors = parseInt(eActor.numActors,10);
             const actor = game.actors.get(eActor.entityID);
-            let tokenData = {
-                name : eActor.name,
-                x: x,
-                y: y,
-                hidden: true
-             }
-             //Use the prototype token from the Actors
-             tokenData = mergeObject(actor.data.token, tokenData, {inplace: false});
-             await Token.create(tokenData);
-        }
 
+             //If numActors didn't convert then just create 1 token
+
+             if (!numActors) {numActors = 1;}
+             const gridSize = canvas.dimensions.size;
+             for (let iActor=1; iActor <= numActors; iActor++) {
+                 //Slightly "shake" the (x,y) coords so we don't pile all the tokens on top of each other and make them hard to find
+                 let tokenData = {
+                     name : eActor.name,
+                     x: x + (Math.random() * gridSize) - gridSize/2, //adjust position within +/-5,
+                     y: y + (Math.random() * gridSize) - gridSize/2, //adjust position within +/-5,
+                     hidden: true
+                 }
+                 //Use the prototype token from the Actors
+                 tokenData = mergeObject(actor.data.token, tokenData, {inplace: false});
+
+                 controlledTokensData.push(tokenData);
+             }
+        }
+        //Add these tokens to the Journal Entry as flags so that we can use createTokens
+        await QuickEncounter.addTokenDataToJournalEntry(qeJournalEntry, controlledTokensData);
+
+        //Use the QuickEncounter Journal Entry to create the tokens and add them to the Combat Tracker
+        const createdTokens = await QuickEncounter.createTokens(qeJournalEntry);
+        await QuickEncounter.createCombat(createdTokens);
     }
 
-    static async create(selectedTokens) {
+    static async create(controlledTokens) {
         //Create a new JournalEntry - the corresponding map note gets created when you save&close the Journal Sheet
 
         const addToCombatTrackerTitle = game.i18n.localize("QE.BUTTON.AddToCombatTracker");
@@ -170,7 +187,7 @@ class QuickEncounter {
 //NOTE: -------- This code chunk should enable us to drag additional encounters or tokens to a single Journal Entry if necessary
 //Perhaps you can even include the Actors and modify the number of tokens
         let content = game.i18n.localize("QE.CONTENT.AddADescription");
-        selectedTokens.forEach((token, i) => {
+        controlledTokens.forEach((token, i) => {
             content += `<li>${token.name}</li>`;
         });
         content += addToCombatTrackerButton;
@@ -179,7 +196,7 @@ class QuickEncounter {
         const instructions = game.i18n.localize("QE.CONTENT.Instructions");
         content += instructions;
 
-        const scene = selectedTokens[0].scene;
+        const scene = controlledTokens[0].scene;
         const journalData = {
             folder: null,
             name: `${scene.name}: Quick Encounter`,
@@ -191,20 +208,27 @@ class QuickEncounter {
 
         //Record the scene for the tokens as a convenience
         await journalEntry.setFlag(MODULE_NAME,SCENE_ID_FLAG_KEY, scene.id);
-        //Save an array of token data
-        let selectedTokensData = [];
-        selectedTokens.forEach((token, i) => {
-            selectedTokensData.push(token.data);
-        });
-        await journalEntry.setFlag(MODULE_NAME, TOKENS_FLAG_KEY, selectedTokensData);
+        await addTokensToJournalEntry(journalEntry, controlledTokens);
 
         const ejSheet = new JournalSheet(journalEntry);
         ejSheet.render(true);
         //Delete the existing tokens (because they will be replaced)
-        selectedTokens.forEach((token, i) => {
-            token.delete();
+        controlledTokens.forEach((token, i) => {
+            canvas.tokens.delete(token.id);
         });
+    }
 
+    static async addTokensToJournalEntry(qeJournalEntry, controlledTokens) {
+        //Save an array of token data
+        let controlledTokensData = [];
+        controlledTokens.forEach((token, i) => {
+            controlledTokensData.push(token.data);
+        });
+        await QuickEncounter.addTokenDataToJournalEntry(qeJournalEntry, controlledTokensData);
+    }
+
+    static async addTokenDataToJournalEntry(qeJournalEntry, controlledTokensData) {
+        await qeJournalEntry.setFlag(MODULE_NAME, TOKENS_FLAG_KEY, controlledTokensData);
     }
 
     static hasEncounter(journalEntry) {
@@ -218,81 +242,57 @@ class QuickEncounter {
         return combatTokensData;
     }
 
-    static async placeNote(ejEntry) {
-        const savedTokens = QuickEncounter.getEncounterTokensFromJournalEntry(ejEntry);
-        //Create a Map Note for this encounter
-        if (savedTokens && savedTokens.length) {
-            const noteAnchor = {
-                x: savedTokens[0].x,
-                y: savedTokens[0].y
-            }
+    static async createTokens(qeJournalEntry) {
+        //Get the scene for this EncounterJournalEntry and view it
+        const sceneID = qeJournalEntry.getFlag(MODULE_NAME, SCENE_ID_FLAG_KEY);
+        const scene = game.scenes.get(sceneID);
+        if (scene) {await scene.view();}
 
-            // Validate the final position is in-bounds
-            if (canvas.grid.hitArea.contains(noteAnchor.x, noteAnchor.y) ) {
+        //Recover token data
+        const combatTokensData = QuickEncounter.getEncounterTokensFromJournalEntry(qeJournalEntry);
 
-                // Create a NoteConfig sheet instance to finalize the creation
-                //Don't activate the note toolbar section since we want to define more
-                //canvas.notes.activate();
-                const newNote = await EncounterNote.create(ejEntry, noteAnchor);
-                const note = canvas.notes.preview.addChild(newNote);
-                await note.draw();  //Draw the new Note on the canvas and add listeners
-                note.sheet.render(true);
-            }
+        //TODO: Match the token in the scene based on its data
+
+        //Or re-create them (automatically get added to the scene)
+        //Have to also control them in order to add them to the combat tracker
+//FIXME: We are skipping a lot of the normal onDragDrop workflow for an actor, including what looks like scaling
+//of the token size to the Scene - need to also test with Token Mold disabled
+        let createdTokens = [];
+        for (let tokenData of combatTokensData) {
+            const newToken = await Token.create(tokenData);
+            if (newToken) {createdTokens.push(newToken);}
         }
+        return createdTokens;
     }
 
-    static async deleteNote(journalEntry) {
-        if (!game.user.isGM) {return;}
-        if (QuickEncounter.hasEncounter(journalEntry)) {
-            //Find the corresponding Map note - have to switch to the correct scene first
-            const sceneID = journalEntry.getFlag(MODULE_NAME, SCENE_ID_FLAG_KEY);
-            const scene = game.scenes.get(sceneID);
-            if (!scene) {return;}
-            await scene.view();
-            const note = journalEntry.sceneNote;
+    static async createCombat(createdTokens) {
+        if (!createdTokens || !createdTokens.length) {return;}
 
-            //Delete the note from the viewed scene
-            if (note) {
-                canvas.scene.deleteEmbeddedEntity("Note",[note.id]);
-            }
-        }
+        //Control the tokens (because that is checked in adding them to the Combat Tracker)
+        await createdTokens.forEach(token => {token.control({releaseOthers : false, updateSight : false});});
+
+        const tabApp = ui.combat;
+        tabApp.renderPopout(tabApp);
+        //If the tokens are not on the Scene then add them
+
+        //Load the recovered tokens into the combat Tracker
+        //Only have to toggle one of them to add all the controlled tokens
+        await createdTokens[0].toggleCombat();
+
+        //Now release control of them as a group, because otherwise the stack is hard to see
+        await createdTokens.forEach(token => {token.release();});
     }
+
+
 
 }
 
-
-async function createCombat() {
-    const journalEntry = this.object;
-
-    //Get the scene for this EncounterJournalEntry and view it
-    const sceneID = journalEntry.getFlag(MODULE_NAME, SCENE_ID_FLAG_KEY);
-    const scene = game.scenes.get(sceneID);
-    if (scene) {await scene.view();}
-
-    //Recover token data
-    const combatTokensData = QuickEncounter.getEncounterTokensFromJournalEntry(journalEntry);
-
-    //Match the token in the scene based on its data
-
-    //Or re-create them (automatically get added to the scene)
-    let createdTokens = [];
-    for (let tokenData of combatTokensData) {
-        createdTokens.push(await Token.create(tokenData));
-    }
-    const tabApp = ui["combat"];
-    tabApp.renderPopout(tabApp);
-    //If the tokens are not on the Scene then add them
-
-    //Load the recovered tokens into the combat Tracker
-    for (let token of createdTokens) {
-        await token.toggleCombat();
-    }
-}
 
 //Add a listener for the embedded Encounter button
 Hooks.on(`renderJournalSheet`, async (journalSheet, html) => {
     if (!game.user.isGM) {return;}
-    html.find('button[name="addToCombatTracker"]').click(createCombat.bind(journalSheet));
+    const qeJournalEntry = journalSheet.entity;
+    html.find('button[name="addToCombatTracker"]').click(QuickEncounter.createCombat(qeJournalEntry));
 });
 
 //The Journal Sheet places a note if there should be one
@@ -305,13 +305,11 @@ Hooks.on('closeJournalSheet', async (journalSheet) => {
         const sceneID = journalEntry.getFlag(MODULE_NAME, SCENE_ID_FLAG_KEY);
         //Note that .sceneNote only returns a note that exists in the viewed scene
         if ((game.scenes.viewed.id === sceneID) && !journalEntry.sceneNote) {
-            await QuickEncounter.placeNote(journalEntry);
+            await EncounterNote.place(journalEntry);
         }
     }
 });
 
-//Delete a corresponding Map Note if you delete the Journal Entry
-Hooks.on("deleteJournalEntry", async (journalEntry) => QuickEncounter.deleteNote);
 
 Hooks.on("init", QuickEncounter.init);
 Hooks.on('setup', QuickEncounter.setup);

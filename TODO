@@ -1,2 +1,7 @@
 1. Example Journal Entry created with how to do it - or linked from the Settings Sheet- Or a dialog when you press the button
 2. If you open the Quick Encounter Journal with stored token information then use that in preference
+
+
+    - refactor Method 1 to insert actors
+
+>>> Sum up and show the XP (5e only) for a combat - Total XP for this Encounter Journal, and a way of calculating per # of players

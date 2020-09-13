@@ -1,4 +1,5 @@
-import {MODULE_NAME} from './QuickEncounter.js';
+import {MODULE_NAME, SCENE_ID_FLAG_KEY, TOKENS_FLAG_KEY} from './QuickEncounter.js';
+import {QuickEncounter} from './QuickEncounter.js';
 
 //Expand the available list of Note icons
 const moreNoteIcons = {
@@ -12,6 +13,8 @@ Extend the placeable Map Note - select the desired tokens and then tap the Quick
 Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tracker when you open the note?
 27-Aug-2020   Created
 30-Aug-2020   Added EncounterNoteConfig
+13-Sep-2020    QuickEncounter.deleteNote moved/renamed to EncounterNote.delete
+                QuickEncounter.placeNote moved/renamed to EncounterNote.place
 
 
 */
@@ -52,43 +55,50 @@ export class EncounterNote{
 
     }
 
-/*
-  constructor(tokens, ...args) {
-      super(...args);
+    static async delete(journalEntry) {
+        if (!game.user.isGM) {return;}
+        if (QuickEncounter.hasEncounter(journalEntry)) {
+            //Find the corresponding Map note - have to switch to the correct scene first
+            const sceneID = journalEntry.getFlag(MODULE_NAME, SCENE_ID_FLAG_KEY);
+            const scene = game.scenes.get(sceneID);
+            if (!scene) {return;}
+            await scene.view();
+            const note = journalEntry.sceneNote;
 
-      //Clone the passed selected tokens so that we can reproduce them
-      //But we store them with the underlying Note so they can be accessed easily
-      this.savedTokens = [];
-      tokens.forEach((token, i) => {
-          this.savedTokens.push(token.clone());
-      });
-      super.savedTokens = this.savedTokens;
+            //Delete the note from the viewed scene
+            if (note) {
+                canvas.scene.deleteEmbeddedEntity("Note",[note.id]);
+            }
+        }
+    }
 
-      this._sheet = new EncounterNoteConfig(this);
+    static async place(qeJournalEntry) {
+        const savedTokens = QuickEncounter.getEncounterTokensFromJournalEntry(qeJournalEntry);
+        //Create a Map Note for this encounter
+        if (savedTokens && savedTokens.length) {
+            const noteAnchor = {
+                x: savedTokens[0].x,
+                y: savedTokens[0].y
+            }
 
+            // Validate the final position is in-bounds
+            if (canvas.grid.hitArea.contains(noteAnchor.x, noteAnchor.y) ) {
 
-      //Is the scene saved? Because we will use that to place the Tokens back on the map
-  }
-*/
-
-
-  /** @override */
- /*
-  _onClickLeft2(event) {
-    const sheet = this.sheet;
-    //TODO: Populate the Combat Tracker as well as popping-up the associated Encounter Journal
-
-    sheet.render();
-    //sheet.render(true, {token: this});
-    ///sheet.maximize();
-
-
-  }
-*/
+                // Create a NoteConfig sheet instance to finalize the creation
+                //Don't activate the note toolbar section since we want to define more
+                //canvas.notes.activate();
+                const newNote = await EncounterNote.create(qeJournalEntry, noteAnchor);
+                const note = canvas.notes.preview.addChild(newNote);
+                await note.draw();  //Draw the new Note on the canvas and add listeners
+                note.sheet.render(true);
+            }
+        }
+    }
 
 }
 
-
+//Delete a corresponding Map Note if you delete the Journal Entry
+Hooks.on("deleteJournalEntry", async (journalEntry) => EncounterNote.delete);
 
 Hooks.on(`renderEncounterNoteConfig`, async (noteConfig, html, data) => {
     const saveEncounterMapNote = game.i18n.localize("QE.BUTTON.SaveEncounterMapNote");

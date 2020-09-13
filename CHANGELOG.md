@@ -1,12 +1,16 @@
 # Changelog
 
-## 0.2.0 Proof of concept of Method 2 (open a Journal Entry referencing actors and click the Quick Encounter button)
-**To Do:**
--   - Add the tokens to the Combat tracker (toggleCombat)
-    - Don't put the tokens on top of each other
-    - refactor to use same toggleCombat for both methods
+## 0.3.0 Working Method 2
+- Added the tokens to the Combat tracker (toggleCombat)
+- Don't put the tokens on top of each other
+- refactor to use same toggleCombat for both methods
+- Use # of actors- 
+To DO:
     - refactor Method 1 to insert actors
-    - Use # of actors
+
+
+## 0.2.0 Proof of concept of Method 2 (open a Journal Entry referencing actors and click the Quick Encounter button)
+
 
 
 ## 0.1.2 Clean-up for Foundry package referencing
