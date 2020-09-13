@@ -19,7 +19,7 @@ Method 1 brings the functionality of Fantasy Grounds "Encounters" to Foundry.
 
 For Roving Encounters, wait to place the Quick Encounter Journal Entry until you decide on the encounter location during a session. Then follow the remaining steps for Method 2.
 
-Quick Encounters works well with [TokenMold] (https://github.com/Moerill/token-mold#token-mold) to vary your tokens names, HP, etc (although TokenMold is not required for Quick Encounters).
+Quick Encounters works well with [TokenMold](https://github.com/Moerill/token-mold#token-mold) to vary your tokens names, HP, etc (although TokenMold is not required for Quick Encounters).
 
 
 ## Install
