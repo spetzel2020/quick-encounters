@@ -15,6 +15,7 @@
                 Split createCombat into createTokens and createCombat so that Method 1 and Method 2 are more modular
 13-Sep-2020     Slightly adjust the position of the dropped tokens around the base corner of the map Note
 14-Sep-2020     Add template info for Encounters - the Journal Entry is shown and then auto-deleted if you don't change it
+14-Sep-2020     Change method of extracting number of actors to avoid reading "Name - L15" as 15 copies
 */
 
 
@@ -124,14 +125,13 @@ export class QuickEncounter {
         entityLinks.each((i, el) => {
             const element = $(el);
             const prev = element.parent();
-            const prevText = prev.text();
             const dataEntity = element.attr("data-entity");
             if (dataEntity === "Actor") {
                 const dataID = element.attr("data-id");
                 const dataName = element.text();
-                const numActors = prevText.match(/(\d+)/);
+                const numActors = parseInt(prev[0].childNodes ? prev[0].childNodes[0].textContent : "1");
                 extractedActors.push({
-                    numActors : numActors ? numActors[0] : null,
+                    numActors : numActors ? numActors : 1,
                     entityID : dataID,
                     name : dataName
                 });
@@ -163,44 +163,6 @@ export class QuickEncounter {
         }
     }
 
-    static async runFromJournal({qeJournalEntry, mapNote, embeddedActors}) {
-        // This version takes any open Journal with embedded Actors and turns them into tokens at the Journal Entry's map note position
-        if (!qeJournalEntry || !mapNote || !embeddedActors.length) {return;}
-        //Future might be able to handle not having a mapNote
-
-        const x = mapNote.data.x;
-        const y = mapNote.data.y;
-        canvas.tokens.activate();
-        const controlledTokensData = [];
-        for (let eActor of embeddedActors) {
-            let numActors = parseInt(eActor.numActors,10);
-            const actor = game.actors.get(eActor.entityID);
-
-             //If numActors didn't convert then just create 1 token
-
-             if (!numActors) {numActors = 1;}
-             const gridSize = canvas.dimensions.size;
-             for (let iActor=1; iActor <= numActors; iActor++) {
-                 //Slightly "shake" the (x,y) coords so we don't pile all the tokens on top of each other and make them hard to find
-                 let tokenData = {
-                     name : eActor.name,
-                     x: x + (Math.random() * gridSize) - gridSize/2, //adjust position within +/-5,
-                     y: y + (Math.random() * gridSize) - gridSize/2, //adjust position within +/-5,
-                     hidden: true
-                 }
-                 //Use the prototype token from the Actors
-                 tokenData = mergeObject(actor.data.token, tokenData, {inplace: false});
-
-                 controlledTokensData.push(tokenData);
-             }
-        }
-        //Add these tokens to the Journal Entry as flags so that we can use createTokens
-        await QuickEncounter.addTokenDataToJournalEntry(qeJournalEntry, controlledTokensData);
-
-        //Use the QuickEncounter Journal Entry to create the tokens and add them to the Combat Tracker
-        const createdTokens = await QuickEncounter.createTokens(qeJournalEntry);
-        await QuickEncounter.createCombat(createdTokens);
-    }
 
     static async createFromTokens(controlledTokens) {
         //Create a new JournalEntry - the corresponding map note gets created when you save&close the Journal Sheet
@@ -308,9 +270,46 @@ export class QuickEncounter {
 
     static async runFromEmbeddedButton(qeJournalEntry) {
         const createdTokens = await QuickEncounter.createTokens(qeJournalEntry);
-        QuickEncounter.createCombat(createdTokens);
+        await QuickEncounter.createCombat(createdTokens);
     }
+    static async runFromJournal({qeJournalEntry, mapNote, embeddedActors}) {
+        // This version takes any open Journal with embedded Actors and turns them into tokens at the Journal Entry's map note position
+        if (!qeJournalEntry || !mapNote || !embeddedActors.length) {return;}
+        //Future might be able to handle not having a mapNote
 
+        const x = mapNote.data.x;
+        const y = mapNote.data.y;
+        canvas.tokens.activate();
+        const controlledTokensData = [];
+        for (let eActor of embeddedActors) {
+            let numActors = parseInt(eActor.numActors,10);
+            const actor = game.actors.get(eActor.entityID);
+
+             //If numActors didn't convert then just create 1 token
+
+             if (!numActors) {numActors = 1;}
+             const gridSize = canvas.dimensions.size;
+             for (let iActor=1; iActor <= numActors; iActor++) {
+                 //Slightly "shake" the (x,y) coords so we don't pile all the tokens on top of each other and make them hard to find
+                 let tokenData = {
+                     name : eActor.name,
+                     x: x + (Math.random() * gridSize) - gridSize/2, //adjust position within +/-5,
+                     y: y + (Math.random() * gridSize) - gridSize/2, //adjust position within +/-5,
+                     hidden: true
+                 }
+                 //Use the prototype token from the Actors
+                 tokenData = mergeObject(actor.data.token, tokenData, {inplace: false});
+
+                 controlledTokensData.push(tokenData);
+             }
+        }
+        //Add these tokens to the Journal Entry as flags so that we can use createTokens
+        await QuickEncounter.addTokenDataToJournalEntry(qeJournalEntry, controlledTokensData);
+
+        //Use the QuickEncounter Journal Entry to create the tokens and add them to the Combat Tracker
+        const createdTokens = await QuickEncounter.createTokens(qeJournalEntry);
+        await QuickEncounter.createCombat(createdTokens);
+    }
 
 
 }

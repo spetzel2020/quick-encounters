@@ -1,11 +1,16 @@
 # TO DO
+
+## BUGS
+FIXED 1. If the Actor embed text includes a number that is the only number, it will be used (Rion -L14) will result in 14 copies
+
+
+## FEATURES
+1. Add the count x Actor to the documentation/tutorial
 >>>2. If you open the Quick Encounter Journal with stored token information then use that in preference
+    - May already be true
 3. Method 2 should create an embedded button and the button should be smaller (or linked to the embedded actors)
 - Or maybe the Actor links are individual buttons that populate the scene instead of showing the Actors
 -- Maybe shift-click shows the Actor or shift-click populates the Map
 >>> 4. Sum up and show the XP (5e only) for a combat - Total XP for this Encounter Journal, and a way of calculating per # of players
-<<<<<<< HEAD
 5. De-select all other controlled tokens when placing tokens to add them to the combat Tracker
 6. Why are we sometimes getting multiple (20?) tokens for each Actor
-=======
->>>>>>> da7ba2b9cfba11776a95b2a62d6c5a60e385b618
