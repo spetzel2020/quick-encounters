@@ -1,5 +1,7 @@
 # Changelog
 
+## 0.3.2 Show a tutorial Journal Entry if you press Quick Encounters without selected tokens or an applicable open Journal Entry
+
 ## 0.3.1 Method 1 inserts actors so both methods produce similar Quick Encounter Journal Entries
 
 ## 0.3.0 Working Method 2
