@@ -6,7 +6,7 @@ Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tra
 13-Sep-2020    QuickEncounter.deleteNote moved/renamed to EncounterNote.delete
                 QuickEncounter.placeNote moved/renamed to EncounterNote.place
                 Fixed flow of deleteJournalEntry --> delete associated Note
-
+14-Sep-2020     Display simple dialog when you delete the Map Note corresponding to a Quick Encounter Journal Entry
 */
 
 
@@ -67,10 +67,23 @@ export class EncounterNote{
             if (!scene) {return;}
             await scene.view();
             const note = journalEntry.sceneNote;
+            const noteName = note.name;
 
             //Delete the note from the viewed scene
             if (note) {
-                await canvas.notes.deleteMany([note.id]);
+                Dialog.prompt({
+                  title: "Deleted Quick Encounter Map Note",
+                  content: "Because you deleted the Quick Encounter Journal Entry I also deleted the associated Map Note",
+                  label : "",
+                  callback : () => {console.log(`Deleted Map Note ${noteName}`);},
+                  options: {
+                    top:  window.innerHeight - 350,
+                    left: window.innerWidth - 720,
+                    width: 400,
+                    jQuery: false
+                  }
+                });
+                canvas.notes.deleteMany([note.id]);
             }
         }
     }

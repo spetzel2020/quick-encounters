@@ -14,6 +14,7 @@
                 (and then the create() creates the tokens from the Journal)
                 Split createCombat into createTokens and createCombat so that Method 1 and Method 2 are more modular
 13-Sep-2020     Slightly adjust the position of the dropped tokens around the base corner of the map Note
+14-Sep-2020     Add template info for Encounters - the Journal Entry is shown and then auto-deleted if you don't change it
 */
 
 
@@ -88,10 +89,31 @@ export class QuickEncounter {
             const candidateJournalEntry = QuickEncounter.findCandidateJournalEntry();
             if (candidateJournalEntry) {QuickEncounter.runFromJournal(candidateJournalEntry);}
             else {
-                ui.notifications.warn(game.i18n.localize("QE.ERROR.HowToUse"));
-                throw new Error("Before using the Quick Encounters button either select hostile tokens, or open a Journal with embedded Actors");
+                //No selected tokens or open Journal Entry
+                QuickEncounter.showTemplateJournalEntry();
             }
         }
+    }
+
+    static async showTemplateJournalEntry() {
+        //Create a new JournalEntry - with info on how to use Quick Encounters
+        const howToUseJournalEntry = await renderTemplate('modules/quick-encounters/templates/how-to-use.html');
+        const title =  game.i18n.localize("QE.TITLE.HowToUse");
+
+        const content = howToUseJournalEntry;
+
+        const scene = canvas.viewed;
+        const journalData = {
+            folder: null,
+            name: title,
+            content: content,
+            type: "encounter",
+            types: "base"
+        }
+        var journalEntry = await JournalEntry.create(journalData);
+
+        const ejSheet = new JournalSheet(journalEntry);
+        ejSheet.render(true);
     }
 
     static extractActors(html) {
@@ -304,9 +326,11 @@ Hooks.on(`renderJournalSheet`, async (journalSheet, html) => {
 });
 
 //The Journal Sheet places a note if there should be one
-Hooks.on('closeJournalSheet', async (journalSheet) => {
+//It also looks to see if this is the Tutorial and deletes the Journal Entry if so
+Hooks.on('closeJournalSheet', async (journalSheet, html) => {
     if (!game.user.isGM) {return;}
     const journalEntry = journalSheet.object;
+
     if (QuickEncounter.hasEncounter(journalEntry)) {
         //If you're on the correct scene and the note doesn't exist in this scene, place it
         //NOTE: This will make it hard to delete the Note - we will keep recreating it
@@ -315,6 +339,9 @@ Hooks.on('closeJournalSheet', async (journalSheet) => {
         if ((game.scenes.viewed.id === sceneID) && !journalEntry.sceneNote) {
             await EncounterNote.place(journalEntry);
         }
+    } else if ($("#QuickEncountersTutorial").length) {
+        //This is the tutorial Journal Entry
+        await JournalEntry.delete(journalEntry.id);
     }
 });
 
