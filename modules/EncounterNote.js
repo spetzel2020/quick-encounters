@@ -1,3 +1,15 @@
+/*
+Extend the placeable Map Note - select the desired tokens and then tap the Quick Encounters button
+Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tracker when you open the note?
+27-Aug-2020   Created
+30-Aug-2020   Added EncounterNoteConfig
+13-Sep-2020    QuickEncounter.deleteNote moved/renamed to EncounterNote.delete
+                QuickEncounter.placeNote moved/renamed to EncounterNote.place
+                Fixed flow of deleteJournalEntry --> delete associated Note
+
+*/
+
+
 import {MODULE_NAME, SCENE_ID_FLAG_KEY, TOKENS_FLAG_KEY} from './QuickEncounter.js';
 import {QuickEncounter} from './QuickEncounter.js';
 
@@ -8,16 +20,7 @@ const moreNoteIcons = {
 Object.assign(CONFIG.JournalEntry.noteIcons, moreNoteIcons);
 
 
-/*
-Extend the placeable Map Note - select the desired tokens and then tap the Quick Encounters button
-Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tracker when you open the note?
-27-Aug-2020   Created
-30-Aug-2020   Added EncounterNoteConfig
-13-Sep-2020    QuickEncounter.deleteNote moved/renamed to EncounterNote.delete
-                QuickEncounter.placeNote moved/renamed to EncounterNote.place
 
-
-*/
 export class EncounterNoteConfig extends NoteConfig {
     /** @override  */
     static get defaultOptions() {
@@ -36,7 +39,7 @@ export class EncounterNote{
               entryId: journalEntry.id,
               x: noteAnchor.x,
               y: noteAnchor.y,
-              icon: CONFIG.JournalEntry.noteIcons.Sword,
+              icon: CONFIG.JournalEntry.noteIcons.Combat,
               iconSize: 80,
               iconTint: "#FF0000",  //Red
               //Don't specify the name so it inherits from the Journal
@@ -67,7 +70,7 @@ export class EncounterNote{
 
             //Delete the note from the viewed scene
             if (note) {
-                canvas.scene.deleteEmbeddedEntity("Note",[note.id]);
+                await canvas.notes.deleteMany([note.id]);
             }
         }
     }
@@ -98,7 +101,7 @@ export class EncounterNote{
 }
 
 //Delete a corresponding Map Note if you delete the Journal Entry
-Hooks.on("deleteJournalEntry", async (journalEntry) => EncounterNote.delete);
+Hooks.on("deleteJournalEntry", EncounterNote.delete);
 
 Hooks.on(`renderEncounterNoteConfig`, async (noteConfig, html, data) => {
     const saveEncounterMapNote = game.i18n.localize("QE.BUTTON.SaveEncounterMapNote");

@@ -1,9 +1,3 @@
-import {EncounterNote} from './EncounterNote.js';
-
-export const MODULE_NAME = "quick-encounters";
-export const SCENE_ID_FLAG_KEY = "sceneID";
-export const TOKENS_FLAG_KEY = "tokens";
-
 /*
 27-Aug-2020     Created
 31-Aug-2020     Switch to creating a Journal Entry and then dragging it to the map for the saved Encounter
@@ -21,6 +15,13 @@ export const TOKENS_FLAG_KEY = "tokens";
                 Split createCombat into createTokens and createCombat so that Method 1 and Method 2 are more modular
 13-Sep-2020     Slightly adjust the position of the dropped tokens around the base corner of the map Note
 */
+
+
+import {EncounterNote} from './EncounterNote.js';
+
+export const MODULE_NAME = "quick-encounters";
+export const SCENE_ID_FLAG_KEY = "sceneID";
+export const TOKENS_FLAG_KEY = "tokens";
 
 
 
@@ -81,7 +82,7 @@ export class QuickEncounter {
         //Method 1: Get the selected tokens and the scene
         const controlledTokens = Array.from(canvas.tokens.controlled);
         if (controlledTokens && controlledTokens.length) {
-            QuickEncounter.create(controlledTokens);
+            QuickEncounter.createFromTokens(controlledTokens);
         } else {
             //Method 2: Check for an open Journal with a map note
             const candidateJournalEntry = QuickEncounter.findCandidateJournalEntry();
@@ -179,7 +180,7 @@ export class QuickEncounter {
         await QuickEncounter.createCombat(createdTokens);
     }
 
-    static async create(controlledTokens) {
+    static async createFromTokens(controlledTokens) {
         //Create a new JournalEntry - the corresponding map note gets created when you save&close the Journal Sheet
 
         const addToCombatTrackerTitle = game.i18n.localize("QE.BUTTON.AddToCombatTracker");
@@ -188,7 +189,7 @@ export class QuickEncounter {
 //Perhaps you can even include the Actors and modify the number of tokens
         let content = game.i18n.localize("QE.CONTENT.AddADescription");
         controlledTokens.forEach((token, i) => {
-            content += `<li>${token.name}</li>`;
+            content += `<li>@Actor[${token.actor.id}]{${token.name}}</li>`;
         });
         content += addToCombatTrackerButton;
 //--------------
@@ -208,13 +209,13 @@ export class QuickEncounter {
 
         //Record the scene for the tokens as a convenience
         await journalEntry.setFlag(MODULE_NAME,SCENE_ID_FLAG_KEY, scene.id);
-        await addTokensToJournalEntry(journalEntry, controlledTokens);
+        await QuickEncounter.addTokensToJournalEntry(journalEntry, controlledTokens);
 
         const ejSheet = new JournalSheet(journalEntry);
         ejSheet.render(true);
         //Delete the existing tokens (because they will be replaced)
         controlledTokens.forEach((token, i) => {
-            canvas.tokens.delete(token.id);
+            canvas.tokens.deleteMany([token.id]);
         });
     }
 
@@ -283,6 +284,11 @@ export class QuickEncounter {
         await createdTokens.forEach(token => {token.release();});
     }
 
+    static async runFromEmbeddedButton(qeJournalEntry) {
+        const createdTokens = await QuickEncounter.createTokens(qeJournalEntry);
+        QuickEncounter.createCombat(createdTokens);
+    }
+
 
 
 }
@@ -292,7 +298,9 @@ export class QuickEncounter {
 Hooks.on(`renderJournalSheet`, async (journalSheet, html) => {
     if (!game.user.isGM) {return;}
     const qeJournalEntry = journalSheet.entity;
-    html.find('button[name="addToCombatTracker"]').click(QuickEncounter.createCombat(qeJournalEntry));
+    html.find('button[name="addToCombatTracker"]').click(() => {
+        QuickEncounter.runFromEmbeddedButton(qeJournalEntry)
+    });
 });
 
 //The Journal Sheet places a note if there should be one
