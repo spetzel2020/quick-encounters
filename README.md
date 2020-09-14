@@ -7,7 +7,7 @@
 * **Translation Support**: en
 
 
-## Description
+# Description
 
 Quick Encounters keeps your [Foundry VTT](https://foundryvtt.com/) map clean and your encounters simple in heavily populated dungeons. Use either or both methods:
 
@@ -19,16 +19,16 @@ Method 1 brings the functionality of Fantasy Grounds "Encounters" to Foundry.
 
 For Roving Encounters, wait to place the Quick Encounter Journal Entry until you decide on the encounter location during a session. Then follow the remaining steps for Method 2.
 
-Quick Encounters works well with [TokenMold] (https://github.com/Moerill/token-mold#token-mold) to vary your tokens names, HP, etc (although TokenMold is not required for Quick Encounters).
+Quick Encounters works well with [TokenMold](https://github.com/Moerill/token-mold#token-mold) to vary your tokens names, HP, etc (although TokenMold is not required for Quick Encounters).
 
 
-## Install
+# Install
 
 1. Go to the "Add-on Modules" tab in Foundry Setup
 2. Click "Install Module" and paste this link: `https://raw.githubusercontent.com/opus1217/quick-encounters/master/module.json`
 3. Open your world and go to Settings>Manage Modules and enable Quick Encounters
 
-## Using Quick Encounters
+# Using Quick Encounters
 ## Method 1
 1. Drag your Hostile tokens to the map and select them
 2. Then press the Quick Encounters button and your tokens and their positions are saved into a Quick Encounter Journal Entry
@@ -36,7 +36,7 @@ Quick Encounters works well with [TokenMold] (https://github.com/Moerill/token-m
 4. Press "Save Map Note" to automatically place a single map pin on the Scene map.
 5. To run your Quick Encounter, simply double-click the map pin and click the "Add to Combat Tracker" button; all your saved tokens will be positioned on the map and added to the combat tracker, ready to fight!
 
-# Method 2
+## Method 2
 1. Drag Actors into an existing or new Journal Entry describing the encounter.
 2. Close the Journal Entry
 3. Now drag the Journal Entry to the Scene map at the encounter position.
