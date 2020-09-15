@@ -116,6 +116,12 @@ export class EncounterNote{
 //Delete a corresponding Map Note if you delete the Journal Entry
 Hooks.on("deleteJournalEntry", EncounterNote.delete);
 
+Hooks.on("closeNoteConfig", async (noteConfig) => {
+    //If this Journal Entry has embedded Actors, then record which scene we dropped the Journal in
+    const note = noteConfig.entity;
+    const journalEntry = note.entry;
+});
+
 Hooks.on(`renderEncounterNoteConfig`, async (noteConfig, html, data) => {
     const saveEncounterMapNote = game.i18n.localize("QE.BUTTON.SaveEncounterMapNote");
     html.find('button[name="submit"]').text(saveEncounterMapNote);

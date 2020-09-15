@@ -15,7 +15,12 @@
                 Split createCombat into createTokens and createCombat so that Method 1 and Method 2 are more modular
 13-Sep-2020     Slightly adjust the position of the dropped tokens around the base corner of the map Note
 14-Sep-2020     Add template info for Encounters - the Journal Entry is shown and then auto-deleted if you don't change it
-14-Sep-2020     Change method of extracting number of actors to avoid reading "Name - L15" as 15 copies
+                0.3.4: Extract Actor information when closing and update the Journal Entry flags
+                This can then also trigger storing the Scene if you open the Journal Entry from a Note
+                We'd like to record embedded Actors on rendering but that creates a render loop (because setFlag -> refresh -> render)
+                So instead we record them on close
+                Have to use a timer to wait for the window to be fully closed
+
 */
 
 
@@ -24,6 +29,7 @@ import {EncounterNote} from './EncounterNote.js';
 export const MODULE_NAME = "quick-encounters";
 export const SCENE_ID_FLAG_KEY = "sceneID";
 export const TOKENS_FLAG_KEY = "tokens";
+export const EMBEDDED_ACTORS_KEY = "embeddedActors";
 
 
 
@@ -132,7 +138,7 @@ export class QuickEncounter {
                 const numActors = parseInt(prev[0].childNodes ? prev[0].childNodes[0].textContent : "1");
                 extractedActors.push({
                     numActors : numActors ? numActors : 1,
-                    entityID : dataID,
+                    actorID : dataID,
                     name : dataName
                 });
             }
@@ -145,21 +151,22 @@ export class QuickEncounter {
         if (Object.keys(ui.windows).length === 0) {return null;}
         else {
             let candidateJournal = null;
-            let mapNote = null;
-            let embeddedActors = [];
             for (let w of Object.values(ui.windows)) {
                 //Check open windows for a Journal Sheet with a Map Note and embedded Actors
                 if ((w instanceof JournalSheet) && (w.object.sceneNote)) {
-                    embeddedActors = QuickEncounter.extractActors(w.element);
-                    candidateJournal = w.object;
-                    mapNote = candidateJournal.sceneNote;
-
-                    break;
+                    const journalEntry = w.object;
+                    const embeddedActors = journalEntry.getFlag(MODULE_NAME, EMBEDDED_ACTORS_KEY);
+                    if (embeddedActors && embeddedActors.length && journalEntry.sceneNote) {
+                        candidateJournal = {
+                            qeJournalEntry : journalEntry,
+                            mapNote : journalEntry.sceneNote,
+                            embeddedActors : embeddedActors
+                        }
+                        break;
+                    }
                 }
             }
-
-            //Now check that the Journal Entry has embedded Actors
-            return {qeJournalEntry: candidateJournal, mapNote : mapNote, embeddedActors : embeddedActors};
+            return candidateJournal;
         }
     }
 
@@ -254,7 +261,11 @@ export class QuickEncounter {
         if (!createdTokens || !createdTokens.length) {return;}
 
         //Control the tokens (because that is checked in adding them to the Combat Tracker)
-        await createdTokens.forEach(token => {token.control({releaseOthers : false, updateSight : false});});
+        //But release any others first (so that we don't inadvertently add them to combat)
+        createdTokens[0].control({releaseOthers : true, updateSight : false});
+        await createdTokens.forEach(token => {
+            token.control({releaseOthers : false, updateSight : false});
+        });
 
         const tabApp = ui.combat;
         tabApp.renderPopout(tabApp);
@@ -283,7 +294,7 @@ export class QuickEncounter {
         const controlledTokensData = [];
         for (let eActor of embeddedActors) {
             let numActors = parseInt(eActor.numActors,10);
-            const actor = game.actors.get(eActor.entityID);
+            const actor = game.actors.get(eActor.actorID);
 
              //If numActors didn't convert then just create 1 token
 
@@ -315,13 +326,19 @@ export class QuickEncounter {
 }
 
 
-//Add a listener for the embedded Encounter button
+//Add a listener for the embedded Encounter button and record the scene if we can
 Hooks.on(`renderJournalSheet`, async (journalSheet, html) => {
     if (!game.user.isGM) {return;}
-    const qeJournalEntry = journalSheet.entity;
+    const journalEntry = journalSheet.entity;
+
+    //If there's an embedded button, then add a listener
     html.find('button[name="addToCombatTracker"]').click(() => {
-        QuickEncounter.runFromEmbeddedButton(qeJournalEntry)
+        QuickEncounter.runFromEmbeddedButton(journalEntry)
     });
+
+    //We'd like to record embedded Actors on rendering but that creates a render loop (because setFlag -> refresh -> render)
+    //So instead we record them on close
+
 });
 
 //The Journal Sheet places a note if there should be one
@@ -330,17 +347,40 @@ Hooks.on('closeJournalSheet', async (journalSheet, html) => {
     if (!game.user.isGM) {return;}
     const journalEntry = journalSheet.object;
 
-    if (QuickEncounter.hasEncounter(journalEntry)) {
-        //If you're on the correct scene and the note doesn't exist in this scene, place it
-        //NOTE: This will make it hard to delete the Note - we will keep recreating it
-        const sceneID = journalEntry.getFlag(MODULE_NAME, SCENE_ID_FLAG_KEY);
-        //Note that .sceneNote only returns a note that exists in the viewed scene
-        if ((game.scenes.viewed.id === sceneID) && !journalEntry.sceneNote) {
-            await EncounterNote.place(journalEntry);
-        }
-    } else if ($("#QuickEncountersTutorial").length) {
+    if ($("#QuickEncountersTutorial").length) {
         //This is the tutorial Journal Entry
         await JournalEntry.delete(journalEntry.id);
+    } else {
+        if (QuickEncounter.hasEncounter(journalEntry)) {
+            //If you're on the correct scene and the note doesn't exist in this scene, place it
+            //NOTE: This will make it hard to delete the Note - we will keep recreating it
+            const sceneID = journalEntry.getFlag(MODULE_NAME, SCENE_ID_FLAG_KEY);
+            //Note that .sceneNote only returns a note that exists in the viewed scene
+            if ((game.scenes.viewed.id === sceneID) && !journalEntry.sceneNote) {
+                await EncounterNote.place(journalEntry);
+            }
+        }
+
+        //Check to see if there are embedded Actors and record their number
+        const embeddedActors = QuickEncounter.extractActors(html);
+
+        //Set the flags after the window has closed (this._closed) - check every 100ms, maximum 1s
+        if (embeddedActors && embeddedActors.length) {
+            let count = 0;
+            let checkID = setInterval(() => {
+                if (!journalSheet || (journalSheet._state === Application.RENDER_STATES.CLOSED) || (count === 10)) {
+                    journalEntry.setFlag(MODULE_NAME,EMBEDDED_ACTORS_KEY, embeddedActors);
+                    //Also record the Note scene if there is one (typically if we opened it from a Note)
+                    const note = journalEntry.sceneNote;
+                    if (note) {
+                        const sceneID = game.scenes.viewed.id;
+                        journalEntry.setFlag(MODULE_NAME,SCENE_ID_FLAG_KEY, sceneID);
+                    }
+                    clearInterval(checkID);
+                }
+                count += 1;
+            }, 100);
+        }
     }
 });
 

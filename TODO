@@ -2,15 +2,18 @@
 
 ## BUGS
 FIXED 1. If the Actor embed text includes a number that is the only number, it will be used (Rion -L14) will result in 14 copies
-
+FIXED (v0.3.4) Sometimes the corresponding Map Note is not deleted when you delete the Journal Entry
+                - This happens for Method 2 because the scene isn't recorded
+4. If you don't drag the Journal to the scene pressing the Quick Encounter button will fail silently
+FIXED (v0.3.4) 5. With Method 1, the Journal Entry is re-opened when we create the Map Note
 
 ## FEATURES
 1. Add the count x Actor to the documentation/tutorial
 >>>2. If you open the Quick Encounter Journal with stored token information then use that in preference
     - May already be true
 3. Method 2 should create an embedded button and the button should be smaller (or linked to the embedded actors)
-- Or maybe the Actor links are individual buttons that populate the scene instead of showing the Actors
--- Maybe shift-click shows the Actor or shift-click populates the Map
+    - Or maybe the Actor links are individual buttons that populate the scene instead of showing the Actors
+    -- Maybe shift-click shows the Actor or shift-click populates the Map
 >>> 4. Sum up and show the XP (5e only) for a combat - Total XP for this Encounter Journal, and a way of calculating per # of players
-5. De-select all other controlled tokens when placing tokens to add them to the combat Tracker
-6. Why are we sometimes getting multiple (20?) tokens for each Actor
+v0.3.4: De-select all other controlled tokens when placing tokens to add them to the combat Tracker
+6. Why do we sometimes get Unknown tokens being added

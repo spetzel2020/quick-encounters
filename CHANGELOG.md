@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.3.4 Bug fixes
+- Fix re-rendering loop with Journal Entries - use a timer to setFkag on closeJournalSheet
+
 ## 0.3.3 Bug fix
 FIXED: If you didn't have a count before the Actor entry, and the Actor description included a number, that's how many copies of the actor you got
 
