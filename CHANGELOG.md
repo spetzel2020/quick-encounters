@@ -1,7 +1,12 @@
 # Changelog
 
+## 0.4.0 Bug fixes
+FIXED
+
 ## 0.3.4 Bug fixes
-- Fix re-rendering loop with Journal Entries - use a timer to setFkag on closeJournalSheet
+FIXED (v0.3.4) 5. With Method 1, the Journal Entry is re-opened when we create the Map Note
+    - Use a timer to wait for the Journal Sheet to be closed
+FIXED (v0.3.4) Sometimes the corresponding Map Note is not deleted when you delete the Journal Entry
 
 ## 0.3.3 Bug fix
 FIXED: If you didn't have a count before the Actor entry, and the Actor description included a number, that's how many copies of the actor you got

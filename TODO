@@ -1,19 +1,32 @@
 # TO DO
 
 ## BUGS
-FIXED 1. If the Actor embed text includes a number that is the only number, it will be used (Rion -L14) will result in 14 copies
-FIXED (v0.3.4) Sometimes the corresponding Map Note is not deleted when you delete the Journal Entry
-                - This happens for Method 2 because the scene isn't recorded
-4. If you don't drag the Journal to the scene pressing the Quick Encounter button will fail silently
-FIXED (v0.3.4) 5. With Method 1, the Journal Entry is re-opened when we create the Map Note
+v0.3.4 If you're on another Scene, the embedded button will switch scenes but the Quick Encounter button won't
+v0.3.4 If you don't drag the Journal to the scene pressing the Quick Encounter button will fail silently
+v0.3.4 If you click Quick Encounters again you get a second copy of the Tutorial
+v0.4.0 If you drag tokens into the Journal Entry, later dragging new Actors will be ignored
+        - should compare the Actors to the tokens and add ones that aren't represented
+
 
 ## FEATURES
 1. Add the count x Actor to the documentation/tutorial
->>>2. If you open the Quick Encounter Journal with stored token information then use that in preference
-    - May already be true
 3. Method 2 should create an embedded button and the button should be smaller (or linked to the embedded actors)
     - Or maybe the Actor links are individual buttons that populate the scene instead of showing the Actors
     -- Maybe shift-click shows the Actor or shift-click populates the Map
 >>> 4. Sum up and show the XP (5e only) for a combat - Total XP for this Encounter Journal, and a way of calculating per # of players
-v0.3.4: De-select all other controlled tokens when placing tokens to add them to the combat Tracker
-6. Why do we sometimes get Unknown tokens being added
+
+## FIXED BUGS
+FIXED 1. If the Actor embed text includes a number that is the only number, it will be used (Rion -L14) will result in 14 copies
+FIXED (v0.3.4) Sometimes the corresponding Map Note is not deleted when you delete the Journal Entry
+                - This happens for Method 2 because the scene isn't recorded
+FIXED (v0.3.4) 5. With Method 1, the Journal Entry is re-opened when we create the Map Note
+FIXED (v0.4.0) Error in onDelete of Tutorial Journal because oneDelete->close triggers another deletion call
+NOT A BUG 6. Why do we sometimes get Unknown tokens being added - seem to be left over from previous interruptions in testing
+FIXED (v0.4.0) v0.3.4 If you drag additional Actors to the Journal Entry, they are not getting added
+
+## COMPLETED FEATURES
+DONE: (v0.4.0): If your on a different scene, pops a dialog to check that you want to switch scenes
+DONE v0.3.4: De-select all other controlled tokens when placing tokens to add them to the combat Tracker
+DONE (v0.4.0) Replace forEach calls with for/of
+DONE 2. If you open the Quick Encounter Journal with stored token information then use that in preference
+DONE - Finish i18n for dialogs (but not for tutorial Journal)

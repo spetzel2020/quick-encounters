@@ -7,6 +7,7 @@ Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tra
                 QuickEncounter.placeNote moved/renamed to EncounterNote.place
                 Fixed flow of deleteJournalEntry --> delete associated Note
 14-Sep-2020     Display simple dialog when you delete the Map Note corresponding to a Quick Encounter Journal Entry
+15-Sep-2020     v0.4.0 i18n for deleting Journal Note
 */
 
 
@@ -60,9 +61,9 @@ export class EncounterNote{
 
     static async delete(journalEntry) {
         if (!game.user.isGM) {return;}
-        if (QuickEncounter.hasEncounter(journalEntry)) {
+        const sceneID = QuickEncounter.getEncounterScene(journalEntry);
+        if (sceneID) {
             //Find the corresponding Map note - have to switch to the correct scene first
-            const sceneID = journalEntry.getFlag(MODULE_NAME, SCENE_ID_FLAG_KEY);
             const scene = game.scenes.get(sceneID);
             if (!scene) {return;}
             await scene.view();
@@ -72,8 +73,8 @@ export class EncounterNote{
             //Delete the note from the viewed scene
             if (note) {
                 Dialog.prompt({
-                  title: "Deleted Quick Encounter Map Note",
-                  content: "Because you deleted the Quick Encounter Journal Entry I also deleted the associated Map Note",
+                  title: game.i18n.localize("QE.TITLE.DeletedJournalNote"),
+                  content: game.i18n.localize("QE.CONTENT.DeletedJournalNote"),
                   label : "",
                   callback : () => {console.log(`Deleted Map Note ${noteName}`);},
                   options: {
@@ -89,7 +90,8 @@ export class EncounterNote{
     }
 
     static async place(qeJournalEntry) {
-        const savedTokens = QuickEncounter.getEncounterTokensFromJournalEntry(qeJournalEntry);
+        if (!qeJournalEntry) {return;}
+        const savedTokens = qeJournalEntry.getFlag(MODULE_NAME, TOKENS_FLAG_KEY);
         //Create a Map Note for this encounter
         if (savedTokens && savedTokens.length) {
             const noteAnchor = {
@@ -116,13 +118,10 @@ export class EncounterNote{
 //Delete a corresponding Map Note if you delete the Journal Entry
 Hooks.on("deleteJournalEntry", EncounterNote.delete);
 
-Hooks.on("closeNoteConfig", async (noteConfig) => {
-    //If this Journal Entry has embedded Actors, then record which scene we dropped the Journal in
-    const note = noteConfig.entity;
-    const journalEntry = note.entry;
-});
-
+//Pretty up the first Map Note (hopefully we can do the same for others)
 Hooks.on(`renderEncounterNoteConfig`, async (noteConfig, html, data) => {
     const saveEncounterMapNote = game.i18n.localize("QE.BUTTON.SaveEncounterMapNote");
     html.find('button[name="submit"]').text(saveEncounterMapNote);
 });
+
+//If we just saved the Map Note, then we should save its position in the Journal Entry so if we're on a different scene we know it
