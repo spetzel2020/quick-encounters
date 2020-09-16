@@ -25,6 +25,9 @@
                 - Replace forEach with for/of to remove async operation ambiguities
                 - Ask Before switching Views
 15-Sep-2020     v0.4.0: Refactor to make flow identical for Method 1 or Method 2 (just use saved tokens preferentially)
+                v0.4.1 on closeJournalSheet, if we don't find a Map Note then create one
+16-Sep-2020     v0.4.1: findCandidateJournalEntry return open sheets without mapNotes
+                Pop a dialog if there's no corresponding map note found
 */
 
 
@@ -192,7 +195,7 @@ export class QuickEncounter {
             let quickEncounter = null;
             for (let w of Object.values(ui.windows)) {
                 //Check open windows for a Journal Sheet with a Map Note and embedded Actors
-                if ((w instanceof JournalSheet) && (w.object.sceneNote)) {
+                if (w instanceof JournalSheet) {
                     quickEncounter = QuickEncounter.extractQuickEncounter(w);
                     if (quickEncounter) {break;}
                 }
@@ -274,6 +277,8 @@ export class QuickEncounter {
 
         // Switch to the correct scene if confirmed
         const qeScene = QuickEncounter.getEncounterScene(qeJournalEntry);
+        //If there isn't a Map Note anywhere, prompt to create one in the center of the view
+        if (!qeScene) QuickEncounter.noMapNoteDialog(qeJournalEntry);
         if (!await QuickEncounter.viewingCorrectScene(qeScene)) {return;}
 
         //Something is desperately wrong if this is null
@@ -298,6 +303,17 @@ export class QuickEncounter {
 
     }
 
+    static async noMapNoteDialog(qeJournalEntry) {
+        Dialog.confirm({
+            title: game.i18n.localize("QE.NoMapNote.TITLE"),
+            content : game.i18n.localize("QE.NoMapNote.CONTENT"),
+            yes : async () => {
+                EncounterNote.place(qeJournalEntry, {placeDefault : true});
+                return true;
+            }
+        });
+    }
+
 
     static async viewingCorrectScene(qeScene) {
         //Get the scene for this Quick Encounter (can't use sceneNote if we're in the wrong scene)
@@ -307,8 +323,8 @@ export class QuickEncounter {
 
         //Otherwise ask if you want to switch to the scene - default is No/false
         return await Dialog.confirm({
-            title: game.i18n.localize("QE.SwitchScene"),
-            content : `${game.i18n.localize("QE.CONTENT.SwitchScene")} ${qeScene.name}?`,
+            title: game.i18n.localize("QE.SwitchScene.TITLE"),
+            content : `${game.i18n.localize("QE.SwitchScene.CONTENT")} ${qeScene.name}?`,
             yes : async () => {
                 await qeScene.view();
                 return true;
@@ -328,7 +344,7 @@ export class QuickEncounter {
                 }
             }
         }
-        return journalEntry.getFlag(MODULE_NAME, SCENE_ID_FLAG_KEY);
+        return null;
     }
 
     static async extractTokenData(extractedActors, coords) {
@@ -423,16 +439,11 @@ Hooks.on('closeJournalSheet', async (journalSheet, html) => {
         //This is the tutorial Journal Entry
         //v0.4.0 Check that we haven't already deleted this (because onDelete -> close)
         if (game.journal.get(journalEntry.id)) {await JournalEntry.delete(journalEntry.id);}
-    } else {
+    } else if (QuickEncounter.extractQuickEncounter(journalSheet)) {
+        //If qeScene is non-null, there is a Map Note *somewhere* (might be on a different scene)
+        //So in 0.4.1 we recreate a Note if qeScene is null (change from previous versions)
         const qeScene = QuickEncounter.getEncounterScene(journalEntry);
-        if (qeScene) {
-            //If you're on the correct scene and the note doesn't exist in this scene, place it
-            //NOTE: This will make it hard to delete the Note - we will keep recreating it
-            //Note that .sceneNote only returns a note that exists in the viewed scene
-            if ((game.scenes.viewed === qeScene) && !journalEntry.sceneNote) {
-                await EncounterNote.place(journalEntry);
-            }
-        }
+        if (!qeScene) {await EncounterNote.place(journalEntry);}
     }
 });
 

@@ -1,7 +1,12 @@
 # Changelog
 
+## 0.4.1 Bug fixes
+FIXED Delete corresponding Map Note wasn't working
+
 ## 0.4.0 Bug fixes
-FIXED
+FIXED (v0.4.0) Error in onDelete of Tutorial Journal because oneDelete->close triggers another deletion call
+NOT A BUG 6. Why do we sometimes get Unknown tokens being added - seem to be left over from previous interruptions in testing
+FIXED (v0.4.0) v0.3.4 If you drag additional Actors to the Journal Entry, they are not getting added
 
 ## 0.3.4 Bug fixes
 FIXED (v0.3.4) 5. With Method 1, the Journal Entry is re-opened when we create the Map Note

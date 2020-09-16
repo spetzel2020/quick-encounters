@@ -8,6 +8,8 @@ Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tra
                 Fixed flow of deleteJournalEntry --> delete associated Note
 14-Sep-2020     Display simple dialog when you delete the Map Note corresponding to a Quick Encounter Journal Entry
 15-Sep-2020     v0.4.0 i18n for deleting Journal Note
+                v0.4.1 delete() - rewrite for getEncounterScene returning the scene not the ID
+16-Sep-2020     v0.4.1 place() - if there aren't token coords, and option=placeDefault, then place a map note in the center
 */
 
 
@@ -61,11 +63,9 @@ export class EncounterNote{
 
     static async delete(journalEntry) {
         if (!game.user.isGM) {return;}
-        const sceneID = QuickEncounter.getEncounterScene(journalEntry);
-        if (sceneID) {
+        const scene = QuickEncounter.getEncounterScene(journalEntry);
+        if (scene) {
             //Find the corresponding Map note - have to switch to the correct scene first
-            const scene = game.scenes.get(sceneID);
-            if (!scene) {return;}
             await scene.view();
             const note = journalEntry.sceneNote;
             const noteName = note.name;
@@ -89,27 +89,34 @@ export class EncounterNote{
         }
     }
 
-    static async place(qeJournalEntry) {
+    static async place(qeJournalEntry, options={}) {
         if (!qeJournalEntry) {return;}
         const savedTokens = qeJournalEntry.getFlag(MODULE_NAME, TOKENS_FLAG_KEY);
-        //Create a Map Note for this encounter
+
+        //Create a Map Note for this encounter - the default is where the saved Tokens were
+        let noteAnchor = {}
         if (savedTokens && savedTokens.length) {
-            const noteAnchor = {
+            noteAnchor = {
                 x: savedTokens[0].x,
                 y: savedTokens[0].y
             }
-
-            // Validate the final position is in-bounds
-            if (canvas.grid.hitArea.contains(noteAnchor.x, noteAnchor.y) ) {
-
-                // Create a NoteConfig sheet instance to finalize the creation
-                //Don't activate the note toolbar section since we want to define more
-                //canvas.notes.activate();
-                const newNote = await EncounterNote.create(qeJournalEntry, noteAnchor);
-                const note = canvas.notes.preview.addChild(newNote);
-                await note.draw();  //Draw the new Note on the canvas and add listeners
-                note.sheet.render(true);
+        } else if (options.placeDefault) {
+            //Otherwise, place it in the middle of the canvas stage (current view)
+            noteAnchor = {
+                x : canvas.stage.pivot.x,
+                y : canvas.stage.pivot.y
             }
+        } else {return;}
+        // Validate the final position is in-bounds
+        if (canvas.grid.hitArea.contains(noteAnchor.x, noteAnchor.y) ) {
+
+            // Create a NoteConfig sheet instance to finalize the creation
+            //Don't activate the note toolbar section since we want to define more
+            //canvas.notes.activate();
+            const newNote = await EncounterNote.create(qeJournalEntry, noteAnchor);
+            const note = canvas.notes.preview.addChild(newNote);
+            await note.draw();  //Draw the new Note on the canvas and add listeners
+            note.sheet.render(true);
         }
     }
 

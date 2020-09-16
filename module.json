@@ -3,7 +3,7 @@
   "title": "Quick Encounters",
   "description": "Save your Encounters in the Journal or pinned to the Scene and run them with one click!",
   "author" : "Spetzel",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "minimumCoreVersion": "0.6.5",
   "compatibleCoreVersion": "0.7.2",
   "languages": [{
@@ -14,10 +14,10 @@
   "esmodules" : ["modules/QuickEncounter.js","modules/EncounterNotes.js"
   ],
   "styles": ["css/quick-encounters.css"],
-  "readme": "https://github.com/opus1217/quick-encounters/blob/v0.4.0/README.md",
+  "readme": "https://github.com/opus1217/quick-encounters/blob/v0.4.1/README.md",
   "bugs": "https://github.com/opus1217/quick-encounters/issues",
   "changelog": "https://github.com/opus1217/quick-encounters/blob/master/CHANGELOG.md",
-  "manifest": "https://raw.githubusercontent.com/opus1217/quick-encounters/v0.4.0/module.json",
-  "download": "https://github.com/opus1217/quick-encounters/archive/v0.4.0.zip",
+  "manifest": "https://raw.githubusercontent.com/opus1217/quick-encounters/v0.4.1/module.json",
+  "download": "https://github.com/opus1217/quick-encounters/archive/v0.4.1.zip",
   "url": "https://github.com/opus1217/quick-encounters"
 }

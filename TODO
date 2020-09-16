@@ -1,11 +1,10 @@
 # TO DO
 
 ## BUGS
-v0.3.4 If you're on another Scene, the embedded button will switch scenes but the Quick Encounter button won't
-v0.3.4 If you don't drag the Journal to the scene pressing the Quick Encounter button will fail silently
 v0.3.4 If you click Quick Encounters again you get a second copy of the Tutorial
 v0.4.0 If you drag tokens into the Journal Entry, later dragging new Actors will be ignored
         - should compare the Actors to the tokens and add ones that aren't represented
+    - If you drag a Journal Entry to the Map, then intercept to change the icon etc.
 
 
 ## FEATURES
@@ -23,6 +22,9 @@ FIXED (v0.3.4) 5. With Method 1, the Journal Entry is re-opened when we create t
 FIXED (v0.4.0) Error in onDelete of Tutorial Journal because oneDelete->close triggers another deletion call
 NOT A BUG 6. Why do we sometimes get Unknown tokens being added - seem to be left over from previous interruptions in testing
 FIXED (v0.4.0) v0.3.4 If you drag additional Actors to the Journal Entry, they are not getting added
+FIXED (v0.4.0) v0.3.4 If you're on another Scene, the embedded button will switch scenes but the Quick Encounter button won't
+FIXED (v0.4.1) v0.4.0 Method 2 isn't creating a Map Note - EncounterNote.place needs to place a Note or ask you to do that if one does not exist
+FIXED (v0.4.1) v0.3.4 If you don't drag the Journal to the scene pressing the Quick Encounter button will fail silently
 
 ## COMPLETED FEATURES
 DONE: (v0.4.0): If your on a different scene, pops a dialog to check that you want to switch scenes

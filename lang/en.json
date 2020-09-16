@@ -1,8 +1,8 @@
 {
   "QE.id": "quick-encounters",
-  "QE.Version" : "v0.4.0",
+  "QE.Version" : "v0.4.1",
   "QE.Name": "Quick Encounters",
-  "QE.Welcome" : "Welcome to Quick Encounters v0.4.0",
+  "QE.Welcome" : "Welcome to Quick Encounters v0.4.1",
   "QE.TITLE.HowToUse" : "How to use Quick Encounters",
   "QE.Description": "Pin your Encounters to the Scene or in the Journal and run them with one click!<h4>Method 1:</h4><p>Place and select your hostile tokens and press the <i class='fas fa-fist-raised'></i>Quick Encounter button to save them into an Encounter Journal Entry. To run the Encounter, double-click the skull icon and press the Add to Combat Tracker button</p><h4>Method 2:</h4><p>Create a Journal Entry with your descriptive text. Drag Actors into the Journal Entry. Drag the Journal Entry to the desired Encounter location on your map. To run the Encounter, select the Map Note, or open the Encounter Journal Entry and click the Quick Encounters button",
   "QE.CONTENT.AddADescription" : "<i>Add a description of the quick encounter for you or your players:</i>",
@@ -12,8 +12,12 @@
   "QE.BUTTON.SaveEncounterMapNote" : "Save Quick Encounter Map Note",
   "QE.NOTE.ConfigTitle" : "Quick Encounter Pin Configuration",
   "QE.ERROR.HowToUse" : "To use Quick Encounters either (a) Select tokens on the map and press the button to create a Quick Encounter Journal Entry or (b) Open a Journal Entry with embedded actors and then press the button to place tokens and run the combat. Do you want to see a sample Journal Entry?",
-  "QE.TITLE.SwitchScene" : "Switch Scene?",
-  "QE.CONTENT.SwitchScene" : "This Quick Encounter is in a different scene; do you want to switch to ",
+  "QE.SwitchScene.TITLE" : "Switch Scene?",
+  "QE.SwitchScene.CONTENT" : "This Quick Encounter is in a different scene; do you want to switch to ",
   "QE.TITLE.DeletedJournalNote" :  "Deleted Quick Encounter Map Note",
-  "QE.CONTENT.DeletedJournalNote" :  "Because you deleted the Quick Encounter Journal Entry I also deleted the associated Map Note"
+  "QE.CONTENT.DeletedJournalNote" :  "Because you deleted the Quick Encounter Journal Entry I also deleted the associated Map Note",
+  "QE.NoMapNote.TITLE" : "No location for Quick Encounter",
+  "QE.NoMapNote.CONTENT" : "I didn't find a corresponding Map Note for this Quick Encounter. Do you want me to create a default Map Note in the center of your view?",
+  "QE.NoMapNote.YES" : "Create a Map Note",
+  "QE.NoMapNote.NO" : "I'll do it myself"
 }
