@@ -4,15 +4,15 @@
 v0.3.4 If you click Quick Encounters again you get a second copy of the Tutorial
 v0.4.0 If you drag tokens into the Journal Entry, later dragging new Actors will be ignored
         - should compare the Actors to the tokens and add ones that aren't represented
-    - If you drag a Journal Entry to the Map, then intercept to change the icon etc.
-
+>>>0.4.0 - If you drag a Journal Entry to the Map, then intercept to change the icon etc.
+0.4.0   The TurnMarker app is throwing errors - are those related to 0.7.2 or in 0.6.6 - need to check
 
 ## FEATURES
-1. Add the count x Actor to the documentation/tutorial
+>>>1. Add the count x Actor to the documentation/tutorial
 3. Method 2 should create an embedded button and the button should be smaller (or linked to the embedded actors)
     - Or maybe the Actor links are individual buttons that populate the scene instead of showing the Actors
     -- Maybe shift-click shows the Actor or shift-click populates the Map
->>> 4. Sum up and show the XP (5e only) for a combat - Total XP for this Encounter Journal, and a way of calculating per # of players
+5. Update the Title bar of the Quick Encounter Journal Entry with the Total XP
 
 ## FIXED BUGS
 FIXED 1. If the Actor embed text includes a number that is the only number, it will be used (Rion -L14) will result in 14 copies
@@ -32,3 +32,5 @@ DONE v0.3.4: De-select all other controlled tokens when placing tokens to add th
 DONE (v0.4.0) Replace forEach calls with for/of
 DONE 2. If you open the Quick Encounter Journal with stored token information then use that in preference
 DONE - Finish i18n for dialogs (but not for tutorial Journal)
+DONE Method 1 should put the # of Actors in front of the actor link - this will enable later changing the specific actors
+DONE (v0.4.1) Sum up and show the XP (5e only) for a combat - Total XP for this Encounter Journal, and a way of calculating per # of players

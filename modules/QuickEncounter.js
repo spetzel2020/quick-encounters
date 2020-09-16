@@ -28,6 +28,7 @@
                 v0.4.1 on closeJournalSheet, if we don't find a Map Note then create one
 16-Sep-2020     v0.4.1: findCandidateJournalEntry return open sheets without mapNotes
                 Pop a dialog if there's no corresponding map note found
+                When you drag in tokens, summarize the number of each Actor and (5e) display XP
 */
 
 
@@ -36,6 +37,7 @@ import {EncounterNote} from './EncounterNote.js';
 export const MODULE_NAME = "quick-encounters";
 export const SCENE_ID_FLAG_KEY = "sceneID";
 export const TOKENS_FLAG_KEY = "tokens";
+export const TOTAL_XP_KEY = "totalXP";
 export const EMBEDDED_ACTORS_KEY = "embeddedActors";
 
 
@@ -115,13 +117,25 @@ export class QuickEncounter {
     static async createFromTokens(controlledTokens) {
         //Create a new JournalEntry - the corresponding map note gets created when you save&close the Journal Sheet
 
+        //0.4.1: Group identical actors with a number before it
+        let tokenActorIDs = new Set();
+        for (const token of controlledTokens) {
+            tokenActorIDs.add(token.actor.id);
+        }
+
         const addToCombatTrackerTitle = game.i18n.localize("QE.BUTTON.AddToCombatTracker");
         const addToCombatTrackerButton = await renderTemplate('modules/quick-encounters/templates/addToCombatTrackerButton.html');
 //NOTE: -------- This code chunk should enable us to drag additional encounters or tokens to a single Journal Entry if necessary
-//Perhaps you can even include the Actors and modify the number of tokens
         let content = game.i18n.localize("QE.CONTENT.AddADescription");
-        for (const token of controlledTokens) {
-            content += `<li>@Actor[${token.actor.id}]{${token.name}}</li>`;
+        let xpTotal = 0;
+        for (const tokenActorID of tokenActorIDs) {
+            const tokens = controlledTokens.filter(t => t.actor.id === tokenActorID);
+            //0.4.1: 5e specific: find XP for this number of this actor
+            const numTokens = tokens.length;
+            const xp = QuickEncounter.getActorXPTotal(tokens[0], numTokens);
+            xpTotal += xp;
+            const xpString = xp ? `(${xp}XP)`: "";
+            content += `<li>${tokens.length}@Actor[${tokenActorID}]{${tokens[0].name}} ${xpString}</li>`;
         }
         content += addToCombatTrackerButton;
 //--------------
@@ -162,7 +176,14 @@ export class QuickEncounter {
         await qeJournalEntry.setFlag(MODULE_NAME, TOKENS_FLAG_KEY, controlledTokensData);
     }
 
-
+    static getActorXPTotal(token, numActors) {
+        if ((game.system.id !== "dnd5e") || !token || !numActors) {return null;}
+        try {
+            return numActors * token.actor.data.data.details.xp.value;
+        } catch(err) {
+            return null;
+        }
+    }
 
     static async showTemplateJournalEntry() {
         //Create a new JournalEntry - with info on how to use Quick Encounters
@@ -278,7 +299,7 @@ export class QuickEncounter {
         // Switch to the correct scene if confirmed
         const qeScene = QuickEncounter.getEncounterScene(qeJournalEntry);
         //If there isn't a Map Note anywhere, prompt to create one in the center of the view
-        if (!qeScene) QuickEncounter.noMapNoteDialog(qeJournalEntry);
+        if (!qeScene) {QuickEncounter.noMapNoteDialog(qeJournalEntry);}
         if (!await QuickEncounter.viewingCorrectScene(qeScene)) {return;}
 
         //Something is desperately wrong if this is null
@@ -296,11 +317,30 @@ export class QuickEncounter {
 
         //Now create the Tokens
         const createdTokens = await QuickEncounter.createTokens(tokenData);
+
+        //If 5e then give GM the total XP
+        QuickEncounter.putXPInChat(createdTokens);
+
         //And add them to the Combat Tracker (wait 100ms for drawing to finish)
         setTimeout(() => {
             QuickEncounter.createCombat(createdTokens);
         },100);
+    }
 
+    static async putXPInChat(createdTokens) {
+        if ((game.system.id !== "dnd5e") || !createdTokens) {return;}
+        let totalXP = null;
+        for (const token of createdTokens) {
+            totalXP += QuickEncounter.getActorXPTotal(token, 1);
+        }
+        if (totalXP) {
+            const chatMessageData = {
+                visible : true,
+                content : `Total XP: ${totalXP}`
+            }
+            const chatMessage = await ChatMessage.create(chatMessageData);
+            //Post is unnecessary because create calls onCreate which calls postOne
+        }
     }
 
     static async noMapNoteDialog(qeJournalEntry) {
@@ -381,8 +421,11 @@ export class QuickEncounter {
 
         //Or re-create them (automatically get added to the scene)
         //Have to also control them in order to add them to the combat tracker
-//FIXME: We are skipping a lot of the normal onDragDrop workflow for an actor, including what looks like scaling
-//of the token size to the Scene
+/*TODO: The normal token workflow (see TokenLayer._onDropActorData) includes:
+        1. Get actor data from Compendium if that's what you used (this is probably worth doing)
+        2. Positioning the token relative to the drop point (whereas we do it relative to a Map Note or previous position)
+        3. Randomizing the token image if that is provided in the Prototype Token
+*/
         let createdTokens = [];
         for (let tokenData of expandedTokenData) {
             const newToken = await Token.create(tokenData);
@@ -413,6 +456,7 @@ export class QuickEncounter {
         for (const token of createdTokens) {
             token.release();
         }
+
     }
 
 
