@@ -1,7 +1,7 @@
 # Quick Encounters
 
 * **Author**: Spetzel#0103
-* **Version**: 0.4.1
+* **Version**: 0.4.2
 * **Foundry VTT Compatibility**: 0.6.5-0.7.2
 * **System Compatibility (If applicable)**: N/A
 * **Translation Support**: en
@@ -24,7 +24,7 @@ Quick Encounters works well with [TokenMold](https://github.com/Moerill/token-mo
 # Install
 
 1. Go to the "Add-on Modules" tab in Foundry Setup
-2. Click "Install Module" and paste this link: `https://raw.githubusercontent.com/opus1217/quick-encounters/master/module.json`
+2. Click "Install Module" and search for **Quick Encounters** OR paste this link: `https://raw.githubusercontent.com/opus1217/quick-encounters/v0.4.2/module.json`
 3. Open your world and go to Settings>Manage Modules and enable Quick Encounters
 
 # Using Quick Encounters

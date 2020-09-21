@@ -10,6 +10,7 @@ Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tra
 15-Sep-2020     v0.4.0 i18n for deleting Journal Note
                 v0.4.1 delete() - rewrite for getEncounterScene returning the scene not the ID
 16-Sep-2020     v0.4.1 place() - if there aren't token coords, and option=placeDefault, then place a map note in the center
+21-Sep-2020     v0.4.2: BUG: Dialog.prompt doesn't exist in Foundry 0.6.6 - replace with our own
 */
 
 
@@ -72,7 +73,8 @@ export class EncounterNote{
 
             //Delete the note from the viewed scene
             if (note) {
-                Dialog.prompt({
+                //0.4.2: Replaces Dialog.prompt from Foundry 0.7.2
+                EncounterNote.dialogPrompt({
                   title: game.i18n.localize("QE.TITLE.DeletedJournalNote"),
                   content: game.i18n.localize("QE.CONTENT.DeletedJournalNote"),
                   label : "",
@@ -87,6 +89,25 @@ export class EncounterNote{
                 canvas.notes.deleteMany([note.id]);
             }
         }
+    }
+
+    static dialogPrompt({title, content, label, callback}={}, options={}) {
+        return new Promise(resolve => {
+          const dialog = new Dialog({
+            title: title,
+            content: content,
+            buttons: {
+              close: {
+                icon: '<i class="fas fa-check"></i>',
+                label: label,
+                callback: callback
+              }
+            },
+            default: "close",
+            close: resolve
+          }, options);
+          dialog.render(true);
+        });
     }
 
     static async place(qeJournalEntry, options={}) {

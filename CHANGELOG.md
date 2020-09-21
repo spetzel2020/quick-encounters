@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.2 Bug fixes
+FIXED 0.4.1 If the number of Actors is part of a sentence, it won't be picked up correctly
+FIXED 0.4.1 If you have a Player selected when you open your Quick Encounter, it will create a new one instead
+            - Fixed: Ignore Friendly tokens
+FIXED 0.4.1 Was using Dialog.prompt which doesn't exist in 0.6.6 - replaced with local implementation
+
 ## 0.4.1 Bug fixes
 FIXED Delete corresponding Map Note wasn't working
 
