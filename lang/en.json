@@ -1,8 +1,8 @@
 {
   "QE.id": "quick-encounters",
-  "QE.Version" : "v0.4.1",
+  "QE.Version" : "v0.4.2",
   "QE.Name": "Quick Encounters",
-  "QE.Welcome" : "Welcome to Quick Encounters v0.4.1",
+  "QE.Welcome" : "Welcome to Quick Encounters v0.4.2",
   "QE.TITLE.HowToUse" : "How to use Quick Encounters",
   "QE.Description": "Pin your Encounters to the Scene or in the Journal and run them with one click!<h4>Method 1:</h4><p>Place and select your hostile tokens and press the <i class='fas fa-fist-raised'></i>Quick Encounter button to save them into an Encounter Journal Entry. To run the Encounter, double-click the skull icon and press the Add to Combat Tracker button</p><h4>Method 2:</h4><p>Create a Journal Entry with your descriptive text. Drag Actors into the Journal Entry. Drag the Journal Entry to the desired Encounter location on your map. To run the Encounter, select the Map Note, or open the Encounter Journal Entry and click the Quick Encounters button",
   "QE.CONTENT.AddADescription" : "<i>Add a description of the quick encounter for you or your players:</i><br><br>",

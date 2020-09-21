@@ -29,6 +29,10 @@
 16-Sep-2020     v0.4.1: findCandidateJournalEntry return open sheets without mapNotes
                 Pop a dialog if there's no corresponding map note found
                 When you drag in tokens, summarize the number of each Actor and (5e) display XP
+20-Sep-2020     v0.4.2: extractActors(): Extract # of Actors using previousSibling because parent is confused by having a sentence with a number
+                Also, whisper the Total XP to the GM, not to everybody
+21-Sep-2020     v0.4.2: Ignore Friendly tokens which might be selected (typically PCs) - this should probably be an option/dialog
+
 */
 
 
@@ -95,7 +99,8 @@ export class QuickEncounter {
         //Called when you press the Quick Encounters button (fist) from the sidebar
         //If you are controlling tokens, it assumes that's the Encounter you want to create
         //Method 1: Get the selected tokens and the scene
-        const controlledTokens = Array.from(canvas.tokens.controlled);
+        //Ignore Friendly tokens
+        const controlledTokens = Array.from(canvas.tokens.controlled).filter(t => t.data.disposition != TOKEN_DISPOSITIONS.FRIENDLY );
         if (controlledTokens && controlledTokens.length) {
             QuickEncounter.createFromTokens(controlledTokens);
         } else {
@@ -251,14 +256,15 @@ export class QuickEncounter {
         if (!entityLinks || !entityLinks.length) {return null;}
 
         const extractedActors = [];
+        const reg = "([0-9]+)[^0-9]*$"; //Matches last "number followed by non-number at the end of a string"
         entityLinks.each((i, el) => {
             const element = $(el);
-            const prev = element.parent();
-            const dataEntity = element.attr("data-entity");
-            if (dataEntity === "Actor") {
+            if (element.attr("data-entity") === "Actor") {
                 const dataID = element.attr("data-id");
                 const dataName = element.text();
-                const numActors = parseInt(prev[0].childNodes ? prev[0].childNodes[0].textContent : "1");
+                const prevSibling = element[0].previousSibling;
+                const possibleInts = prevSibling ? prevSibling.textContent.match(reg) : ["1"];
+                const numActors = parseInt(possibleInts ? possibleInts[0] : "1");
                 extractedActors.push({
                     numActors : numActors ? numActors : 1,
                     actorID : dataID,
@@ -335,6 +341,8 @@ export class QuickEncounter {
         }
         if (totalXP) {
             const chatMessageData = {
+                user: game.user,
+                whisperTo: game.user,
                 visible : true,
                 content : `Total XP: ${totalXP}`
             }
