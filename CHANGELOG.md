@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.4.3
+Fixed module.json Description
+
 ## 0.4.2 Bug fixes
 FIXED 0.4.1 If the number of Actors is part of a sentence, it won't be picked up correctly
 FIXED 0.4.1 If you have a Player selected when you open your Quick Encounter, it will create a new one instead
