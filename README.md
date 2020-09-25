@@ -1,7 +1,7 @@
 # Quick Encounters
-
+NEW in v0.5! Save your player tokens at the entrance to new Scenes, 
 * **Author**: Spetzel#0103
-* **Version**: 0.4.3
+* **Version**: 0.5.0
 * **Foundry VTT Compatibility**: 0.6.5-0.7.2
 * **System Compatibility (If applicable)**: N/A
 * **Translation Support**: en
@@ -9,22 +9,18 @@
 
 # Description
 
-Quick Encounters keeps your [Foundry VTT](https://foundryvtt.com/) map clean and your encounters simple in heavily populated dungeons. Use either or both methods - you can always press the Quick Encounters button for a helpful tutorial.
+Quick Encounters keeps your [Foundry VTT](https://foundryvtt.com/) map clean and your encounters simple in heavily populated dungeons. With Quick Encounters you can:
+* Design your encounters by positioning and configuring Hostile tokens, then save the tokens into a Quick Encounter Journal Entry, marked with a single Map Note on the Scene which only you the DM see (similar to the Encounter ability in Fantasy Grounds). To run your Quick Encounter, simply double-click the Map Note icon and click the "Add to Combat Tracker" button; all your saved tokens will be positioned back on the map and added to the Combat Tracker, ready to fight!
+* Quickly run encounters from converted or packaged modules by opening the relevant Journal Entry and pressing the Quick Encounter button - any embedded Actors are converted into tokens distributed around the corresponding Map Note, and added to the Combat Tracker
+* Easily scale-up encounters by just increasing the number of Actors (change "3 Zombies" to "10 Zombies" in the Journal Entry)
+* Run Roving Encounter by moving the Map Note to the desired location just before activating the encounter
+* Save your player tokens at the entrance to a new Scene so you don't have to drag/move them
 
-**Method 1:** Drag Hostile tokens to the map and select them. Then press the Quick Encounters button and your tokens and their positions are saved into a Quick Encounter Journal Entry, and "packaged" into a single map note on the Scene. To run your Quick Encounter, simply double-click the map pin and click the "Add to Combat Tracker" button; all your saved tokens will be positioned back on the map and added to the Combat Tracker, ready to fight!
-
-Method 1 brings the functionality of Fantasy Grounds "Encounters" to Foundry.
-
-**Method 2:** Drag Actors into an existing or new Journal Entry describing the encounter. Then drag the Journal Entry to the Scene map at the encounter position. To run your Quick Encounter, simply double-click the map pin and click the Quick Encounter button. Your saved tokens will be positioned around the map note, and added to the Combat Tracker.
-
-For Roving Encounters, wait to place the Quick Encounter Journal Entry until you decide on the encounter location during a session. Then follow the remaining steps for Method 2.
-
-Quick Encounters works well with [TokenMold](https://github.com/Moerill/token-mold#token-mold) to vary your tokens names, HP, etc (although TokenMold is not required for Quick Encounters).
+Quick Encounters works well with [TokenMold](https://github.com/Moerill/token-mold#token-mold) to vary your tokens names, HP, etc (although TokenMold is not required for Quick Encounters). dnd5e only: Quick Encounters also previews the XP for each group of hostiles.
 
 # Install
-
 1. Go to the "Add-on Modules" tab in Foundry Setup
-2. Click "Install Module" and search for **Quick Encounters** OR paste this link: `https://raw.githubusercontent.com/opus1217/quick-encounters/v0.4.3/module.json`
+2. Click "Install Module" and search for **Quick Encounters** OR paste this link: `https://raw.githubusercontent.com/opus1217/quick-encounters/v0.5.0/module.json`
 3. Open your world and go to Settings>Manage Modules and enable Quick Encounters
 
 # Using Quick Encounters
