@@ -13,7 +13,6 @@
   }],
   "esmodules" : ["modules/QuickEncounter.js","modules/EncounterNotes.js"
   ],
-  "styles": ["css/quick-encounters.css"],
   "readme": "https://github.com/opus1217/quick-encounters/blob/v0.4.3/README.md",
   "bugs": "https://github.com/opus1217/quick-encounters/issues",
   "changelog": "https://github.com/opus1217/quick-encounters/blob/master/CHANGELOG.md",

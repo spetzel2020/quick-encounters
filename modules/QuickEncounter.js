@@ -32,6 +32,7 @@
 20-Sep-2020     v0.4.2: extractActors(): Extract # of Actors using previousSibling because parent is confused by having a sentence with a number
                 Also, whisper the Total XP to the GM, not to everybody
 21-Sep-2020     v0.4.2: Ignore Friendly tokens which might be selected (typically PCs) - this should probably be an option/dialog
+25-Sep-2020     v0.5.0: Dialog to check if you want friendlies in your Quick Encounters
 
 */
 
@@ -49,12 +50,12 @@ export const EMBEDDED_ACTORS_KEY = "embeddedActors";
 export class QuickEncounter {
     static init() {
         game.settings.register(MODULE_NAME, "quickEncountersVersion", {
-          name: "Quick Encounters Version",
-          hint: "",
-          scope: "system",
-          config: false,
-          default: game.i18n.localize("QE.Version"),
-          type: String
+            name: "Quick Encounters Version",
+            hint: "",
+            scope: "system",
+            config: false,
+            default: game.i18n.localize("QE.Version"),
+            type: String
         });
     }
 
@@ -99,10 +100,24 @@ export class QuickEncounter {
         //Called when you press the Quick Encounters button (fist) from the sidebar
         //If you are controlling tokens, it assumes that's the Encounter you want to create
         //Method 1: Get the selected tokens and the scene
-        //Ignore Friendly tokens
-        const controlledTokens = Array.from(canvas.tokens.controlled).filter(t => t.data.disposition != TOKEN_DISPOSITIONS.FRIENDLY );
+        //Exclude friendly tokens unless you say yes to the dialog
+        const controlledTokens = Array.from(canvas.tokens.controlled);
+        const controlledFriendlyTokens = controlledTokens.filter(t => t.data.disposition === TOKEN_DISPOSITIONS.FRIENDLY );
         if (controlledTokens && controlledTokens.length) {
-            QuickEncounter.createFromTokens(controlledTokens);
+            if (controlledFriendlyTokens && controlledFriendlyTokens.length) {
+                Dialog.confirm({
+                  title: game.i18n.localize("QE.IncludeFriendlies.TITLE"),
+                  content: game.i18n.localize("QE.IncludeFriendlies.CONTENT"),
+                  yes: () => {QuickEncounter.createFromTokens(controlledTokens)},
+                  no: () => {
+                      const controlledNonFriendlyTokens = controlledTokens.filter(t => t.data.disposition !== TOKEN_DISPOSITIONS.FRIENDLY );
+                      if (controlledNonFriendlyTokens.length) {QuickEncounter.createFromTokens(controlledNonFriendlyTokens);}
+                  }
+                });
+            } else {
+                QuickEncounter.createFromTokens(controlledTokens);
+            }
+
         } else {
             //Method 2: Check for an open Journal with embedded Actors and a map Note
             const quickEncounter = QuickEncounter.findCandidateJournalEntry();

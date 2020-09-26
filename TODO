@@ -4,10 +4,14 @@
 v0.3.4 If you click Quick Encounters again you get a second copy of the Tutorial
 v0.4.0 If you drag tokens into the Journal Entry, later dragging new Actors will be ignored
         - should compare the Actors to the tokens and add ones that aren't represented
->>>0.4.0   The TurnMarker app is throwing errors - are those related to 0.7.2 or in 0.6.6 - need to check
-
+0.4.0   The TurnMarker app is throwing errors - are those related to 0.7.2 or in 0.6.6
+        - Doesn't seem to be happening in 0.6.6
+>>>0.4.3   Switch Scene still not working properly (qeScene.view() needs to wait until finished)
+>>>0.4.3   Saved tokens should bypass Token Mold
 
 ## FEATURES
+- Add option to allow Friendly tokens
+    - I ignored the Friendly tokens you had selected; if you want them included, change the setting in Game Settings> Configure Settings>Module Settings
 - Method 2 should create an embedded button and the button should be smaller (or linked to the embedded actors)
     - Or maybe the Actor links are individual buttons that populate the scene instead of showing the Actors
     -- Maybe shift-click shows the Actor or shift-click populates the Map
@@ -15,6 +19,8 @@ v0.4.0 If you drag tokens into the Journal Entry, later dragging new Actors will
 - Update the Title bar of the Quick Encounter Journal Entry with the Total XP
 - Allow you to use Compendium entries as well as Actors
 - If you drag a Journal Entry to the Map, then intercept to change the icon etc.
+
+
 
 ## FIXED BUGS
 FIXED 1. If the Actor embed text includes a number that is the only number, it will be used (Rion -L14) will result in 14 copies
