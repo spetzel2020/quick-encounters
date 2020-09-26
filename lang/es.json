@@ -1,0 +1,23 @@
+{
+  "QE.id": "quick-encounters",
+  "QE.Version" : "v0.4.3",
+  "QE.Name": "Encuentros Rápidos",
+  "QE.Welcome" : "Bienvenido a Encuentros Rápidos v0.4.3",
+  "QE.TITLE.HowToUse" : "Cómo usar Encuentros Rápidos",
+  "QE.Description": "¡Fija tus Encuentros a una Escena o a un Apunte con un solo clic!<h4>Método 1:</h4><p>Coloca los iconos de los enemigos y presiona el botón <i class='fas fa-fist-raised'></i>Encuentro Rápido para guardarlo en una Entrada de Encuentro de Apuntes. Para activar el Encuentro, haz doble-clic en el icono de la calavera y presiona el botón de Añadir al Asistente de Combate</p><h4>Método 2:</h4><p>Crea una Entrada de Apuntes con un texto descriptivo. Arrastra los actores a la entrada. Arrastra la Entrada de Apuntes a la localización del mapa en la que quieras poner el Encuentro Rápido. Para activar el Encuentro selecciona la Nota del Mapa, o abre la Entrada de Encuentro de Apuntes y haz clic en el botón Encuentros Rápidos",
+  "QE.CONTENT.AddADescription" : "<i>Añade una breve descripción del encuentro para ti o para tus jugadores:</i><br><br>",
+  "QE.CONTENT.Instructions" : "<strong>Los iconos y sus posiciones se han guardado en esta Entrada de Apuntes.</strong><br>Cuando la cierres, los iconos seleccionados serán sustituidos con un único icono de Encuentro fijado a la Escena. Para activar el Encuentro Rápido haz doble-clic en el icono del combate y presiona el botón Añadir Encuentro Rápido al Asistente de Combate.",
+  "QE.BUTTON.AddToCombatTracker" : "Añadir Encuentro Rápido al Asistente de Combate",
+  "QE.BUTTON.CreateQuickEncounter" : "Crea un Encuentro Rápido a partir de los iconos seleccionados, o activa un Encuentro Rápido ya existende desde los Apuntes",
+  "QE.BUTTON.SaveEncounterMapNote" : "Guarda una Nota del Mapa del Encuentro Rápido",
+  "QE.NOTE.ConfigTitle" : "Configuración de la chinqueta del Encuentro Rápido",
+  "QE.ERROR.HowToUse" : "Para usar Encuentros Rápidos debes (a) Seleccionar los iconos en el mapa y presionar el botón para crear una Entrada de Encuentro Rápido en los Apuntes o (b) Abrir una Entrada de Apuntes con los contendientes implicados y presionar el botón para situar los iconos y activar el combate. ¿Quieres ver un ejemplo de Entrada de Apuntes?",
+  "QE.SwitchScene.TITLE" : "¿Cambiar de Escena?",
+  "QE.SwitchScene.CONTENT" : "Este Encuentro Rápido pertenece a una Escena distinta; ¿Quieres cambiar de escena?",
+  "QE.TITLE.DeletedJournalNote" :  "Borrada la Nota del Mapa del Encuentro Rápido",
+  "QE.CONTENT.DeletedJournalNote" :  "Como has borrado la Entrada de Apuntes del Encuentro Rápido, he borrado la Nota del Mapa asociada",
+  "QE.NoMapNote.TITLE" : "No se encuentra la localización del Encuentro Rápido",
+  "QE.NoMapNote.CONTENT" : "No he podido encontrar la Nota del Mapa asociada a este Encuentro Rápido. ¿Quieres crear una Nota del Mapa por defecto en el centro de la vista actual?",
+  "QE.NoMapNote.YES" : "Crea una Nota del Mapa",
+  "QE.NoMapNote.NO" : "Lo haré yo mismo"
+}
