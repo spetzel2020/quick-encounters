@@ -11,6 +11,7 @@ Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tra
                 v0.4.1 delete() - rewrite for getEncounterScene returning the scene not the ID
 16-Sep-2020     v0.4.1 place() - if there aren't token coords, and option=placeDefault, then place a map note in the center
 21-Sep-2020     v0.4.2: BUG: Dialog.prompt doesn't exist in Foundry 0.6.6 - replace with our own
+26-Sep-2020     v0.5.0: Use QuickEncounter.switchToMapNoteScene
 */
 
 
@@ -67,7 +68,7 @@ export class EncounterNote{
         const scene = QuickEncounter.getEncounterScene(journalEntry);
         if (scene) {
             //Find the corresponding Map note - have to switch to the correct scene first
-            await scene.view();
+            if (!await QuickEncounter.switchToMapNoteScene(scene, journalEntry)) {return;}
             const note = journalEntry.sceneNote;
             const noteName = note.name;
 
@@ -151,5 +152,3 @@ Hooks.on(`renderEncounterNoteConfig`, async (noteConfig, html, data) => {
     const saveEncounterMapNote = game.i18n.localize("QE.BUTTON.SaveEncounterMapNote");
     html.find('button[name="submit"]').text(saveEncounterMapNote);
 });
-
-//If we just saved the Map Note, then we should save its position in the Journal Entry so if we're on a different scene we know it

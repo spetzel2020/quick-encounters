@@ -1,6 +1,13 @@
 # Changelog
 
-## 0.5.0
+## v0.5.0
+### Changes
+- Now lets you include Friendly tokens (for example Players) in an Encounter (but checks first)
+### Bug Fixes
+- Fixed: Works better with Token Mold! Saved tokens are now reproduced exactly (before saved tokens were re-rolled and changed when you ran the Quick Encounter)
+- Fixed: No more ruining a surprise encounter: no longer puts an XP message in the chat, but rather a total in the Quick Encounter Journal Entry
+- Fixed: Was opening a second Tutorial window; now re-opens the existing window
+- Fixed: Was not waiting long enough to switch to the Quick Encounter scene
 
 
 ## 0.4.3
