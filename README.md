@@ -24,7 +24,7 @@ Quick Encounters works well with [TokenMold](https://github.com/Moerill/token-mo
 3. Open your world and go to Settings>Manage Modules and enable Quick Encounters
 
 # Using Quick Encounters
-## Method 1
+## Method 1 (like Fantasy Grounds "Encounters")
 1. Drag your Hostile tokens to the map and select them
 2. Then press the Quick Encounters button and your tokens and their positions are saved into a Quick Encounter Journal Entry
 3. Close the Journal Entry and you will see a Quick Encounter Map Note
@@ -32,8 +32,8 @@ Quick Encounters works well with [TokenMold](https://github.com/Moerill/token-mo
 5. To run your Quick Encounter, simply double-click the map pin and click the "Add to Combat Tracker" button; all your saved tokens will be positioned on the map and added to the combat tracker, ready to fight!
 
 ## Method 2
-1. Drag Actors into an existing or new Journal Entry describing the encounter.
+1. Drag Actors into an existing or new Journal Entry describing the encounter (you can add how many of them you want).
 2. Close the Journal Entry
-3. Now drag the Journal Entry to the Scene map at the encounter position.
+3. Now drag the placed Journal Entry Note to the Scene map at the desired encounter position.
 4. To run your Quick Encounter, simply double-click the map pin to open the Quick Encounter Journal Entry.
 5. Click the Quick Encounter button: your saved tokens will be positioned around the map note, and added to the Combat Tracker.
