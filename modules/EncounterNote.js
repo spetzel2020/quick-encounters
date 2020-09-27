@@ -13,6 +13,7 @@ Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tra
 21-Sep-2020     v0.4.2: BUG: Dialog.prompt doesn't exist in Foundry 0.6.6 - replace with our own
 26-Sep-2020     v0.5.0: Use QuickEncounter.switchToMapNoteScene
 27-Sep-2020     v0.5.0: Bypass the Note Config sheet - just create it and allow for updating later
+                v0.5.0: NYI: Base code for Hook on renderNoteCOnfig to change it to look like a QE Note (but need a way of determining a QE Note)
 */
 
 
@@ -143,4 +144,31 @@ Hooks.on("deleteJournalEntry", EncounterNote.delete);
 Hooks.on(`renderEncounterNoteConfig`, async (noteConfig, html, data) => {
     const updateEncounterMapNote = game.i18n.localize("QE.UpdateEncounterMapNote.BUTTON");
     html.find('button[name="submit"]').text(updateEncounterMapNote);
+});
+
+//NOT YET IMPLEMENTED
+//If you drag a Quick Encounter Journal Entry to the Scene, then intercept it to render it similarly,
+//but this time allow you to change stuff
+Hooks.on(`renderNoteConfig`, async (noteConfig, html, data) => {
+    const note = noteConfig.object;
+    const journalEntry = game.journal.get(note.entryId);
+
+//FIXME: Temporary so that we skip this until we can determine if something is a Quick Encounter just from the Journal Entry (not the sheet)
+    const isQEJournalEntry = false;
+
+    if (noteConfig.intercepted || !isQEJournalEntry) {return;}
+    mergeObject(data.object, {
+        icon: CONFIG.JournalEntry.noteIcons.Combat,
+        iconSize: 80,
+        iconTint: "#FF0000",  //Red
+        //Don't specify the name so it inherits from the Journal
+        textAnchor: CONST.TEXT_ANCHOR_POINTS.TOP,
+        fontSize: 24
+    })
+
+
+    const newInnerHtml = await noteConfig._renderInner(data);
+    if (noteConfig.element.length ) {noteConfig._replaceHTML(noteConfig.element, newInnerHtml);}
+    noteConfig.activateListeners(newInnerHtml);
+    noteConfig.intercepted = true;
 });

@@ -38,6 +38,7 @@
                 v0.5.0: Remove putting XP in chat - just put it before the activation button in the Journal Entry
                 v0.5.0: Add switchToMapNoteScene() - waits for up to 2s to find the map Note in the other scene
                 v0.5.0: Add the Quick Encounters button dynamically when you render the Journal Entry, regardless of Method 1 or 2
+                0.5.0 Token.create() was returning a single token if you passed in a single-element array of token data; fixed to check
 */
 
 
@@ -504,7 +505,9 @@ export class QuickEncounter {
         //v0.5.0 Skip a second call to Token Mold if you are using Method 1 with saved tokens
         //Also, use the ability of Token.create to handle an array
         //Have to clone the expandedTokenData because it gets (potentially) updated by Token Mold
-        let createdTokens = await Token.create(duplicate(expandedTokenData));
+        //Annoyingly, Token.create returns a single token if you passed in a single element array
+        const tempCreatedTokens = await Token.create(duplicate(expandedTokenData));
+        let createdTokens = tempCreatedTokens.length ? tempCreatedTokens : [tempCreatedTokens];
         //v0.5.0: Now reset the token data in case it was adjusted (e.g. by Token Mold), just for those that are frozen
         for (let i=0; i<expandedTokenData.length; i++) {
             if (expandedTokenData[i].frozen) {

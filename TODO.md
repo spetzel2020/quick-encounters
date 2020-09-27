@@ -37,6 +37,8 @@ FIXED (v0.5.0) v0.3.4 If you click Quick Encounters again you get a second copy 
 FIXED (v0.5.0) 0.4.3   Switch Scene still not working properly (qeScene.view() needs to wait until finished)
 NOT A BUG  0.4.0   The TurnMarker app is throwing errors - are those related to 0.7.2 or in 0.6.6
         - Doesn't seem to be happening in 0.6.6
+FIXED (v0.5.0) 0.5.0 Token.create() was returning a single token if you passed in a single-element array of token data; fixed to check
+    - (would mean single-opponent encounters wouldn't be added to the Combat Tracker)
 
 
 ## COMPLETED FEATURES
