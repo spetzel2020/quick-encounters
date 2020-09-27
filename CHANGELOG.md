@@ -4,6 +4,8 @@
 ### Changes
 - Now lets you include Friendly tokens (for example Players) in an Encounter (but checks first)
 - Dynamically adds a Quick Encounter button at the top of any candidate Quick Encounter Journal Entry
+- Automatically adds a Note for Method 1, and asks for Method 2
+
 ### Bug Fixes
 - Fixed: Works better with Token Mold! Saved tokens are now reproduced exactly (before, saved tokens were re-rolled and changed when you ran the Quick Encounter)
 - Fixed: No more ruining a surprise encounter: no longer puts an XP message in the chat, but rather a total in the Quick Encounter Journal Entry

@@ -49,7 +49,9 @@ export const TOKENS_FLAG_KEY = "tokens";
 export const TOTAL_XP_KEY = "totalXP";
 export const EMBEDDED_ACTORS_KEY = "embeddedActors";
 
-
+export function deleteAllEQMapNotes(text="Unknown") {
+    QuickEncounter.deleteAllEQMapNotes(text);
+}
 
 export class QuickEncounter {
     static init() {
@@ -83,18 +85,19 @@ export class QuickEncounter {
                 title: "Delete all Quick Encounter Map Notes",
                 icon: "fas fa-trash",
                 toggle: false,
-                active: false,
-                visible: false, // game.user.isGM,
-                onClick: () => QuickEncounter.deleteAllEQMapNotes()
+                button: true,
+                visible: false, //game.user.isGM,
+                onClick: () => QuickEncounter.deleteAllEQMapNotes("Unknown")
             });
         }
     }
 
-    static async deleteAllEQMapNotes() {
+    static async deleteAllEQMapNotes(text) {
         let notes = canvas.notes.placeables;
         for (let iNote = 0; iNote < notes.length; iNote++) {
-            if (notes[iNote].text === "Unknown") {
+            if (notes[iNote].text === text) {
                 canvas.notes.placeables.splice(iNote,1);
+                notes[iNote].delete();
                 iNote--;
             }
         }
@@ -168,7 +171,7 @@ export class QuickEncounter {
         const scene = controlledTokens[0].scene;
         const journalData = {
             folder: null,
-            name: `${scene.name}: Quick Encounter`,
+            name:  `Quick Encounter: ${scene.name}`,
             content: content,
             type: "encounter",
             types: "base"
@@ -185,6 +188,9 @@ export class QuickEncounter {
         for (const token of controlledTokens) {
             canvas.tokens.deleteMany([token.id]);
         }
+
+        //And create the Map Note (otherwise it will ask when you close the Journal Entry)
+        EncounterNote.place(journalEntry);
     }
 
     static async addTokensToJournalEntry(qeJournalEntry, controlledTokens) {
@@ -567,7 +573,7 @@ Hooks.on('closeJournalSheet', async (journalSheet, html) => {
         //If qeScene is non-null, there is a Map Note *somewhere* (might be on a different scene)
         //So in 0.4.1 we recreate a Note if qeScene is null (change from previous versions)
         const qeScene = QuickEncounter.getEncounterScene(journalEntry);
-        if (!qeScene) {await EncounterNote.place(journalEntry);}
+        if (!qeScene) {QuickEncounter.noMapNoteDialog(journalEntry);}
     }
 });
 

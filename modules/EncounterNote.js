@@ -12,6 +12,7 @@ Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tra
 16-Sep-2020     v0.4.1 place() - if there aren't token coords, and option=placeDefault, then place a map note in the center
 21-Sep-2020     v0.4.2: BUG: Dialog.prompt doesn't exist in Foundry 0.6.6 - replace with our own
 26-Sep-2020     v0.5.0: Use QuickEncounter.switchToMapNoteScene
+27-Sep-2020     v0.5.0: Bypass the Note Config sheet - just create it and allow for updating later
 */
 
 
@@ -28,11 +29,12 @@ Object.assign(CONFIG.JournalEntry.noteIcons, moreNoteIcons);
 
 export class EncounterNoteConfig extends NoteConfig {
     /** @override  */
+    //WARNING: Do not add submitOnClose=true because that will create a submit loop
     static get defaultOptions() {
-    	  const options = super.defaultOptions;
-    	  options.id = "encounter-note-config";
-          options.title = game.i18n.localize("QE.NOTE.ConfigTitle");
-    	  return options;
+        return mergeObject(super.defaultOptions, {
+            id : "encounter-note-config",
+            title : game.i18n.localize( "QE.Config.TITLE")
+        });
     }
 }
 
@@ -52,15 +54,10 @@ export class EncounterNote{
               fontSize: 24
         };
 
-        //Use new Note rather than Note.create because this won't be persisted
-        //Until the GM "saves" the Note
-        //This uses the same approach as JournalEntry._onDropData
-        let newNote = new Note(noteData);
-
+        //v0.5.0: Switch to Note.create() to bypass the NOte dialog
+        //This is different from the JournalEntry._onDropData approach
+        let newNote = await Note.create(noteData);
         newNote._sheet = new EncounterNoteConfig(newNote);
-
-        return newNote;
-
     }
 
     static async delete(journalEntry) {
@@ -131,14 +128,9 @@ export class EncounterNote{
         } else {return;}
         // Validate the final position is in-bounds
         if (canvas.grid.hitArea.contains(noteAnchor.x, noteAnchor.y) ) {
-
-            // Create a NoteConfig sheet instance to finalize the creation
-            //Don't activate the note toolbar section since we want to define more
-            //canvas.notes.activate();
+            // Create a Note; we don't pop-up the Note sheet because we really want this Note to be placed
+            //(they can always edit it afterwards)
             const newNote = await EncounterNote.create(qeJournalEntry, noteAnchor);
-            const note = canvas.notes.preview.addChild(newNote);
-            await note.draw();  //Draw the new Note on the canvas and add listeners
-            note.sheet.render(true);
         }
     }
 
@@ -149,6 +141,6 @@ Hooks.on("deleteJournalEntry", EncounterNote.delete);
 
 //Pretty up the first Map Note (hopefully we can do the same for others)
 Hooks.on(`renderEncounterNoteConfig`, async (noteConfig, html, data) => {
-    const saveEncounterMapNote = game.i18n.localize("QE.BUTTON.SaveEncounterMapNote");
-    html.find('button[name="submit"]').text(saveEncounterMapNote);
+    const updateEncounterMapNote = game.i18n.localize("QE.UpdateEncounterMapNote.BUTTON");
+    html.find('button[name="submit"]').text(updateEncounterMapNote);
 });

@@ -7,13 +7,12 @@ v0.5.0 You still see and hear HP rolling with Token Mold, even though the saved 
 
 
 ## FEATURES
-- Method 1 should create the Map Note without asking
+
 - Method 2 should create an embedded button and the button should be smaller (or linked to the embedded actors)
     - Or maybe the Actor links are individual buttons that populate the scene instead of showing the Actors
     -- Maybe shift-click shows the Actor or shift-click populates the Map
-- Method 2 should create the Map Note immediately and then you drag it to the appropriate place
 - Allow you to use Compendium entries as well as Actors
-- If you drag a Journal Entry to the Map, then intercept to change the icon etc.
+>>>- If you drag a Journal Entry to the Map, then intercept to change the icon etc.
 - Improve the way the Journal Entry gets built to do more with the template and handlebars
 
 
@@ -50,3 +49,5 @@ DONE Method 1 should put the # of Actors in front of the actor link - this will 
 DONE (v0.4.1) Sum up and show the XP (5e only) for a combat - Total XP for this Encounter Journal, and a way of calculating per # of players
 DONE (v0.4.2) Add the count x Actor to the documentation/tutorial
 DONE (v0.5.0) - If you include Friendly tokens, show a dialog to check that's what you want
+DONE (v0.5.0) - Method 1 should create the Map Note without asking
+DONE (v0.5.0) - Method 2 will now always ask you to create a Map Note when you close the Journal Entry
