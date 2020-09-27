@@ -76,8 +76,8 @@ export class EncounterNote{
             if (note) {
                 //0.4.2: Replaces Dialog.prompt from Foundry 0.7.2
                 EncounterNote.dialogPrompt({
-                  title: game.i18n.localize("QE.TITLE.DeletedJournalNote"),
-                  content: game.i18n.localize("QE.CONTENT.DeletedJournalNote"),
+                  title: game.i18n.localize("QE.DeletedJournalNote.TITLE"),
+                  content: game.i18n.localize("QE.DeletedJournalNote.CONTENT"),
                   label : "",
                   callback : () => {console.log(`Deleted Map Note ${noteName}`);},
                   options: {

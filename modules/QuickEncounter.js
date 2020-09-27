@@ -37,6 +37,7 @@
                 (This handles the case of Token Mold or other modules adusting its data)
                 v0.5.0: Remove putting XP in chat - just put it before the activation button in the Journal Entry
                 v0.5.0: Add switchToMapNoteScene() - waits for up to 2s to find the map Note in the other scene
+                v0.5.0: Add the Quick Encounters button dynamically when you render the Journal Entry, regardless of Method 1 or 2
 */
 
 
@@ -146,11 +147,10 @@ export class QuickEncounter {
             tokenActorIDs.add(token.actor.id);
         }
 
-        const addToCombatTrackerTitle = game.i18n.localize("QE.BUTTON.AddToCombatTracker");
-        const addToCombatTrackerButton = await renderTemplate('modules/quick-encounters/templates/addToCombatTrackerButton.html');
+        //v0.5.0 The Quick Encounters button now gets added dynamically when we render the relevant Journal Entry
 //NOTE: -------- This code chunk should enable us to drag additional encounters or tokens to a single Journal Entry if necessary
 //FIXME: Replace all this with a renderTemplate section using handlebars
-        let content = game.i18n.localize("QE.CONTENT.AddADescription");
+        let content = game.i18n.localize("QE.Instructions.CONTENT");
         let xpTotal = 0;
         for (const tokenActorID of tokenActorIDs) {
             const tokens = controlledTokens.filter(t => t.actor.id === tokenActorID);
@@ -162,12 +162,8 @@ export class QuickEncounter {
             content += `<li>${tokens.length}@Actor[${tokenActorID}]{${tokens[0].name}} ${xpString}</li>`;
         }
         //v0.5.0: Put total XP in the Journal Entry
-        if (xpTotal) {content += game.i18n.localize("QE.CONTENT.TotalXP")+` ${xpTotal}XP<br>`;}
-        content += addToCombatTrackerButton;
+        if (xpTotal) {content += game.i18n.localize("QE.TotalXP.CONTENT")+` ${xpTotal}XP<br>`;}
 //--------------
-
-        const instructions = game.i18n.localize("QE.CONTENT.Instructions");
-        content += instructions;
 
         const scene = controlledTokens[0].scene;
         const journalData = {
@@ -190,6 +186,7 @@ export class QuickEncounter {
             canvas.tokens.deleteMany([token.id]);
         }
     }
+
     static async addTokensToJournalEntry(qeJournalEntry, controlledTokens) {
         //Save an array of token data
         let controlledTokensData = [];
@@ -344,7 +341,7 @@ export class QuickEncounter {
         const existingTokens = quickEncounter.existingTokens;
 
 
-        // This version takes any open Journal with embedded Actors and turns them into tokens at the Journal Entry's map note position
+        //EITHER take saved tokens and reposition them, OR create tokens from embedded Actors
         if (!(qeJournalEntry && ((extractedActors && extractedActors.length) || (existingTokens && existingTokens.length)))) {return;}
 
         // Switch to the correct scene if confirmed
@@ -362,7 +359,8 @@ export class QuickEncounter {
         //If we have existing tokens, then re-create those, otherwise create them from Actors
         let tokenData = [];
         //v0.5.0 FIXME: We will want to re-create tokens that have been saved but otherwise create them from Actors
-        //So set a frozen flag on each saved token that doesn't allow further changes
+        //So set a frozen flag on each saved token that doesn't allow further changes (so that saved tokens don't get re-rolled)
+        //Setting directly rather than using setFlag because we don't need this saved between sessions
         if (existingTokens && existingTokens.length) {
             tokenData = existingTokens;
             tokenData.forEach((td) => {td.frozen = true;});
@@ -373,7 +371,6 @@ export class QuickEncounter {
 
         //Now create the Tokens
         const createdTokens = await QuickEncounter.createTokens(tokenData);
-
 
         //And add them to the Combat Tracker (wait 100ms for drawing to finish)
         setTimeout(() => {
@@ -543,6 +540,12 @@ export class QuickEncounter {
 //Add a listener for the embedded Encounter button and record the scene if we can
 Hooks.on(`renderJournalSheet`, async (journalSheet, html) => {
     if (!game.user.isGM) {return;}
+
+    //v0.5.0 If this could be a Quick Encounter, add the button at the top
+    if (QuickEncounter.extractQuickEncounter(journalSheet)) {
+        const addToCombatTrackerButton = await renderTemplate('modules/quick-encounters/templates/addToCombatTrackerButton.html');
+        html.find('.editor-content').prepend(addToCombatTrackerButton);
+    }
 
     //If there's an embedded button, then add a listener
     html.find('button[name="addToCombatTracker"]').click(() => {

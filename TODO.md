@@ -1,14 +1,13 @@
 # TO DO
 
 ## BUGS
-v0.4.0 If you drag tokens into the Journal Entry, later dragging new Actors will be ignored
+v0.4.0 If you drag tokens into the Journal Entry, later adding new Actors will be ignored
         - should compare the Actors to the tokens and add ones that aren't represented
-0.4.0   The TurnMarker app is throwing errors - are those related to 0.7.2 or in 0.6.6
-        - Doesn't seem to be happening in 0.6.6
-
+v0.5.0 You still see and hear HP rolling with Token Mold, even though the saved tokens are not changed        
 
 
 ## FEATURES
+- Method 1 should create the Map Note without asking
 - Method 2 should create an embedded button and the button should be smaller (or linked to the embedded actors)
     - Or maybe the Actor links are individual buttons that populate the scene instead of showing the Actors
     -- Maybe shift-click shows the Actor or shift-click populates the Map
@@ -16,6 +15,7 @@ v0.4.0 If you drag tokens into the Journal Entry, later dragging new Actors will
 - Allow you to use Compendium entries as well as Actors
 - If you drag a Journal Entry to the Map, then intercept to change the icon etc.
 - Improve the way the Journal Entry gets built to do more with the template and handlebars
+
 
 
 ## FIXED BUGS
@@ -36,6 +36,9 @@ FIXED (v0.4.2) 0.4.1 Was using Dialog.prompt which doesn't exist in 0.6.6 - repl
 FIXED (v0.5.0) 0.4.3 Saved tokens should bypass Token Mold
 FIXED (v0.5.0) v0.3.4 If you click Quick Encounters again you get a second copy of the Tutorial
 FIXED (v0.5.0) 0.4.3   Switch Scene still not working properly (qeScene.view() needs to wait until finished)
+NOT A BUG  0.4.0   The TurnMarker app is throwing errors - are those related to 0.7.2 or in 0.6.6
+        - Doesn't seem to be happening in 0.6.6
+
 
 ## COMPLETED FEATURES
 DONE: (v0.4.0): If you're on a different scene, pops a dialog to check that you want to switch scenes
