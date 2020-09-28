@@ -1,4 +1,7 @@
-# Changelog
+# Release Notes
+
+## v0.5.1
+- Fixed: You can now add additional Actors to a Quick Encounter (uses saved Tokens if they exist, or creates new ones from the embedded Actors)
 
 ## v0.5.0
 ### Changes

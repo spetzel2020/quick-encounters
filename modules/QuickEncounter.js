@@ -39,6 +39,8 @@
                 v0.5.0: Add switchToMapNoteScene() - waits for up to 2s to find the map Note in the other scene
                 v0.5.0: Add the Quick Encounters button dynamically when you render the Journal Entry, regardless of Method 1 or 2
                 0.5.0 Token.create() was returning a single token if you passed in a single-element array of token data; fixed to check
+27-Sep-2020     v0.5.1: Increase the timeout when waiting for tokens to draw before adding to the Combat Tracker
+                v0.5.1: run(): Uses saved Tokens if they exist, but otherwise supplements with created ones from the embedded Actors
 */
 
 
@@ -132,7 +134,7 @@ export class QuickEncounter {
             if (quickEncounter) {QuickEncounter.run(quickEncounter);}
             else {
                 //No selected tokens or open Journal Entry
-                QuickEncounter.showTemplateJournalEntry();
+                QuickEncounter.showTutorialJournalEntry();
             }
         }
     }
@@ -215,7 +217,7 @@ export class QuickEncounter {
         }
     }
 
-    static async showTemplateJournalEntry() {
+    static async showTutorialJournalEntry() {
         //0.5.0: Check if there's an existing open Tutorial
         const existingTutorial = QuickEncounter.findOpenQETutorial();
         if (existingTutorial) {
@@ -345,11 +347,11 @@ export class QuickEncounter {
         const qeJournalEntry = quickEncounter.journalEntry;
         let mapNote = quickEncounter.mapNote;
         const extractedActors = quickEncounter.extractedActors;
-        const existingTokens = quickEncounter.existingTokens;
+        const savedTokensData = quickEncounter.existingTokens;
 
 
         //EITHER take saved tokens and reposition them, OR create tokens from embedded Actors
-        if (!(qeJournalEntry && ((extractedActors && extractedActors.length) || (existingTokens && existingTokens.length)))) {return;}
+        if (!(qeJournalEntry && ((extractedActors && extractedActors.length) || (savedTokensData && savedTokensData.length)))) {return;}
 
         // Switch to the correct scene if confirmed
         const qeScene = QuickEncounter.getEncounterScene(qeJournalEntry);
@@ -363,26 +365,49 @@ export class QuickEncounter {
         const coords = {x: mapNote.data.x, y: mapNote.data.y}
         canvas.tokens.activate();
 
-        //If we have existing tokens, then re-create those, otherwise create them from Actors
-        let tokenData = [];
-        //v0.5.0 FIXME: We will want to re-create tokens that have been saved but otherwise create them from Actors
+        //The frozen flag indicates if we should reset token data after creating the tokens
+        let extractedActorTokenData = await QuickEncounter.createTokenDataFromActors(extractedActors, coords);
+        if (extractedActorTokenData) {extractedActorTokenData.forEach((td) => {td.frozen = false;})};
+        if (savedTokensData) {savedTokensData.forEach((td) => {td.frozen = true;})};
+
+        //v0.5.1 If we have more actors than saved tokens, create more tokens
+        //If we have fewer actors than saved tokens, skip some
+        let combinedTokenData = [];
+        //v0.5.0 We will want to re-create tokens that have been saved but otherwise create them from Actors
         //So set a frozen flag on each saved token that doesn't allow further changes (so that saved tokens don't get re-rolled)
         //Setting directly rather than using setFlag because we don't need this saved between sessions
-        if (existingTokens && existingTokens.length) {
-            tokenData = existingTokens;
-            tokenData.forEach((td) => {td.frozen = true;});
-        } else {
-            tokenData = await QuickEncounter.createTokenDataFromActors(extractedActors, coords);
-            tokenData.forEach((td) => {td.frozen = false;});
+        //v0.5.1 Create both from the embedded Actors and any saved Tokens and then attempt to reconcile
+        //First cut: If you have more actors than saved tokens of that actor (including none), then generate
+        //If we have no savedTokens, do none of this checking
+
+        for (const ea of extractedActors) {
+            const eaTokensData = extractedActorTokenData.filter(eatd => eatd.actorId === ea.actorID);
+            const savedTokensForThisActorID = savedTokensData ? savedTokensData.filter(std => std.actorId === ea.actorID) : null;
+
+            if (!savedTokensForThisActorID) {
+                //No saved tokens - just use the Actor data
+                combinedTokenData = combinedTokenData.concat(eaTokensData);
+            } else {
+                const numExcessActors = eaTokensData.length - savedTokensForThisActorID.length;
+                if (numExcessActors >= 0) {
+                    //if excessActors > 0 take all of the saved tokens and then as many as necessary from the extracted Actor tokens
+                    combinedTokenData = combinedTokenData.concat(savedTokensForThisActorID);
+                    combinedTokenData = combinedTokenData.concat(eaTokensData.slice(0, numExcessActors));
+                } else if (numExcessActors < 0) {
+                    //Take all possible saved tokens up to the number
+                    combinedTokenData = combinedTokenData.concat(savedTokensForThisActorID.slice(0, eaTokensData.length));
+                }
+            }
         }
 
-        //Now create the Tokens
-        const createdTokens = await QuickEncounter.createTokens(tokenData);
 
-        //And add them to the Combat Tracker (wait 100ms for drawing to finish)
+        //Now create the Tokens
+        const createdTokens = await QuickEncounter.createTokens(combinedTokenData);
+
+        //And add them to the Combat Tracker (wait 200ms for drawing to finish)
         setTimeout(() => {
             QuickEncounter.createCombat(createdTokens);
-        },100);
+        },200);
     }
 
 //DEPRECATED

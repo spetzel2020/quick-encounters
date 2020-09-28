@@ -1,13 +1,13 @@
 # TO DO
 
 ## BUGS
-v0.4.0 If you drag tokens into the Journal Entry, later adding new Actors will be ignored
-        - should compare the Actors to the tokens and add ones that aren't represented
-v0.5.0 You still see and hear HP rolling with Token Mold, even though the saved tokens are not changed        
+v0.5.0 You still see and hear HP rolling with Token Mold, even though the saved tokens are not changed
+v0.5.0 (Maybe fixed) Sometimes the Combat Tracker is not ready in time - need to increase the timeout and maybe check if it's been rendered
+v0.5.0 XP and Total XP need to be dynamically calculated when you render the Journal Sheet (put totalXP at the top)
+
 
 
 ## FEATURES
-
 - Method 2 should create an embedded button and the button should be smaller (or linked to the embedded actors)
     - Or maybe the Actor links are individual buttons that populate the scene instead of showing the Actors
     -- Maybe shift-click shows the Actor or shift-click populates the Map
@@ -39,7 +39,7 @@ NOT A BUG  0.4.0   The TurnMarker app is throwing errors - are those related to 
         - Doesn't seem to be happening in 0.6.6
 FIXED (v0.5.0) 0.5.0 Token.create() was returning a single token if you passed in a single-element array of token data; fixed to check
     - (would mean single-opponent encounters wouldn't be added to the Combat Tracker)
-
+FIXED (v0.5.0) v0.4.0 If you drag tokens into the Journal Entry, later adding new Actors will be ignored
 
 ## COMPLETED FEATURES
 DONE: (v0.4.0): If you're on a different scene, pops a dialog to check that you want to switch scenes

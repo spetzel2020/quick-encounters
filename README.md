@@ -1,7 +1,7 @@
 # Quick Encounters
 NEW in v0.5! Save your player tokens at the entrance to new Scenes, Quick Encounter button always available, Surprise encounters! - see [Release Notes](https://github.com/opus1217/quick-encounters/blob/master/CHANGELOG.md#changelog)
 * **Author**: Spetzel#0103
-* **Version**: 0.5.0
+* **Version**: 0.5.1
 * **Foundry VTT Compatibility**: 0.6.5-0.7.2
 * **System Compatibility (If applicable)**: N/A
 * **Translation Support**: en
@@ -20,7 +20,7 @@ Quick Encounters works well with [TokenMold](https://github.com/Moerill/token-mo
 
 # Install
 1. Go to the "Add-on Modules" tab in Foundry Setup
-2. Click "Install Module" and search for **Quick Encounters** OR paste this link: `https://raw.githubusercontent.com/opus1217/quick-encounters/v0.5.0b/module.json`
+2. Click "Install Module" and search for **Quick Encounters** OR paste this link: `https://raw.githubusercontent.com/opus1217/quick-encounters/v0.5.1b/module.json`
 3. Open your world and go to Settings>Manage Modules and enable Quick Encounters
 
 # Using Quick Encounters
