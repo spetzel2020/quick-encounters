@@ -1,6 +1,6 @@
 # Release Notes
 
-## v0.5.1
+## v0.5.2
 - Fixed: You can now add additional Actors to a Quick Encounter (uses saved Tokens if they exist, or creates new ones from the embedded Actors)
 - Fixed: Make the embedded button smaller - width of the text and centered
 - Create a separate dynamic section at the top of a Quick Encounter Journal Entry
