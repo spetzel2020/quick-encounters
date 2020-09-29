@@ -42,6 +42,8 @@
 27-Sep-2020     v0.5.1: Increase the timeout when waiting for tokens to draw before adding to the Combat Tracker
                 v0.5.1: run(): Uses saved Tokens if they exist, but otherwise supplements with created ones from the embedded Actors
 28-Sep-2020     v0.5.1: Method 1: Put per opponent XP next to each Actor and then (always) put total XP with the button
+29-Sep-2020     v0.5.1: FIXED: findOpenQETutorial(): Use Journal Entry name to match instead of jQuery
+                v0.5.1: Create a separate dynamic section at the top of a Quick Encounter Journal Entry
 */
 
 
@@ -270,7 +272,8 @@ export class QuickEncounter {
             for (let w of Object.values(ui.windows)) {
                 //Check open windows for the tutorial Journal Entry
                 if (w instanceof JournalSheet) {
-                    if (w.element.find("#QuickEncountersTutorial")) {
+                    const journalEntry = w.entity;
+                    if (journalEntry && (journalEntry.name === game.i18n.localize("QE.TITLE.HowToUse"))) {
                         qeTutorial = w;
                         break;
                     }
@@ -581,18 +584,19 @@ Hooks.on(`renderJournalSheet`, async (journalSheet, html) => {
         let totalXP = null;
         for (const eActor of extractedActors) {
             const actor = game.actors.get(eActor.actorID);
-            const actorXP =QuickEncounter.getActorXP(actor);
-            if (actorXP) {
+            const actorXP = QuickEncounter.getActorXP(actor);
+            //Only include non-character tokens in XP
+            if (actorXP && (actor.data.type === "npc")) {
                 if (!totalXP) {totalXP = 0;}
                 totalXP += eActor.numActors * actorXP;
             }
         }
-        const addToCombatTrackerButton = await renderTemplate('modules/quick-encounters/templates/addToCombatTrackerButton.html');
-        html.find('.editor-content').prepend(addToCombatTrackerButton);
+        let totalXPLine = null;
         if (totalXP) {
-            const totalXPPrefix = game.i18n.localize("QE.TotalXP.CONTENT");
-            html.find('.editor-content').prepend(`${totalXPPrefix} ${totalXP}XP<br>`);
+            totalXPLine = `${game.i18n.localize("QE.TotalXP.CONTENT")} ${totalXP}XP<br>`;
         }
+        const qeJournalEntryIntro = await renderTemplate('modules/quick-encounters/templates/qeJournalEntryIntro.html', {totalXPLine});
+        html.find('.editor-content').prepend(qeJournalEntryIntro);
 
     }
 

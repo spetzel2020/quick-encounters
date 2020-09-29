@@ -1,0 +1,23 @@
+TUTORIAL
+1. Press Quick Encounter button with nothing selected -> should pop up Tutorial
+2. With Tutorial open, repeat #1 -> should keep existing Tutorial
+3. Close Tutorial -> should delete the Journal Entry
+4. Open some Journal Entries with no embedded Actors, press QE button -> should open Tutorial
+5. Open multiple Journal Entries with embedded Actors, press QE button -> should run the Encounter
+
+
+METHOD 1
+1. Select one friendly token and press QE button -> should ask if you want to add to JE
+2. Select multiple friendly and neutral tokens -> should ask...
+3. Select one hostile token and press QE button -> adds to JE
+4. Select multiple hostile and neutral tokens and press QE button -> adds to JE
+
+
+METHOD 2
+1. Add Actors to a Journal Entry ; should re-render with embedded QE button
+
+
+USE, MOVING, DELETION
+1. Delete Note; should get recreated next time you close the Journal Entry
+2. Move Note - Actor tokens should be created at the position of the Note
+3. Start on another Scene and run an Encounter - should switch scenes

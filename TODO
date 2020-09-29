@@ -3,18 +3,20 @@
 ## BUGS
 v0.5.0 You still see and hear HP rolling with Token Mold, even though the saved tokens are not changed
 v0.5.0 (Maybe fixed) Sometimes the Combat Tracker is not ready in time - need to increase the timeout and maybe check if it's been rendered
->>>v0.5.0 XP and Total XP need to be dynamically calculated when you render the Journal Sheet (put totalXP at the top)
-
+>>>v0.5.0 Actor XP needs to be dynamically calculated when you render the Journal Sheet
+    - perhaps re-render when you're done
 
 
 ## FEATURES
-- Method 2 should create an embedded button and the button should be smaller (or linked to the embedded actors)
+- Individual buttons linked to the embedded actors)
     - Or maybe the Actor links are individual buttons that populate the scene instead of showing the Actors
     -- Maybe shift-click shows the Actor or shift-click populates the Map
 - Allow you to use Compendium entries as well as Actors
->>>- If you drag a Journal Entry to the Map, then intercept to change the icon etc.
+- If you drag a Journal Entry to the Map, then intercept to change the icon etc.
+    - Partially done
 - Improve the way the Journal Entry gets built to do more with the template and handlebars
-
+- Drag new Actors into a Journal Entry - should redo the calculations
+    - should add individual XPs after Actors (in both Methods)
 
 
 ## FIXED BUGS
@@ -54,3 +56,4 @@ DONE (v0.5.0) - If you include Friendly tokens, show a dialog to check that's wh
 DONE (v0.5.0) - Method 1 should create the Map Note without asking
 DONE (v0.5.0) - Method 2 will now always ask you to create a Map Note when you close the Journal Entry
 DONE (v0.5.1) Dynamically calculate Encounter XP above the button
+DONE v0.5.0 Make the embedded button smaller - width of the text and centered
