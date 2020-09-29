@@ -3,20 +3,16 @@
 ## BUGS
 v0.5.0 You still see and hear HP rolling with Token Mold, even though the saved tokens are not changed
 v0.5.0 (Maybe fixed) Sometimes the Combat Tracker is not ready in time - need to increase the timeout and maybe check if it's been rendered
->>>v0.5.0 Actor XP needs to be dynamically calculated when you render the Journal Sheet
-    - perhaps re-render when you're done
-
 
 ## FEATURES
-- Individual buttons linked to the embedded actors)
-    - Or maybe the Actor links are individual buttons that populate the scene instead of showing the Actors
-    -- Maybe shift-click shows the Actor or shift-click populates the Map
 - Allow you to use Compendium entries as well as Actors
-- If you drag a Journal Entry to the Map, then intercept to change the icon etc.
-    - Partially done
+- If you drag a Journal Entry to the Scene, then intercept to change the icon etc.
+    - Partially done: could identify it's a Quick Encounter from the inclusion of Actor links
+        but perhaps a better approach would be with a flag that was set
 - Improve the way the Journal Entry gets built to do more with the template and handlebars
-- Drag new Actors into a Journal Entry - should redo the calculations
-    - should add individual XPs after Actors (in both Methods)
+- After Actor links: Show individual XP and whether tokens have been placed dynamically
+    - probably requires re-rendering
+- Allow a way to NOT have Quick Encounters turn Actor links into a Quick Encounter Journal Entry
 
 
 ## FIXED BUGS

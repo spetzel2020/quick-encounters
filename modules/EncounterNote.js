@@ -151,7 +151,7 @@ Hooks.on(`renderEncounterNoteConfig`, async (noteConfig, html, data) => {
 //but this time allow you to change stuff
 Hooks.on(`renderNoteConfig`, async (noteConfig, html, data) => {
     const note = noteConfig.object;
-    const journalEntry = game.journal.get(note.entryId);
+    const journalEntry = note.entry;
 
 //FIXME: Temporary so that we skip this until we can determine if something is a Quick Encounter just from the Journal Entry (not the sheet)
     const isQEJournalEntry = false;
