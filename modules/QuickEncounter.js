@@ -41,6 +41,7 @@
                 0.5.0 Token.create() was returning a single token if you passed in a single-element array of token data; fixed to check
 27-Sep-2020     v0.5.1: Increase the timeout when waiting for tokens to draw before adding to the Combat Tracker
                 v0.5.1: run(): Uses saved Tokens if they exist, but otherwise supplements with created ones from the embedded Actors
+28-Sep-2020     v0.5.1: Method 1: Put per opponent XP next to each Actor and then (always) put total XP with the button
 */
 
 
@@ -162,13 +163,11 @@ export class QuickEncounter {
             const tokens = controlledTokens.filter(t => t.actor.id === tokenActorID);
             //0.4.1: 5e specific: find XP for this number of this actor
             const numTokens = tokens.length;
-            const xp = QuickEncounter.getActorXPTotal(tokens[0], numTokens);
-            xpTotal += xp;
-            const xpString = xp ? `(${xp}XP)`: "";
+            const xp = QuickEncounter.getActorXP(tokens[0].actor);
+            xpTotal += numTokens * xp;
+            const xpString = xp ? `(${xp}XP each)`: "";
             content += `<li>${tokens.length}@Actor[${tokenActorID}]{${tokens[0].name}} ${xpString}</li>`;
         }
-        //v0.5.0: Put total XP in the Journal Entry
-        if (xpTotal) {content += game.i18n.localize("QE.TotalXP.CONTENT")+` ${xpTotal}XP<br>`;}
 //--------------
 
         const scene = controlledTokens[0].scene;
@@ -208,10 +207,10 @@ export class QuickEncounter {
         await qeJournalEntry.setFlag(MODULE_NAME, TOKENS_FLAG_KEY, controlledTokensData);
     }
 
-    static getActorXPTotal(token, numActors) {
-        if ((game.system.id !== "dnd5e") || !token || !numActors) {return null;}
+    static getActorXP(actor) {
+        if ((game.system.id !== "dnd5e") || !actor) {return null;}
         try {
-            return numActors * token.actor.data.data.details.xp.value;
+            return actor.data.data.details.xp.value;
         } catch(err) {
             return null;
         }
@@ -415,7 +414,7 @@ export class QuickEncounter {
         if ((game.system.id !== "dnd5e") || !createdTokens) {return;}
         let totalXP = null;
         for (const token of createdTokens) {
-            totalXP += QuickEncounter.getActorXPTotal(token, 1);
+            totalXP += QuickEncounter.getActorXP(token.actor);
         }
         if (totalXP) {
             const chatMessageData = {
@@ -575,10 +574,26 @@ export class QuickEncounter {
 Hooks.on(`renderJournalSheet`, async (journalSheet, html) => {
     if (!game.user.isGM) {return;}
 
-    //v0.5.0 If this could be a Quick Encounter, add the button at the top
-    if (QuickEncounter.extractQuickEncounter(journalSheet)) {
+    //v0.5.0 If this could be a Quick Encounter, add the button at the top and the total XP
+    const quickEncounter = QuickEncounter.extractQuickEncounter(journalSheet);
+    if (quickEncounter) {
+        const extractedActors = quickEncounter.extractedActors;
+        let totalXP = null;
+        for (const eActor of extractedActors) {
+            const actor = game.actors.get(eActor.actorID);
+            const actorXP =QuickEncounter.getActorXP(actor);
+            if (actorXP) {
+                if (!totalXP) {totalXP = 0;}
+                totalXP += eActor.numActors * actorXP;
+            }
+        }
         const addToCombatTrackerButton = await renderTemplate('modules/quick-encounters/templates/addToCombatTrackerButton.html');
         html.find('.editor-content').prepend(addToCombatTrackerButton);
+        if (totalXP) {
+            const totalXPPrefix = game.i18n.localize("QE.TotalXP.CONTENT");
+            html.find('.editor-content').prepend(`${totalXPPrefix} ${totalXP}XP<br>`);
+        }
+
     }
 
     //If there's an embedded button, then add a listener
