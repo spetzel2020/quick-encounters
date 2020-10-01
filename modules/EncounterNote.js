@@ -11,6 +11,9 @@ Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tra
                 v0.4.1 delete() - rewrite for getEncounterScene returning the scene not the ID
 16-Sep-2020     v0.4.1 place() - if there aren't token coords, and option=placeDefault, then place a map note in the center
 21-Sep-2020     v0.4.2: BUG: Dialog.prompt doesn't exist in Foundry 0.6.6 - replace with our own
+26-Sep-2020     v0.5.0: Use QuickEncounter.switchToMapNoteScene
+27-Sep-2020     v0.5.0: Bypass the Note Config sheet - just create it and allow for updating later
+                v0.5.0: NYI: Base code for Hook on renderNoteCOnfig to change it to look like a QE Note (but need a way of determining a QE Note)
 */
 
 
@@ -27,11 +30,12 @@ Object.assign(CONFIG.JournalEntry.noteIcons, moreNoteIcons);
 
 export class EncounterNoteConfig extends NoteConfig {
     /** @override  */
+    //WARNING: Do not add submitOnClose=true because that will create a submit loop
     static get defaultOptions() {
-    	  const options = super.defaultOptions;
-    	  options.id = "encounter-note-config";
-          options.title = game.i18n.localize("QE.NOTE.ConfigTitle");
-    	  return options;
+        return mergeObject(super.defaultOptions, {
+            id : "encounter-note-config",
+            title : game.i18n.localize( "QE.Config.TITLE")
+        });
     }
 }
 
@@ -51,15 +55,10 @@ export class EncounterNote{
               fontSize: 24
         };
 
-        //Use new Note rather than Note.create because this won't be persisted
-        //Until the GM "saves" the Note
-        //This uses the same approach as JournalEntry._onDropData
-        let newNote = new Note(noteData);
-
+        //v0.5.0: Switch to Note.create() to bypass the NOte dialog
+        //This is different from the JournalEntry._onDropData approach
+        let newNote = await Note.create(noteData);
         newNote._sheet = new EncounterNoteConfig(newNote);
-
-        return newNote;
-
     }
 
     static async delete(journalEntry) {
@@ -67,7 +66,7 @@ export class EncounterNote{
         const scene = QuickEncounter.getEncounterScene(journalEntry);
         if (scene) {
             //Find the corresponding Map note - have to switch to the correct scene first
-            await scene.view();
+            if (!await QuickEncounter.switchToMapNoteScene(scene, journalEntry)) {return;}
             const note = journalEntry.sceneNote;
             const noteName = note.name;
 
@@ -75,8 +74,8 @@ export class EncounterNote{
             if (note) {
                 //0.4.2: Replaces Dialog.prompt from Foundry 0.7.2
                 EncounterNote.dialogPrompt({
-                  title: game.i18n.localize("QE.TITLE.DeletedJournalNote"),
-                  content: game.i18n.localize("QE.CONTENT.DeletedJournalNote"),
+                  title: game.i18n.localize("QE.DeletedJournalNote.TITLE"),
+                  content: game.i18n.localize("QE.DeletedJournalNote.CONTENT"),
                   label : "",
                   callback : () => {console.log(`Deleted Map Note ${noteName}`);},
                   options: {
@@ -130,14 +129,9 @@ export class EncounterNote{
         } else {return;}
         // Validate the final position is in-bounds
         if (canvas.grid.hitArea.contains(noteAnchor.x, noteAnchor.y) ) {
-
-            // Create a NoteConfig sheet instance to finalize the creation
-            //Don't activate the note toolbar section since we want to define more
-            //canvas.notes.activate();
+            // Create a Note; we don't pop-up the Note sheet because we really want this Note to be placed
+            //(they can always edit it afterwards)
             const newNote = await EncounterNote.create(qeJournalEntry, noteAnchor);
-            const note = canvas.notes.preview.addChild(newNote);
-            await note.draw();  //Draw the new Note on the canvas and add listeners
-            note.sheet.render(true);
         }
     }
 
@@ -148,8 +142,33 @@ Hooks.on("deleteJournalEntry", EncounterNote.delete);
 
 //Pretty up the first Map Note (hopefully we can do the same for others)
 Hooks.on(`renderEncounterNoteConfig`, async (noteConfig, html, data) => {
-    const saveEncounterMapNote = game.i18n.localize("QE.BUTTON.SaveEncounterMapNote");
-    html.find('button[name="submit"]').text(saveEncounterMapNote);
+    const updateEncounterMapNote = game.i18n.localize("QE.UpdateEncounterMapNote.BUTTON");
+    html.find('button[name="submit"]').text(updateEncounterMapNote);
 });
 
-//If we just saved the Map Note, then we should save its position in the Journal Entry so if we're on a different scene we know it
+//NOT YET IMPLEMENTED
+//If you drag a Quick Encounter Journal Entry to the Scene, then intercept it to render it similarly,
+//but this time allow you to change stuff
+Hooks.on(`renderNoteConfig`, async (noteConfig, html, data) => {
+    const note = noteConfig.object;
+    const journalEntry = note.entry;
+
+//FIXME: Temporary so that we skip this until we can determine if something is a Quick Encounter just from the Journal Entry (not the sheet)
+    const isQEJournalEntry = false;
+
+    if (noteConfig.intercepted || !isQEJournalEntry) {return;}
+    mergeObject(data.object, {
+        icon: CONFIG.JournalEntry.noteIcons.Combat,
+        iconSize: 80,
+        iconTint: "#FF0000",  //Red
+        //Don't specify the name so it inherits from the Journal
+        textAnchor: CONST.TEXT_ANCHOR_POINTS.TOP,
+        fontSize: 24
+    })
+
+
+    const newInnerHtml = await noteConfig._renderInner(data);
+    if (noteConfig.element.length ) {noteConfig._replaceHTML(noteConfig.element, newInnerHtml);}
+    noteConfig.activateListeners(newInnerHtml);
+    noteConfig.intercepted = true;
+});

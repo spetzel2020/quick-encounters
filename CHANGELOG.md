@@ -1,4 +1,24 @@
-# Changelog
+# Release Notes
+
+## v0.5.2
+- Fixed: You can now add additional Actors to a Quick Encounter (uses saved Tokens if they exist, or creates new ones from the embedded Actors)
+- Fixed: Make the embedded button smaller - width of the text and centered
+- Create a separate dynamic section at the top of a Quick Encounter Journal Entry
+- Rewrite Tutorial - corrected errors and simplified
+
+## v0.5.0
+### Changes
+- Now lets you include Friendly tokens (for example Players) in an Encounter (but checks first)
+- Dynamically adds a Quick Encounter button at the top of any candidate Quick Encounter Journal Entry
+- Automatically adds a Note for Method 1, and asks for Method 2
+
+### Bug Fixes
+- Fixed: Works better with Token Mold! Saved tokens are now reproduced exactly (before, saved tokens were re-rolled and changed when you ran the Quick Encounter)
+- Fixed: No more ruining a surprise encounter: no longer puts an XP message in the chat, but rather a total in the Quick Encounter Journal Entry
+- Fixed: Was opening a second Tutorial window; now re-opens the existing window
+- Fixed: Was not waiting long enough to switch to the Quick Encounter scene
+- Fixed: "Fist" icon was not being shown on Add Quick Encounter to Combat Tracker button
+
 
 ## 0.4.3
 Fixed module.json Description
