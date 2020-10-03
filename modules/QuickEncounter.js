@@ -44,6 +44,10 @@
 28-Sep-2020     v0.5.1: Method 1: Put per opponent XP next to each Actor and then (always) put total XP with the button
 29-Sep-2020     v0.5.1: FIXED: findOpenQETutorial(): Use Journal Entry name to match instead of jQuery
                 v0.5.1: Create a separate dynamic section at the top of a Quick Encounter Journal Entry
+3-Oct-2020      v0.5.3: FIXED: If you have the Tutorial Journal Entry open and try to save a Journal Entry and then close it, it will delete the Journal ENTRY
+                - because it's searching the WHOLE DOM for QuickEncountersTutorial, not just the particular Journal SHeet being closed
+                v0.5.3: FIXED: Remove any existing versions of the dynamic QE Journal button first before recomputing it
+                    (because in Foundry v0.7.3 if you save with it, it will get added to the underlying content)
 */
 
 
@@ -578,6 +582,13 @@ Hooks.on(`renderJournalSheet`, async (journalSheet, html) => {
     if (!game.user.isGM) {return;}
 
     //v0.5.0 If this could be a Quick Encounter, add the button at the top and the total XP
+    //v0.5.3 Remove any existing versions of this first before recomputing it - limit to 5 checks just in case
+    for (let iCheck=0; iCheck < 5; iCheck++) {
+        const qeDiv = journalSheet.element.find("#QuickEncounterIntro");
+        if (!qeDiv) {break;}
+        qeDiv.parentNode.removeChild(qeDiv);
+    }
+
     const quickEncounter = QuickEncounter.extractQuickEncounter(journalSheet);
     if (quickEncounter) {
         const extractedActors = quickEncounter.extractedActors;
@@ -612,7 +623,9 @@ Hooks.on('closeJournalSheet', async (journalSheet, html) => {
     if (!game.user.isGM) {return;}
     const journalEntry = journalSheet.object;
 
-    if ($("#QuickEncountersTutorial").length) {
+    //0.5.3: BUG: If you had the Tutorial JE open it would delete another Journal Entry when you closed it
+    //This was happening because $("QuickEncountersTutorial") by itself was searching the whole DOM
+    if (journalSheet.element.find("#QuickEncountersTutorial").length) {
         //This is the tutorial Journal Entry
         //v0.4.0 Check that we haven't already deleted this (because onDelete -> close)
         if (game.journal.get(journalEntry.id)) {await JournalEntry.delete(journalEntry.id);}

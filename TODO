@@ -2,9 +2,17 @@
 
 ## BUGS
 v0.5.0 You still see and hear HP rolling with Token Mold, even though the saved tokens are not changed
-v0.5.0 (Maybe fixed) Sometimes the Combat Tracker is not ready in time - need to increase the timeout and maybe check if it's been rendered
+v0.5.0 Sometimes the Combat Tracker is not ready in time - need to increase the timeout and maybe check if it's been rendered
+    - happens when the image is not local but an http link
+    - or possibly if the CT hasn't been rendered previously?
 
 ## FEATURES
+>>> Options:
+    - Freeze all, freeze name, freeze size/appearance
+    - Make newly created tokens (Method 2) Invisible
+    - Create the Quick Encounter section in a QE Journal Entry (otherwise you have to use the sidebar button)
+- Allow a way to NOT have Quick Encounters turn Actor links into a Quick Encounter Journal Entry
+    - save with the Journal Entry as a flag; but then how do you turn it on again?
 - Allow you to use Compendium entries as well as Actors
 - If you drag a Journal Entry to the Scene, then intercept to change the icon etc.
     - Partially done: could identify it's a Quick Encounter from the inclusion of Actor links
@@ -12,7 +20,7 @@ v0.5.0 (Maybe fixed) Sometimes the Combat Tracker is not ready in time - need to
 - Improve the way the Journal Entry gets built to do more with the template and handlebars
 - After Actor links: Show individual XP and whether tokens have been placed dynamically
     - probably requires re-rendering
-- Allow a way to NOT have Quick Encounters turn Actor links into a Quick Encounter Journal Entry
+>>> Move the Tutorial completely into lang/
 
 
 ## FIXED BUGS
@@ -38,6 +46,12 @@ NOT A BUG  0.4.0   The TurnMarker app is throwing errors - are those related to 
 FIXED (v0.5.0) 0.5.0 Token.create() was returning a single token if you passed in a single-element array of token data; fixed to check
     - (would mean single-opponent encounters wouldn't be added to the Combat Tracker)
 FIXED (v0.5.0) v0.4.0 If you drag tokens into the Journal Entry, later adding new Actors will be ignored
+FIXED (v0.5.3) v0.5.2 If you have the Tutorial Journal Entry open and try to save a Journal Entry and then close it, it will delete the Journal ENTRY
+            - because it's searching the WHOLE DOM for QuickEncountersTutorial, not just the particular Journal SHeet being closed
+FIXED (v0.5.3)  If you press the Quick Encounters button in a QE Journal, get another instance of the button;
+                    - needs to check that the button and Div isn't already there
+                    - was this happening in 0.6.6? No
+                    - Delete any existing dynamic QE sections and re-create them
 
 ## COMPLETED FEATURES
 DONE: (v0.4.0): If you're on a different scene, pops a dialog to check that you want to switch scenes
@@ -53,3 +67,4 @@ DONE (v0.5.0) - Method 1 should create the Map Note without asking
 DONE (v0.5.0) - Method 2 will now always ask you to create a Map Note when you close the Journal Entry
 DONE (v0.5.1) Dynamically calculate Encounter XP above the button
 DONE v0.5.0 Make the embedded button smaller - width of the text and centered
+DONE 0.5.3 Incorporate current Spanish translation

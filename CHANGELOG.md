@@ -1,5 +1,11 @@
 # Release Notes
 
+## 0.5.3
+- Spanish translation of dialogs and messages (thanks https://github.com/lozalojo)
+- Fixed: If you had the Tutorial Journal Entry open and tried to save a Journal Entry and then close it, it would delete the Journal Entry
+- Fixed: Remove any existing versions of the dynamic QE Journal button first before recomputing it
+        - in Foundry v0.7.3 it was getting re-added each time
+
 ## v0.5.2
 - Fixed: You can now add additional Actors to a Quick Encounter (uses saved Tokens if they exist, or creates new ones from the embedded Actors)
 - Fixed: Make the embedded button smaller - width of the text and centered
