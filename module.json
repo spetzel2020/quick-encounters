@@ -6,7 +6,7 @@
   "author" : "Spetzel",
   "version": "0.5.3",
   "minimumCoreVersion": "0.6.5",
-  "compatibleCoreVersion": "0.7.3",
+  "compatibleCoreVersion": "0.7.2",
   "languages": [{
     "lang": "en",
     "name": "English",
