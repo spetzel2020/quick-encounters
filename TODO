@@ -4,7 +4,6 @@
 v0.5.0 You still see and hear HP rolling with Token Mold, even though the saved tokens are not changed
 v0.5.0 Sometimes the Combat Tracker is not ready in time - need to increase the timeout and maybe check if it's been rendered
     - happens when the image is not local but an http link
-    - or possibly if the CT hasn't been rendered previously?
 v0.5.3 In Foundry 0.7.3, doesn't create saved tokens correctly if they were made from a non-standard Actor
 
 
@@ -74,3 +73,4 @@ DONE (v0.5.1) Dynamically calculate Encounter XP above the button
 DONE v0.5.0 Make the embedded button smaller - width of the text and centered
 DONE (0.5.3) Incorporate current Spanish translation
 DONE (0.5.3b) Move the Tutorial completely into lang/
+DONE (0.5.3c) Move asking about creating a Map Note to when you want to run the Encounter; otherwise put a note in the dynamic section

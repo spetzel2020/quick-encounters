@@ -51,6 +51,9 @@
 5-Oct-2020      v0.5.3b: Make templates/how-to-use.html based on lang phrases to make translation easier
                 Remove QE.ERROR.HowToUse (unused) and rename QE.TITLE.HowToUse to QE.HowToUse.TITLE for consistency
                 Rename QE.BUTTON.CreateQuickEncounter to QE.CreateQuickEncounter.BUTTON
+                v0.5.3c: No longer asks every time you open a Quick Encounter whether you want a Map Note, instead:
+                - Puts a warning in the QE dynamic section
+                - Asks you when you go to run it (already did this)
 */
 
 
@@ -609,7 +612,13 @@ Hooks.on(`renderJournalSheet`, async (journalSheet, html) => {
         if (totalXP) {
             totalXPLine = `${game.i18n.localize("QE.TotalXP.CONTENT")} ${totalXP}XP<br>`;
         }
-        const qeJournalEntryIntro = await renderTemplate('modules/quick-encounters/templates/qeJournalEntryIntro.html', {totalXPLine});
+        //If there's no Map Note, include a warning
+        let noMapNoteWarning = null;
+        const qeScene = QuickEncounter.getEncounterScene(journalSheet.object);
+        if (!qeScene) {
+            noMapNoteWarning = `${game.i18n.localize("QE.AddToCombatTracker.NoMapNote")}`;
+        }
+        const qeJournalEntryIntro = await renderTemplate('modules/quick-encounters/templates/qeJournalEntryIntro.html', {totalXPLine, noMapNoteWarning});
         html.find('.editor-content').prepend(qeJournalEntryIntro);
 
     }
@@ -620,8 +629,8 @@ Hooks.on(`renderJournalSheet`, async (journalSheet, html) => {
     });
 });
 
-//The Journal Sheet places a note if there should be one
-//It also looks to see if this is the Tutorial and deletes the Journal Entry if so
+//The Journal Sheet  looks to see if this is the Tutorial and deletes the Journal Entry if so
+//Placing a map Note is moved to when you actually run the Encounter
 Hooks.on('closeJournalSheet', async (journalSheet, html) => {
     if (!game.user.isGM) {return;}
     const journalEntry = journalSheet.object;
@@ -632,11 +641,6 @@ Hooks.on('closeJournalSheet', async (journalSheet, html) => {
         //This is the tutorial Journal Entry
         //v0.4.0 Check that we haven't already deleted this (because onDelete -> close)
         if (game.journal.get(journalEntry.id)) {await JournalEntry.delete(journalEntry.id);}
-    } else if (QuickEncounter.extractQuickEncounter(journalSheet)) {
-        //If qeScene is non-null, there is a Map Note *somewhere* (might be on a different scene)
-        //So in 0.4.1 we recreate a Note if qeScene is null (change from previous versions)
-        const qeScene = QuickEncounter.getEncounterScene(journalEntry);
-        if (!qeScene) {QuickEncounter.noMapNoteDialog(journalEntry);}
     }
 });
 
