@@ -48,6 +48,9 @@
                 - because it's searching the WHOLE DOM for QuickEncountersTutorial, not just the particular Journal SHeet being closed
                 v0.5.3: FIXED: Remove any existing versions of the dynamic QE Journal button first before recomputing it
                     (because in Foundry v0.7.3 if you save with it, it will get added to the underlying content)
+5-Oct-2020      v0.5.3b: Make templates/how-to-use.html based on lang phrases to make translation easier
+                Remove QE.ERROR.HowToUse (unused) and rename QE.TITLE.HowToUse to QE.HowToUse.TITLE for consistency
+                Rename QE.BUTTON.CreateQuickEncounter to QE.CreateQuickEncounter.BUTTON
 */
 
 
@@ -83,7 +86,7 @@ export class QuickEncounter {
         if (notesButton && game.user.isGM) {
             notesButton.tools.push({
                 name: "linkEncounter",
-                title: game.i18n.localize("QE.BUTTON.CreateQuickEncounter"),
+                title: game.i18n.localize("QE.CreateQuickEncounter.BUTTON"),
                 icon: "fas fa-fist-raised",
                 toggle: false,
                 button: true,
@@ -232,7 +235,7 @@ export class QuickEncounter {
 
         //Create a new JournalEntry - with info on how to use Quick Encounters
         const howToUseJournalEntry = await renderTemplate('modules/quick-encounters/templates/how-to-use.html');
-        const title =  game.i18n.localize("QE.TITLE.HowToUse");
+        const title =  game.i18n.localize("QE.HowToUse.TITLE");
 
         const content = howToUseJournalEntry;
 
@@ -585,8 +588,8 @@ Hooks.on(`renderJournalSheet`, async (journalSheet, html) => {
     //v0.5.3 Remove any existing versions of this first before recomputing it - limit to 5 checks just in case
     for (let iCheck=0; iCheck < 5; iCheck++) {
         const qeDiv = journalSheet.element.find("#QuickEncounterIntro");
-        if (!qeDiv) {break;}
-        qeDiv.parentNode.removeChild(qeDiv);
+        if (!qeDiv || !qeDiv[0] || !qeDiv[0].parentNode) {break;}
+        qeDiv[0].parentNode.removeChild(qeDiv[0]);
     }
 
     const quickEncounter = QuickEncounter.extractQuickEncounter(journalSheet);

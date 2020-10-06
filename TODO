@@ -5,14 +5,19 @@ v0.5.0 You still see and hear HP rolling with Token Mold, even though the saved 
 v0.5.0 Sometimes the Combat Tracker is not ready in time - need to increase the timeout and maybe check if it's been rendered
     - happens when the image is not local but an http link
     - or possibly if the CT hasn't been rendered previously?
+v0.5.3 In Foundry 0.7.3, doesn't create saved tokens correctly if they were made from a non-standard Actor
+
 
 ## FEATURES
 >>> Options:
     - Freeze all, freeze name, freeze size/appearance
     - Make newly created tokens (Method 2) Invisible
     - Create the Quick Encounter section in a QE Journal Entry (otherwise you have to use the sidebar button)
+    - Option to have to specifically designate a Journal Entry as a Quick Encounter (or you can use the side button)
+
 - Allow a way to NOT have Quick Encounters turn Actor links into a Quick Encounter Journal Entry
     - save with the Journal Entry as a flag; but then how do you turn it on again?
+
 - Allow you to use Compendium entries as well as Actors
 - If you drag a Journal Entry to the Scene, then intercept to change the icon etc.
     - Partially done: could identify it's a Quick Encounter from the inclusion of Actor links
@@ -20,7 +25,7 @@ v0.5.0 Sometimes the Combat Tracker is not ready in time - need to increase the 
 - Improve the way the Journal Entry gets built to do more with the template and handlebars
 - After Actor links: Show individual XP and whether tokens have been placed dynamically
     - probably requires re-rendering
->>> Move the Tutorial completely into lang/
+
 
 
 ## FIXED BUGS
@@ -67,4 +72,5 @@ DONE (v0.5.0) - Method 1 should create the Map Note without asking
 DONE (v0.5.0) - Method 2 will now always ask you to create a Map Note when you close the Journal Entry
 DONE (v0.5.1) Dynamically calculate Encounter XP above the button
 DONE v0.5.0 Make the embedded button smaller - width of the text and centered
-DONE 0.5.3 Incorporate current Spanish translation
+DONE (0.5.3) Incorporate current Spanish translation
+DONE (0.5.3b) Move the Tutorial completely into lang/
