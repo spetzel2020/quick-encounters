@@ -54,6 +54,8 @@
                 v0.5.3c: No longer asks every time you open a Quick Encounter whether you want a Map Note, instead:
                 - Puts a warning in the QE dynamic section
                 - Asks you when you go to run it (already did this)
+                v0.5.3d: Add option to "freeze" captured tokens so that TokenMold doesn't regenerate HP, name, etc
+                (Default is true so that only newly generated tokens are changed )
 */
 
 
@@ -78,6 +80,14 @@ export class QuickEncounter {
             config: false,
             default: game.i18n.localize("QE.Version"),
             type: String
+        });
+        game.settings.register(MODULE_NAME, "freezeCapturedTokens", {
+            name: game.i18n.localize("QE.FreezeCapturedTokens.NAME"),
+            hint: game.i18n.localize("QE.FreezeCapturedTokens.HINT"),
+            scope: "world",
+            config: true,
+            default: true,
+            type: Boolean
         });
     }
 
@@ -379,8 +389,10 @@ export class QuickEncounter {
 
         //The frozen flag indicates if we should reset token data after creating the tokens
         let extractedActorTokenData = await QuickEncounter.createTokenDataFromActors(extractedActors, coords);
-        if (extractedActorTokenData) {extractedActorTokenData.forEach((td) => {td.frozen = false;})};
-        if (savedTokensData) {savedTokensData.forEach((td) => {td.frozen = true;})};
+        if (extractedActorTokenData) {extractedActorTokenData.forEach((td) => {td.frozen = false;})}
+        //v0.5.3d: Check the value of setting "freezeCapturedTokens"
+        const freezeCapturedTokens = game.settings.get(MODULE_NAME, "freezeCapturedTokens");
+        if (savedTokensData) {savedTokensData.forEach((td) => {td.frozen = freezeCapturedTokens;})}
 
         //v0.5.1 If we have more actors than saved tokens, create more tokens
         //If we have fewer actors than saved tokens, skip some

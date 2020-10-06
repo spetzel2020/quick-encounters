@@ -9,14 +9,12 @@ v0.5.3 In Foundry 0.7.3, doesn't create saved tokens correctly if they were made
 
 ## FEATURES
 >>> Options:
-    - Freeze all, freeze name, freeze size/appearance
     - Make newly created tokens (Method 2) Invisible
     - Create the Quick Encounter section in a QE Journal Entry (otherwise you have to use the sidebar button)
     - Option to have to specifically designate a Journal Entry as a Quick Encounter (or you can use the side button)
 
 - Allow a way to NOT have Quick Encounters turn Actor links into a Quick Encounter Journal Entry
     - save with the Journal Entry as a flag; but then how do you turn it on again?
-
 - Allow you to use Compendium entries as well as Actors
 - If you drag a Journal Entry to the Scene, then intercept to change the icon etc.
     - Partially done: could identify it's a Quick Encounter from the inclusion of Actor links
@@ -24,6 +22,8 @@ v0.5.3 In Foundry 0.7.3, doesn't create saved tokens correctly if they were made
 - Improve the way the Journal Entry gets built to do more with the template and handlebars
 - After Actor links: Show individual XP and whether tokens have been placed dynamically
     - probably requires re-rendering
+    - place in a custom companion dialog
+- Scan Journal Entries to turn into Actor links and Quick Encounters
 
 
 
@@ -58,19 +58,20 @@ FIXED (v0.5.3)  If you press the Quick Encounters button in a QE Journal, get an
                     - Delete any existing dynamic QE sections and re-create them
 
 ## COMPLETED FEATURES
-DONE: (v0.4.0): If you're on a different scene, pops a dialog to check that you want to switch scenes
-DONE v0.3.4: De-select all other controlled tokens when placing tokens to add them to the combat Tracker
-DONE (v0.4.0) Replace forEach calls with for/of
-DONE 2. If you open the Quick Encounter Journal with stored token information then use that in preference
-DONE - Finish i18n for dialogs (but not for tutorial Journal)
-DONE Method 1 should put the # of Actors in front of the actor link - this will enable later changing the specific actors
-DONE (v0.4.1) Sum up and show the XP (5e only) for a combat - Total XP for this Encounter Journal, and a way of calculating per # of players
-DONE (v0.4.2) Add the count x Actor to the documentation/tutorial
-DONE (v0.5.0) - If you include Friendly tokens, show a dialog to check that's what you want
-DONE (v0.5.0) - Method 1 should create the Map Note without asking
-DONE (v0.5.0) - Method 2 will now always ask you to create a Map Note when you close the Journal Entry
-DONE (v0.5.1) Dynamically calculate Encounter XP above the button
-DONE v0.5.0 Make the embedded button smaller - width of the text and centered
-DONE (0.5.3) Incorporate current Spanish translation
-DONE (0.5.3b) Move the Tutorial completely into lang/
-DONE (0.5.3c) Move asking about creating a Map Note to when you want to run the Encounter; otherwise put a note in the dynamic section
+(v0.4.0): If you're on a different scene, pops a dialog to check that you want to switch scenes
+v0.3.4: De-select all other controlled tokens when placing tokens to add them to the combat Tracker
+(v0.4.0) Replace forEach calls with for/of
+2. If you open the Quick Encounter Journal with stored token information then use that in preference
+- Finish i18n for dialogs (but not for tutorial Journal)
+Method 1 should put the # of Actors in front of the actor link - this will enable later changing the specific actors
+(v0.4.1) Sum up and show the XP (5e only) for a combat - Total XP for this Encounter Journal, and a way of calculating per # of players
+(v0.4.2) Add the count x Actor to the documentation/tutorial
+(v0.5.0) - If you include Friendly tokens, show a dialog to check that's what you want
+(v0.5.0) - Method 1 should create the Map Note without asking
+(v0.5.0) - Method 2 will now always ask you to create a Map Note when you close the Journal Entry
+(v0.5.1) Dynamically calculate Encounter XP above the button
+v0.5.0 Make the embedded button smaller - width of the text and centered
+(0.5.3) Incorporate current Spanish translation
+(0.5.3b) Move the Tutorial completely into lang/
+(0.5.3c) Move asking about creating a Map Note to when you want to run the Encounter; otherwise put a note in the dynamic section
+(0.5.3d) Add Freeze "captured" tokens option (as to whether Token Mold is allowed to change the tokens after they're saved)
