@@ -3,7 +3,7 @@
 ## v0.5.4
 - Spanish translation of dialogs and messages (thanks https://github.com/lozalojo)
 - Move asking about creating a Map Note to when you want to run the Encounter; otherwise put a warning in the dynamic section
-- New options: Freeze "captured" tokens option to control whether saved tokens are regenerated (for example by TokenMold) or copied as is
+- New option: **Freeze "captured" tokens** option to control whether saved tokens are regenerated (for example by TokenMold) or copied as is
 - Fixed: If you had the Tutorial Journal Entry open and tried to save a Journal Entry and then close it, it would delete the Journal Entry
 - Fixed: Remove any existing versions of the dynamic QE Journal button first before recomputing it
         - in Foundry v0.7.3 it was getting re-added each time        
@@ -28,10 +28,10 @@
 - Fixed: "Fist" icon was not being shown on Add Quick Encounter to Combat Tracker button
 
 
-## 0.4.3
+## v0.4.3
 Fixed module.json Description
 
-## 0.4.2 Bug fixes
+## v0.4.2 Bug fixes
 FIXED 0.4.1 If the number of Actors is part of a sentence, it won't be picked up correctly
 FIXED 0.4.1 If you have a Player selected when you open your Quick Encounter, it will create a new one instead
             - Fixed: Ignore Friendly tokens
