@@ -4,7 +4,7 @@ NEW in v0.5! Save your player tokens at the entrance to new Scenes, works better
 * **Version**: 0.5.3
 * **Foundry VTT Compatibility**: 0.6.5-0.7.2
 * **System Compatibility (If applicable)**: N/A
-* **Translation Support**: en,es
+* **Translation Support**: en, es
 
 
 # Description
