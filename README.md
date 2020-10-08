@@ -2,7 +2,7 @@
 NEW in v0.5! Save your player tokens at the entrance to new Scenes, works better with Token Mold, Quick Encounter button always available, Surprise encounters! - see [Release Notes](https://github.com/opus1217/quick-encounters/blob/master/CHANGELOG.md#changelog)
 * **Author**: Spetzel#0103
 * **Version**: 0.5.3
-* **Foundry VTT Compatibility**: 0.6.5-0.7.3
+* **Foundry VTT Compatibility**: 0.6.5-0.7.2
 * **System Compatibility (If applicable)**: N/A
 * **Translation Support**: en, es
 

@@ -3,6 +3,7 @@
 ## 0.5.3
 - Spanish translation of dialogs and messages (thanks https://github.com/lozalojo)
 - Move asking about creating a Map Note to when you want to run the Encounter; otherwise put a warning in the dynamic section
+- Added a Freeze "captured" tokens option to control whether saved tokens are regenerated (for example by TokenMold) or copied as is
 - Fixed: If you had the Tutorial Journal Entry open and tried to save a Journal Entry and then close it, it would delete the Journal Entry
 - Fixed: Remove any existing versions of the dynamic QE Journal button first before recomputing it
         - in Foundry v0.7.3 it was getting re-added each time        
