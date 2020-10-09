@@ -1,8 +1,8 @@
 {
   "QE.id": "quick-encounters",
-  "QE.Version" : "v0.5.3",
+  "QE.Version" : "v0.5.4",
   "QE.Name": "Encuentros Rápidos (Quick Encounters)",
-  "QE.Welcome" : "Bienvenido a Encuentros Rápidos v0.5.3",
+  "QE.Welcome" : "Bienvenido a Encuentros Rápidos v0.5.4",
   "QE.HowToUse.TITLE" : "Cómo usar Encuentros Rápidos",
   "QE.Description": "¡Fije sus Encuentros a una Escena o un Diario con un solo clic!<h4>Método 1:</h4><p>Coloque los iconos de los enemigos y pulse el botón <i class='fas fa-fist-raised'>Encuentro Rápido</i> para guardarlo en una Entrada de Encuentro en los Diarios. Para activar el Encuentro, haga doble-clic en el icono de la calavera y pulse el botón de Añadir al Asistente de Combate</p><h4>Método 2:</h4><p>Cree una Entrada de Diario con un texto descriptivo. Arrastre los actores a la entrada. Arrastre la Entrada a la localización del mapa en la que quiera poner el Encuentro Rápido. Para activar el Encuentro seleccione la Nota del Mapa, o abra la Entrada de Encuentro en los Diarios y haga clic en el botón Encuentros Rápidos",
   "QE.Instructions.CONTENT" : "<strong>Los iconos y sus posiciones se han guardado en esta Entrada de Diario.</strong><br>Cuando la cierre, los iconos seleccionados serán sustituidos con un único icono de Encuentro fijado a la Escena. Para activar el Encuentro Rápido haga doble-clic en el icono del combate y pulse el botón Añadir Encuentro Rápido al Asistente de Combate.<br><br><h3>Encuentro Rápido</h3><p><i>Añada una descripción del Encuentro Rápido para usted o para sus jugadores:</i></p><br>",
