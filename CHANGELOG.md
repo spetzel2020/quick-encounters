@@ -1,6 +1,6 @@
 # Release Notes
 
-## 0.6
+## 0.6.0
 - Allow Compendium entries as well as Actors
 - Fixed? Combat tracker now pops up more reliably
 

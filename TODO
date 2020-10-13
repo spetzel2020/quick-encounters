@@ -6,6 +6,9 @@ v0.5.3 NOT A BUG? In Foundry 0.7.3, doesn't create saved tokens correctly if the
 
 
 ## FEATURES
+>>> Test 0.7.3 Compatibility
+
+
 >>> Options:
     - Make newly created tokens (Method 2) Invisible
     - Create the Quick Encounter section in a QE Journal Entry (otherwise you have to use the sidebar button)
@@ -18,13 +21,15 @@ v0.5.3 NOT A BUG? In Foundry 0.7.3, doesn't create saved tokens correctly if the
     - Partially done: could identify it's a Quick Encounter from the inclusion of Actor links
         but perhaps a better approach would be with a flag that was set
 - Improve the way the Journal Entry gets built to do more with the template and handlebars
+
 - After Actor links: Show individual XP and whether tokens have been placed dynamically
     - probably requires re-rendering
     - place in a custom companion dialog
 
-- Scan Journal Entries to turn into Actor links and Quick Encounters
->>> Allow die rolls before the Actor links for dynamic generation
-- Allow dynamic generation of which monsters (use a RollTable?)
+More sophisticated monster entries:
+    - Scan Journal Entries to turn into Actor links and Quick Encounters
+    - Allow die rolls before the Actor links for dynamic generation
+    - Allow dynamic generation of which monsters (use a RollTable?)
 
 
 ## FIXED BUGS
