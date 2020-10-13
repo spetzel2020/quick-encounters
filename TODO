@@ -2,9 +2,7 @@
 
 ## BUGS
 v0.5.0 You still see and hear HP rolling with Token Mold, even though the saved tokens are not changed
-v0.5.0 Sometimes the Combat Tracker is not ready in time - need to increase the timeout and maybe check if it's been rendered
-    - happens when the image is not local but an http link
-v0.5.3 In Foundry 0.7.3, doesn't create saved tokens correctly if they were made from a non-standard Actor
+v0.5.3 NOT A BUG? In Foundry 0.7.3, doesn't create saved tokens correctly if they were made from a non-standard Actor
 
 
 ## FEATURES
@@ -15,7 +13,7 @@ v0.5.3 In Foundry 0.7.3, doesn't create saved tokens correctly if they were made
 
 - Allow a way to NOT have Quick Encounters turn Actor links into a Quick Encounter Journal Entry
     - save with the Journal Entry as a flag; but then how do you turn it on again?
-- Allow you to use Compendium entries as well as Actors
+
 - If you drag a Journal Entry to the Scene, then intercept to change the icon etc.
     - Partially done: could identify it's a Quick Encounter from the inclusion of Actor links
         but perhaps a better approach would be with a flag that was set
@@ -23,8 +21,10 @@ v0.5.3 In Foundry 0.7.3, doesn't create saved tokens correctly if they were made
 - After Actor links: Show individual XP and whether tokens have been placed dynamically
     - probably requires re-rendering
     - place in a custom companion dialog
-- Scan Journal Entries to turn into Actor links and Quick Encounters
 
+- Scan Journal Entries to turn into Actor links and Quick Encounters
+>>> Allow die rolls before the Actor links for dynamic generation
+- Allow dynamic generation of which monsters (use a RollTable?)
 
 
 ## FIXED BUGS
@@ -56,6 +56,8 @@ FIXED (v0.5.3)  If you press the Quick Encounters button in a QE Journal, get an
                     - needs to check that the button and Div isn't already there
                     - was this happening in 0.6.6? No
                     - Delete any existing dynamic QE sections and re-create them
+FIXED? in 0.6.0: v0.5.0 Sometimes the Combat Tracker is not ready in time - need to increase the timeout and maybe check if it's been rendered
+                        - happens when the image is not local but an http link
 
 ## COMPLETED FEATURES
 (v0.4.0): If you're on a different scene, pops a dialog to check that you want to switch scenes
@@ -75,3 +77,4 @@ v0.5.0 Make the embedded button smaller - width of the text and centered
 (0.5.3b) Move the Tutorial completely into lang/
 (0.5.3c) Move asking about creating a Map Note to when you want to run the Encounter; otherwise put a note in the dynamic section
 (0.5.3d) Add Freeze "captured" tokens option (as to whether Token Mold is allowed to change the tokens after they're saved)
+v0.6.0 Allows you to import Actors dynamically by using Compendium entries (but note it will re-import the Actor every time)

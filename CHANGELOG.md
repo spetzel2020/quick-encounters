@@ -1,5 +1,9 @@
 # Release Notes
 
+## 0.6
+- Allow Compendium entries as well as Actors
+- Fixed? Combat tracker now pops up more reliably
+
 ## v0.5.4
 - Spanish translation of dialogs and messages (thanks https://github.com/lozalojo)
 - Move asking about creating a Map Note to when you want to run the Encounter; otherwise put a warning in the dynamic section
