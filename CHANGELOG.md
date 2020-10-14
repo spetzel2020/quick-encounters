@@ -1,8 +1,9 @@
 # Release Notes
 
-## 0.6.0
+## 0.6.0ab
 - Allow Compendium entries as well as Actors
 - Fixed? Combat tracker now pops up more reliably
+- Was popping an extra copy of the tutorial every time you pressed the button
 
 ## v0.5.4
 - Spanish translation of dialogs and messages (thanks https://github.com/lozalojo)

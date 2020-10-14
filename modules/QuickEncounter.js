@@ -294,7 +294,7 @@ export class QuickEncounter {
                 //Check open windows for the tutorial Journal Entry
                 if (w instanceof JournalSheet) {
                     const journalEntry = w.entity;
-                    if (journalEntry && (journalEntry.name === game.i18n.localize("QE.TITLE.HowToUse"))) {
+                    if (journalEntry && (journalEntry.name === game.i18n.localize("QE.HowToUse.TITLE"))) {
                         qeTutorial = w;
                         break;
                     }
@@ -348,10 +348,13 @@ export class QuickEncounter {
                 const prevSibling = element[0].previousSibling;
                 const possibleInts = prevSibling ? prevSibling.textContent.match(reg) : ["1"];
                 const numActors = parseInt(possibleInts ? possibleInts[0] : "1");
+                //If this is a Compendium, then that may use either data-lookup or data-id depending on the index
+                //Although in Foundry 0.7.4 I can't find _replaceCompendiumLink any more
+                const actorID =
                 extractedActors.push({
                     numActors : numActors ? numActors : 1,
                     dataPackName : dataPackName,                    //if non-null then this is a Compendium reference
-                    actorID : dataPackName ? dataLookup : dataID, //If Compendium this is a reference into that
+                    actorID : dataID ? dataID : dataLookup,           //If Compendium sometimes this is the reference
                     name : dataName
                 });
             }

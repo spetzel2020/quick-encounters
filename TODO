@@ -6,8 +6,7 @@ v0.5.3 NOT A BUG? In Foundry 0.7.3, doesn't create saved tokens correctly if the
 
 
 ## FEATURES
->>> Test 0.7.3 Compatibility
-
+>>> Test 0.7.4 Compatibility
 
 >>> Options:
     - Make newly created tokens (Method 2) Invisible
@@ -63,6 +62,7 @@ FIXED (v0.5.3)  If you press the Quick Encounters button in a QE Journal, get an
                     - Delete any existing dynamic QE sections and re-create them
 FIXED? in 0.6.0: v0.5.0 Sometimes the Combat Tracker is not ready in time - need to increase the timeout and maybe check if it's been rendered
                         - happens when the image is not local but an http link
+FIXED in 0.6.0b: v0.5.4: Should check for QE.HowToUse.TITLE in deciding whether to pop up an extra Tutorial
 
 ## COMPLETED FEATURES
 (v0.4.0): If you're on a different scene, pops a dialog to check that you want to switch scenes

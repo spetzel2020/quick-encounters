@@ -1,7 +1,7 @@
 TUTORIAL
-1. Press Quick Encounter button with nothing selected -> should pop up Tutorial     - OK in Foundry 0.7.3
-2. With Tutorial open, repeat #1 -> should keep existing Tutorial                  - OK in Foundry 0.7.3
-3. Close Tutorial -> should delete the Journal Entry                                 - OK in Foundry 0.7.3
+1. Press Quick Encounter button with nothing selected -> should pop up Tutorial    	 -OK
+2. With Tutorial open, repeat #1 -> should keep existing Tutorial                 		 - BUG: Opened a new one
+3. Close Tutorial -> should delete the Journal Entry                                			- OK in Foundry 0.7.4
 4. Open some Journal Entries with no embedded Actors, press QE button -> should open Tutorial    - OK in Foundry 0.7.3
 5. Open multiple Journal Entries with embedded Actors, press QE button -> should run the Encounter    - OK in Foundry 0.7.3
 6. Leave Tutorial Window open; create another Journal Entry, Save, and then close - should be kept  - OK in Foundry 0.7.3
@@ -10,16 +10,19 @@ TUTORIAL
 
 METHOD 1
 1. Select one friendly token and press QE button -> should ask if you want to add to JE       - OK in Foundry 0.7.3
-2. Select multiple friendly and neutral tokens -> should ask...                               - OK in Foundry 0.7.3
-3. Select one hostile token and press QE button -> adds to JE                                 - OK in Foundry 0.7.3
-4. Select multiple hostile and neutral tokens and press QE button -> adds to JE                  - OK in Foundry 0.7.3
+2. Select multiple friendly and neutral tokens -> should ask...                              		 - OK in Foundry 0.7.4
+3. Select one hostile token and press QE button -> adds to JE                                		 - OK in Foundry 0.7.4
+4. Select multiple hostile and neutral tokens and press QE button -> adds to JE                 	 - OK in Foundry 0.7.4
 
 
 METHOD 2
-1. Add Actors to a Journal Entry ; should re-render with embedded QE button                   - OK in Foundry 0.7.3
+1. Add Actors to a Journal Entry ; should re-render with embedded QE button                   - OK in Foundry 0.7.4
 
 
 USE, MOVING, DELETION
-1. Delete Note; should get recreated next time you close the Journal Entry            - OK in Foundry 0.7.3
-2. Move Note - Actor tokens should be created at the position of the Note                 - OK in Foundry 0.7.3
-3. Start on another Scene and run an Encounter - should switch scenes                         - OK in Foundry 0.7.3
+1. Delete Note; should get warning in Journal Entry            		 - OK in Foundry 0.7.4
+2. Move Note - Actor tokens should be created at the position of the Note                 - OK in Foundry 0.7.4
+3. Start on another Scene and run an Encounter - should switch scenes                         - OK in Foundry 0.7.4
+
+RUN AN ENCOUNTER
+1. Add a Compendium Entry "Dire Wolf" - get "Query returned multiple entries"		BUG in 0.7.4 (QE 0.6)
