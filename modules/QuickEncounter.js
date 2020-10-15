@@ -57,6 +57,8 @@
                 v0.5.3d: Add option to "freeze" captured tokens so that TokenMold doesn't regenerate HP, name, etc
                 (Default is true so that only newly generated tokens are changed )
 12-Oct-2020     v0.6.0: Allow Quick Encounters to use Compendium links
+15-Oct-2020     v0.6.0c: Handle multipliers that are dice rolls, e.g. 1d4+2 Vampire Spawn
+                (Note they must be in Foundry [[/r 1d4+2]] form  to be recognized)
 */
 
 
@@ -333,7 +335,8 @@ export class QuickEncounter {
         if (!entityLinks || !entityLinks.length) {return null;}
 
         const extractedActors = [];
-        const reg = "([0-9]+)[^0-9]*$"; //Matches last "number followed by non-number at the end of a string"
+        const intReg = "([0-9]+)[^0-9]*$"; //Matches last "number followed by non-number at the end of a string"
+        const dieRollReg = /([0-9]+\s*d[4,6,8,10,12](?:\s*\+\s*[0-9]+))/;
         entityLinks.each((i, el) => {
             const element = $(el);
             const dataEntity = element.attr("data-entity");
@@ -346,13 +349,30 @@ export class QuickEncounter {
             if ((dataEntity === ACTOR) || (dataPack && (dataPack.entity === ACTOR))) {
                 const dataName = element.text();
                 const prevSibling = element[0].previousSibling;
-                const possibleInts = prevSibling ? prevSibling.textContent.match(reg) : ["1"];
-                const numActors = parseInt(possibleInts ? possibleInts[0] : "1");
+                let multiplier = 1;
+                //v0.6 Check for a die roll entry
+                if (prevSibling) {
+                    if (prevSibling.classList && prevSibling.classList.contains("inline-roll")) {
+                        //Try to get it from the data-formula attribute
+                        try {
+                            multiplier = prevSibling.attributes["data-formula"].value;
+                            if (!multiplier) {multiplier = 1;}
+                        } catch {
+                            //Otherwise try to prase it out
+                            multiplier = prevSibling.textContent.match(dieRollReg);
+                            multiplier = multiplier? multiplier[0] : 1;
+                        }
+                    } else {
+                        const possibleInts = prevSibling.textContent.match(intReg);
+                        multiplier = parseInt(possibleInts ? possibleInts[0] : "1");
+                    }
+                }
+
                 //If this is a Compendium, then that may use either data-lookup or data-id depending on the index
                 //Although in Foundry 0.7.4 I can't find _replaceCompendiumLink any more
                 const actorID =
                 extractedActors.push({
-                    numActors : numActors ? numActors : 1,
+                    numActors : multiplier  ? multiplier : 1,
                     dataPackName : dataPackName,                    //if non-null then this is a Compendium reference
                     actorID : dataID ? dataID : dataLookup,           //If Compendium sometimes this is the reference
                     name : dataName
@@ -534,7 +554,7 @@ export class QuickEncounter {
         const gridSize = canvas.dimensions.size;
         let expandedTokenData = [];
         for (let eActor of extractedActors) {
-            let numActors = eActor.numActors;
+            let multiplier = eActor.numActors;
             let actor = null;
             //v0.6 Need to check whether this is a direct Actor reference or from a Compendium
             if (eActor.dataPackName) {
@@ -548,8 +568,21 @@ export class QuickEncounter {
                 actor = game.actors.get(eActor.actorID);
             }
             if (!actor) {continue;}     //possibly will happen with Compemdium
+
              //If numActors didn't convert then just create 1 token
-             if (!numActors) {numActors = 1;}
+             let numActors;
+             if (!multiplier) {
+                 numActors = 1;
+             } else if (typeof multiplier === "number") {
+                 numActors = multiplier;
+             } else if ((typeof multiplier === "string") && Roll.validate(multiplier)) {
+                 //v0.6: Pass the multiplier to the roll formula, which allows for a digit or a formula
+                 let r= new Roll(multiplier);
+                 r.evaluate();
+                 numActors = r.total ? r.total : 1;
+             } else {
+                 numActors = 1;
+             }
 
              for (let iActor=1; iActor <= numActors; iActor++) {
                  //Slightly vary the (x,y) coords so we don't pile all the tokens on top of each other and make them hard to find
