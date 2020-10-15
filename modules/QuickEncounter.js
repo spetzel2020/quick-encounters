@@ -59,6 +59,7 @@
 12-Oct-2020     v0.6.0: Allow Quick Encounters to use Compendium links
 15-Oct-2020     v0.6.0c: Handle multipliers that are dice rolls, e.g. 1d4+2 Vampire Spawn
                 (Note they must be in Foundry [[/r 1d4+2]] form  to be recognized)
+15-Oct-2020     v0.6.1: Prorotype embedded vs companion dialog methods
 */
 
 
@@ -90,6 +91,14 @@ export class QuickEncounter {
             scope: "world",
             config: true,
             default: true,
+            type: Boolean
+        });
+        game.settings.register(MODULE_NAME, "useEmbeddedMethod", {
+            name: game.i18n.localize("QE.UseEmbeddedMethod.NAME"),
+            hint: game.i18n.localize("QE.UseEmbeddedMethod.HINT"),
+            scope: "world",
+            config: true,
+            default: true,  //True during Beta
             type: Boolean
         });
     }

@@ -1,8 +1,8 @@
 {
   "QE.id": "quick-encounters",
-  "QE.Version" : "v0.6.0",
+  "QE.Version" : "v0.6.1",
   "QE.Name": "Quick Encounters",
-  "QE.Welcome" : "Welcome to Quick Encounters v0.6.0",
+  "QE.Welcome" : "Welcome to Quick Encounters v0.6.1",
   "QE.Description": "Pin your Encounters to the Scene or in the Journal and run them with one click!<h4>Method 1:</h4><p>Place and select your hostile tokens and click the <i class='fas fa-fist-raised'></i>Quick Encounter button to save them into an Encounter Journal Entry. To run the Encounter, double-click the Combat icon and click the Add to Combat Tracker button</p><h4>Method 2:</h4><p>Create a Journal Entry with your descriptive text. Drag Actors into the Journal Entry. Drag the Journal Entry to the desired Encounter location on your map. To run the Encounter, select the Map Note, or open the Encounter Journal Entry and click the Quick Encounters button",
   "QE.Instructions.CONTENT" : "<strong>Your tokens and their positions have been saved in this Journal Entry and replaced with a single Quick Encounter Note.</strong><br><br>To run the Quick Encounter, double-click the Map Note icon and then click the Add Quick Encounter to Combat Tracker button.<br><br><h3>Quick Encounter</h3><p><i>Add a description of the Quick Encounter for you or your players:</i></p><br>",
   "QE.TotalXP.CONTENT" : "<br>Total for this Encounter:",
@@ -30,5 +30,7 @@
   "QE.HowToUse.Method2" : "<h3>Method 2</h3><ol><li>Create a Journal Entry and describe your Encounter or open an existing Journal Entry (like the ones you'd find in a purchased module).</li><li>Drag Actors into your Journal Entry (you can put a number in front of the Actor link to get more than one)</li><li>Close the Journal Entry; if a Note doesn't already exist, one will be added to the center of your Scene view - move it to your desired Encounter location</li><li>To run your Quick Encounter, double-click the Note to open the Quick Encounter Journal Entry.</li><li>Click the Quick Encounter button: your generated tokens will be positioned around the Note and added to the Combat Tracker, ready to fight!<ul><li>In this method, your tokens are always Invisible when added to the map</li></ul></li></ol><p>&nbsp;</p>",
   "QE.HowToUse.WhatNow" : "<h2>What Now?</h2><p>You can just close this Journal Entry as is and it will be deleted automagically!</p><p>Or you can delete all this text and turn it into your first Quick Encounter Journal Entry by following Method 2 above. Good luck!</p>",
   "QE.FreezeCapturedTokens.NAME" : "Freeze \"captured\" tokens",
-  "QE.FreezeCapturedTokens.HINT" : "Existing tokens that you save into a Quick Encounter will not be changed (for example by TokenMold) when you run the Encounter. Clear the checkbox if you want to allow TokenMold or other programs to change tokens' name, HP, or other stats. This setting does not affect tokens newly generated from Actor links."
+  "QE.FreezeCapturedTokens.HINT" : "Existing tokens that you save into a Quick Encounter will not be changed (for example by TokenMold) when you run the Encounter. Clear the checkbox if you want to allow TokenMold or other programs to change tokens' name, HP, or other stats. This setting does not affect tokens newly generated from Actor links.",
+  "QE.UseEmbeddedMethod.NAME" : "Use older embedded method",
+  "QE.UseEmbeddedMethod.HINT" : "Use the older Quick Encounters design which embeds the tokens, actors, and Quick Encounters button directly in the Journal Entry."
 }
