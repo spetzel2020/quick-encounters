@@ -6,8 +6,6 @@ v0.5.3 NOT A BUG? In Foundry 0.7.3, doesn't create saved tokens correctly if the
 
 
 ## FEATURES
->>> Test 0.7.4 Compatibility
-
 >>> Options:
     - Make newly created tokens (Method 2) Invisible
     - Create the Quick Encounter section in a QE Journal Entry (otherwise you have to use the sidebar button)
@@ -29,7 +27,7 @@ More sophisticated monster entries:
     - Scan Journal Entries to turn into Actor links and Quick Encounters
     - Allow die rolls before the Actor links for dynamic generation
     - Allow dynamic generation of which monsters (use a RollTable?)
-
+Show which Journal Entries have Quick Encounters in the Journal list
 
 ## FIXED BUGS
 FIXED 1. If the Actor embed text includes a number that is the only number, it will be used (Rion -L14) will result in 14 copies

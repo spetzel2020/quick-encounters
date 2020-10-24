@@ -59,11 +59,12 @@
 12-Oct-2020     v0.6.0: Allow Quick Encounters to use Compendium links
 15-Oct-2020     v0.6.0c: Handle multipliers that are dice rolls, e.g. 1d4+2 Vampire Spawn
                 (Note they must be in Foundry [[/r 1d4+2]] form  to be recognized)
-15-Oct-2020     v0.6.1: Prorotype embedded vs companion dialog methods
+15-Oct-2020     v0.6.1: Prototype embedded vs companion dialog methods
 */
 
 
 import {EncounterNote} from './EncounterNote.js';
+import {EncounterCompanionSheet} from './EncounterCompanionSheet.js';
 
 export const MODULE_NAME = "quick-encounters";
 export const SCENE_ID_FLAG_KEY = "sceneID";
@@ -181,7 +182,6 @@ export class QuickEncounter {
 
     static async createFromTokens(controlledTokens) {
         //Create a new JournalEntry - the corresponding map note gets created when you save&close the Journal Sheet
-
         //0.4.1: Group identical actors with a number before it
         let tokenActorIDs = new Set();
         for (const token of controlledTokens) {
@@ -193,6 +193,7 @@ export class QuickEncounter {
 //FIXME: Replace all this with a renderTemplate section using handlebars
         let content = game.i18n.localize("QE.Instructions.CONTENT");
         let xpTotal = 0;
+        let combatants = [];
         for (const tokenActorID of tokenActorIDs) {
             const tokens = controlledTokens.filter(t => t.actor.id === tokenActorID);
             //0.4.1: 5e specific: find XP for this number of this actor
@@ -201,6 +202,11 @@ export class QuickEncounter {
             xpTotal += numTokens * xp;
             const xpString = xp ? `(${xp}XP each)`: "";
             content += `<li>${tokens.length}@Actor[${tokenActorID}]{${tokens[0].name}} ${xpString}</li>`;
+            combatants.push({
+                num : numTokens,
+                name : tokens[0].name,
+                xp : xpString
+            });
         }
 //--------------
 
@@ -220,6 +226,12 @@ export class QuickEncounter {
 
         const ejSheet = new JournalSheet(journalEntry);
         ejSheet.render(true);
+
+        //v0.6.1: Also pop open a companion dialog with details about what tokens have been placed and XP
+        const companionSheet = new EncounterCompanionSheet(combatants);
+        companionSheet.render(true);
+
+
         //Delete the existing tokens (because they will be replaced)
         for (const token of controlledTokens) {
             canvas.tokens.deleteMany([token.id]);

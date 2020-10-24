@@ -1,0 +1,18 @@
+<form>
+    <div id="QEContainers">
+        <fieldset class="group-container opponent-container">
+            <legend class='group-legend'>Combatants</legend>
+            <div class="group-field opponent-field">
+                {{#each combatants}}
+                    <div class='actor-container'>
+                        <img class='actor-portrait' src="{{this.img}}" title="{{this.name}}" id="{{this.id}}"/>
+                        <p>"{{this.num}}x {{this.name}} {{this.xpString}} "</p>
+                        <div class="actor-subtract">
+                            <i class="fas fa-minus" title="{{this.name}}" id="{{this.id}}"></i>
+                        </div>
+                    </div>
+                {{/each}}
+            </div>
+        </fieldset>
+    </div>
+</form>

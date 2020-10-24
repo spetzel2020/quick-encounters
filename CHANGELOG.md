@@ -1,5 +1,8 @@
 # Release Notes
 
+## 0.6.1
+- Added companion Dialog - outline
+
 ## 0.6.0abc
 - Allow Compendium entries as well as Actors
 - Fixed? Combat tracker now pops up more reliably
