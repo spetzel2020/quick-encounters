@@ -1,5 +1,5 @@
 # Quick Encounters
-NEW in v0.5! Save your player tokens at the entrance to new Scenes, works better with Token Mold, Quick Encounter button always available, Surprise encounters! - see [Release Notes](https://github.com/opus1217/quick-encounters/blob/master/CHANGELOG.md#changelog)
+NEW in v0.6! Use Compendium Actors for infrequent Encounters, and random (e.g. 1d4+2) numbers of opponents - see [Release Notes](https://github.com/opus1217/quick-encounters/blob/master/CHANGELOG.md#changelog)
 * **Author**: Spetzel#0103
 * **Version**: 0.6.1
 * **Foundry VTT Compatibility**: 0.6.5-0.7.5
