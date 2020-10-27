@@ -43,6 +43,6 @@ Quick Encounters works well with [TokenMold](https://github.com/Moerill/token-mo
 *Coming Soon!*
 
 ## License
-**Quick Encounters for Foundry VTT** is licensed under the [GNU General Public License v3.0](https://github.com/opus1217/quick-encounters/blob/master/LICENSE)
+**Quick Encounters for Foundry VTT** by Jeffrey Pugh is licensed under the [GNU General Public License v3.0](https://github.com/opus1217/quick-encounters/blob/master/LICENSE)
 
 This work is licensed under Foundry Virtual Tabletop [EULA - Limited License Agreement for module development v 0.1.6](http://foundryvtt.com/pages/license.html).
