@@ -25,6 +25,9 @@ v0.5.3 In Foundry 0.7.3, doesn't create saved tokens correctly if they were made
     - place in a custom companion dialog
 - Scan Journal Entries to turn into Actor links and Quick Encounters
 
+>>> When you close/delete the Combat Tracker, pop up a dialog with info about the XP and XP per Player token
+    - make this another option
+
 
 
 ## FIXED BUGS

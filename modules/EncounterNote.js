@@ -17,8 +17,7 @@ Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tra
 */
 
 
-import {MODULE_NAME, SCENE_ID_FLAG_KEY, TOKENS_FLAG_KEY} from './QuickEncounter.js';
-import {QuickEncounter} from './QuickEncounter.js';
+import {QuickEncounter, MODULE_NAME, SCENE_ID_FLAG_KEY, TOKENS_FLAG_KEY} from './QuickEncounter.js';
 
 //Expand the available list of Note icons
 const moreNoteIcons = {
@@ -39,7 +38,7 @@ export class EncounterNoteConfig extends NoteConfig {
     }
 }
 
-export class EncounterNote{
+export class EncounterNote {
     static async create(journalEntry, noteAnchor) {
         if (!journalEntry) {return;}
         // Create Note data

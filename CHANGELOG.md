@@ -1,5 +1,8 @@
 # Release Notes
 
+## v0.5.5
+- Add displayXPAfterCombat option to display Encounter XP and XP per player token when you End Combat or delete the Combat Tracker
+
 ## v0.5.4
 - Spanish translation of dialogs and messages (thanks https://github.com/lozalojo)
 - Move asking about creating a Map Note to when you want to run the Encounter; otherwise put a warning in the dynamic section
