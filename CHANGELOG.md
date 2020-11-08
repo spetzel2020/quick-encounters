@@ -2,6 +2,7 @@
 
 ## v0.5.5
 - Add Display XP after Combat setting to display Encounter XP and XP per player token when you End Combat
+- Confirm compatible with Foundry 0.7.6
 
 ## v0.5.4
 - Spanish translation of dialogs and messages (thanks https://github.com/lozalojo)
