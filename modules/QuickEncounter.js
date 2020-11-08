@@ -56,15 +56,21 @@
                 - Asks you when you go to run it (already did this)
                 v0.5.3d: Add option to "freeze" captured tokens so that TokenMold doesn't regenerate HP, name, etc
                 (Default is true so that only newly generated tokens are changed )
+12-Oct-2020     v0.6.0: Allow Quick Encounters to use Compendium links
+15-Oct-2020     v0.6.0c: Handle multipliers that are dice rolls, e.g. 1d4+2 Vampire Spawn
+                (Note they must be in Foundry [[/r 1d4+2]] form  to be recognized)
+15-Oct-2020     v0.6.1: Prototype embedded vs companion dialog methods
 6-Nov-2020      v0.5.5:  When you close/delete the Combat Tracker, pop up a dialog with info about the XP and XP per Player token
                 Add a config option to turn this on/off (displayEncounterXPAfterCombat) provided this is DND5E
                 Remove implicit localize in name&hint for config options
 7-Nov-2020      v0.5.5: Rename putXPInChat to computeTotalXP      
-                v0.5.5b: Tweak the dialog          
+                v0.5.5b: Tweak the dialog
+
 */
 
 
 import {EncounterNote} from './EncounterNote.js';
+import {EncounterCompanionSheet} from './EncounterCompanionSheet.js';
 
 export const MODULE_NAME = "quick-encounters";
 export const SCENE_ID_FLAG_KEY = "sceneID";
@@ -101,6 +107,14 @@ export class QuickEncounter {
             config: true,
             visible: game.system.id === "dnd5e",
             default: true,
+            type: Boolean
+        });
+        game.settings.register(MODULE_NAME, "useEmbeddedMethod", {
+            name: game.i18n.localize("QE.UseEmbeddedMethod.NAME"),
+            hint: game.i18n.localize("QE.UseEmbeddedMethod.HINT"),
+            scope: "world",
+            config: true,
+            default: true,  //True during Beta
             type: Boolean
         });
     }
@@ -183,7 +197,6 @@ export class QuickEncounter {
 
     static async createFromTokens(controlledTokens) {
         //Create a new JournalEntry - the corresponding map note gets created when you save&close the Journal Sheet
-
         //0.4.1: Group identical actors with a number before it
         let tokenActorIDs = new Set();
         for (const token of controlledTokens) {
@@ -194,14 +207,19 @@ export class QuickEncounter {
 //NOTE: -------- This code chunk should enable us to drag additional encounters or tokens to a single Journal Entry if necessary
 //FIXME: Replace all this with a renderTemplate section using handlebars
         let content = game.i18n.localize("QE.Instructions.CONTENT");
+        let combatants = [];
         for (const tokenActorID of tokenActorIDs) {
             const tokens = controlledTokens.filter(t => t.actor.id === tokenActorID);
             //0.4.1: 5e specific: find XP for this number of this actor
             const xp = QuickEncounter.getActorXP(tokens[0].actor);
             const xpString = xp ? `(${xp}XP each)`: "";
             content += `<li>${tokens.length}@Actor[${tokenActorID}]{${tokens[0].name}} ${xpString}</li>`;
+            combatants.push({
+                num : numTokens,
+                name : tokens[0].name,
+                xp : xpString
+            });
         }
-//--------------
 
         const scene = controlledTokens[0].scene;
         const journalData = {
@@ -219,6 +237,12 @@ export class QuickEncounter {
 
         const ejSheet = new JournalSheet(journalEntry);
         ejSheet.render(true);
+
+        //v0.6.1: Also pop open a companion dialog with details about what tokens have been placed and XP
+        const companionSheet = new EncounterCompanionSheet(combatants);
+        companionSheet.render(true);
+
+
         //Delete the existing tokens (because they will be replaced)
         for (const token of controlledTokens) {
             canvas.tokens.deleteMany([token.id]);
@@ -304,7 +328,7 @@ export class QuickEncounter {
                 //Check open windows for the tutorial Journal Entry
                 if (w instanceof JournalSheet) {
                     const journalEntry = w.entity;
-                    if (journalEntry && (journalEntry.name === game.i18n.localize("QE.TITLE.HowToUse"))) {
+                    if (journalEntry && (journalEntry.name === game.i18n.localize("QE.HowToUse.TITLE"))) {
                         qeTutorial = w;
                         break;
                     }
@@ -317,12 +341,14 @@ export class QuickEncounter {
     static extractQuickEncounter(journalSheet) {
         const journalEntry = journalSheet.entity;
         const mapNote = journalEntry.sceneNote;
+        //0.6 this now potentially includes Compendium links
         const extractedActors = QuickEncounter.extractActors(journalSheet.element);
         const existingTokens =  journalEntry.getFlag(MODULE_NAME, TOKENS_FLAG_KEY);
 
-        //Minimum Quick Encounter has a Journal Entry, and tokens or actors
+        //Minimum Quick Encounter has a Journal Entry, and tokens or actors (or 0.6 Compendium which turns into Actors)
         //If there isn't a map Note we may need to switch scenes
-        if (journalEntry && ((extractedActors && extractedActors.length) || (existingTokens && existingTokens.length))) {
+        if (journalEntry && ((extractedActors && extractedActors.length) || (existingTokens && existingTokens.length))
+            ) {
             const quickEncounter = {
                 journalEntry : journalEntry,
                 mapNote : mapNote,
@@ -336,22 +362,51 @@ export class QuickEncounter {
     }
 
     static extractActors(html) {
+        const ACTOR = "Actor";
         const entityLinks = html.find(".entity-link");
         if (!entityLinks || !entityLinks.length) {return null;}
 
         const extractedActors = [];
-        const reg = "([0-9]+)[^0-9]*$"; //Matches last "number followed by non-number at the end of a string"
+        const intReg = "([0-9]+)[^0-9]*$"; //Matches last "number followed by non-number at the end of a string"
+        const dieRollReg = /([0-9]+\s*d[4,6,8,10,12](?:\s*\+\s*[0-9]+))/;
         entityLinks.each((i, el) => {
             const element = $(el);
-            if (element.attr("data-entity") === "Actor") {
-                const dataID = element.attr("data-id");
+            const dataEntity = element.attr("data-entity");
+            const dataID = element.attr("data-id");
+            //0.6 If it's a Compendium we just have a data.pack attribute
+            const dataPackName = element.attr("data-pack"); //Not used if Actor
+            const dataLookup = element.attr("data-lookup");
+            //Get the dataPack entity type (has to be Actor)
+            const dataPack = game.packs.get(dataPackName);
+            if ((dataEntity === ACTOR) || (dataPack && (dataPack.entity === ACTOR))) {
                 const dataName = element.text();
                 const prevSibling = element[0].previousSibling;
-                const possibleInts = prevSibling ? prevSibling.textContent.match(reg) : ["1"];
-                const numActors = parseInt(possibleInts ? possibleInts[0] : "1");
+                let multiplier = 1;
+                //v0.6 Check for a die roll entry
+                if (prevSibling) {
+                    if (prevSibling.classList && prevSibling.classList.contains("inline-roll")) {
+                        //Try to get it from the data-formula attribute
+                        try {
+                            multiplier = prevSibling.attributes["data-formula"].value;
+                            if (!multiplier) {multiplier = 1;}
+                        } catch {
+                            //Otherwise try to prase it out
+                            multiplier = prevSibling.textContent.match(dieRollReg);
+                            multiplier = multiplier? multiplier[0] : 1;
+                        }
+                    } else {
+                        const possibleInts = prevSibling.textContent.match(intReg);
+                        multiplier = parseInt(possibleInts ? possibleInts[0] : "1");
+                    }
+                }
+
+                //If this is a Compendium, then that may use either data-lookup or data-id depending on the index
+                //Although in Foundry 0.7.4 I can't find _replaceCompendiumLink any more
+                const actorID =
                 extractedActors.push({
-                    numActors : numActors ? numActors : 1,
-                    actorID : dataID,
+                    numActors : multiplier  ? multiplier : 1,
+                    dataPackName : dataPackName,                    //if non-null then this is a Compendium reference
+                    actorID : dataID ? dataID : dataLookup,           //If Compendium sometimes this is the reference
                     name : dataName
                 });
             }
@@ -512,11 +567,35 @@ export class QuickEncounter {
         const gridSize = canvas.dimensions.size;
         let expandedTokenData = [];
         for (let eActor of extractedActors) {
-            let numActors = eActor.numActors;
-            const actor = game.actors.get(eActor.actorID);
+            let multiplier = eActor.numActors;
+            let actor = null;
+            //v0.6 Need to check whether this is a direct Actor reference or from a Compendium
+            if (eActor.dataPackName) {
+                const actorPack = game.packs.get(eActor.dataPackName);
+                if (!actorPack) {continue;}
+                //Import this actor because otherwise you won't be able to see character sheet etc.
+                actor = await game.actors.importFromCollection(eActor.dataPackName, eActor.actorID, {}, {renderSheet: false});
+                //Try This
+                eActor.actorID = actor.id;
+            } else {
+                actor = game.actors.get(eActor.actorID);
+            }
+            if (!actor) {continue;}     //possibly will happen with Compemdium
 
              //If numActors didn't convert then just create 1 token
-             if (!numActors) {numActors = 1;}
+             let numActors;
+             if (!multiplier) {
+                 numActors = 1;
+             } else if (typeof multiplier === "number") {
+                 numActors = multiplier;
+             } else if ((typeof multiplier === "string") && Roll.validate(multiplier)) {
+                 //v0.6: Pass the multiplier to the roll formula, which allows for a digit or a formula
+                 let r= new Roll(multiplier);
+                 r.evaluate();
+                 numActors = r.total ? r.total : 1;
+             } else {
+                 numActors = 1;
+             }
 
              for (let iActor=1; iActor <= numActors; iActor++) {
                  //Slightly vary the (x,y) coords so we don't pile all the tokens on top of each other and make them hard to find
@@ -528,7 +607,8 @@ export class QuickEncounter {
                  }
                  //Use the prototype token from the Actors
                  tokenData = mergeObject(actor.data.token, tokenData, {inplace: false});
-
+                 //If from a Compendium, we remember that and the original Compendium actorID
+                 if (eActor.dataPackName) {tokenData.compendiumActorID = eActor.actorID;}
                  expandedTokenData.push(tokenData);
              }
         }
@@ -568,13 +648,14 @@ export class QuickEncounter {
             token.control({releaseOthers : false, updateSight : false});
         }
 
-        const tabApp = ui.combat;
-        tabApp.renderPopout(tabApp);
-        //If the tokens are not on the Scene then add them
-
         //Load the recovered tokens into the combat Tracker
         //Only have to toggle one of them to add all the controlled tokens
         await createdTokens[0].toggleCombat();
+
+        //0.6: Moved after toggling combat in case that actually creates the combat entity
+        const tabApp = ui.combat;
+        tabApp.renderPopout(tabApp);
+        //If the tokens are not on the Scene then add them
 
         //Now release control of them as a group, because otherwise the stack is hard to see
         for (const token of createdTokens) {

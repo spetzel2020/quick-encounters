@@ -1,5 +1,14 @@
 # Release Notes
 
+## 0.6.1
+- Added companion Dialog - outline
+
+## 0.6.0abc
+- Allow Compendium entries as well as Actors
+- Fixed? Combat tracker now pops up more reliably
+- Was popping an extra copy of the tutorial every time you pressed the button
+- Handle multipliers that are dice rolls, e.g. 1d4+2 Vampire Spawn (Note they must be in Foundry [[/r 1d4+2]] form  to be recognized)
+
 ## v0.5.5
 - Add Display XP after Combat setting to display Encounter XP and XP per player token when you End Combat
 - Confirm compatible with Foundry 0.7.6
