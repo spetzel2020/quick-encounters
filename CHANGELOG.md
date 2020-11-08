@@ -1,7 +1,7 @@
 # Release Notes
 
 ## v0.5.5
-- Add displayXPAfterCombat option to display Encounter XP and XP per player token when you End Combat or delete the Combat Tracker
+- Add Display XP after Combat setting to display Encounter XP and XP per player token when you End Combat
 
 ## v0.5.4
 - Spanish translation of dialogs and messages (thanks https://github.com/lozalojo)
