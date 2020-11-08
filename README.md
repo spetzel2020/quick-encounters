@@ -1,7 +1,7 @@
 # Quick Encounters
-NEW in v0.5! Save your player tokens at the entrance to new Scenes, works better with Token Mold, Quick Encounter button always available, Surprise encounters! - see [Release Notes](https://github.com/opus1217/quick-encounters/blob/master/CHANGELOG.md#changelog)
+NEW in v0.6! Use Compendium Actors for infrequent Encounters, and random (e.g. 1d4+2) numbers of opponents - see [Release Notes](https://github.com/opus1217/quick-encounters/blob/master/CHANGELOG.md#changelog)
 * **Author**: Spetzel#0103
-* **Version**: 0.5.5
+* **Version**: 0.6.1
 * **Foundry VTT Compatibility**: 0.6.5-0.7.6
 * **System Compatibility (If applicable)**: N/A
 * **Translation Support**: en, es
@@ -21,7 +21,7 @@ Quick Encounters works well with [TokenMold](https://github.com/Moerill/token-mo
 
 # Install
 1. Go to the "Add-on Modules" tab in Foundry Setup
-2. Click "Install Module" and search for **Quick Encounters** OR paste this link: `https://raw.githubusercontent.com/spetzel2020/quick-encounters/v0.5.5/module.json`
+2. Click "Install Module" and search for **Quick Encounters** OR paste this link: `https://raw.githubusercontent.com/opus1217/quick-encounters/v0.6.1/module.json`
 3. Open your world and go to Settings>Manage Modules and enable Quick Encounters
 
 # Using Quick Encounters
@@ -38,3 +38,11 @@ Quick Encounters works well with [TokenMold](https://github.com/Moerill/token-mo
 3. Now drag the placed Journal Entry Note to the Scene map at the desired encounter position.
 4. To run your Quick Encounter, simply double-click the map pin to open the Quick Encounter Journal Entry.
 5. Click the Quick Encounter button: your saved tokens will be positioned around the map note, and added to the Combat Tracker.
+
+## Contributions
+*Coming Soon!*
+
+## License
+**Quick Encounters for Foundry VTT** by Jeffrey Pugh is licensed under the [GNU General Public License v3.0](https://github.com/opus1217/quick-encounters/blob/master/LICENSE)
+
+This work is licensed under Foundry Virtual Tabletop [EULA - Limited License Agreement for module development v 0.1.6](http://foundryvtt.com/pages/license.html).

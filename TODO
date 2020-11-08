@@ -2,28 +2,36 @@
 
 ## BUGS
 v0.5.0 You still see and hear HP rolling with Token Mold, even though the saved tokens are not changed
-v0.5.0 Sometimes the Combat Tracker is not ready in time - need to increase the timeout and maybe check if it's been rendered
-    - happens when the image is not local but an http link
-v0.5.3 In Foundry 0.7.3, doesn't create saved tokens correctly if they were made from a non-standard Actor
+v0.5.3 NOT A BUG? In Foundry 0.7.3, doesn't create saved tokens correctly if they were made from a non-standard Actor
 
 
 ## FEATURES
->>> Options:
+>>> Add to Settings:
     - Make newly created tokens (Method 2) Invisible
     - Create the Quick Encounter section in a QE Journal Entry (otherwise you have to use the sidebar button)
     - Option to have to specifically designate a Journal Entry as a Quick Encounter (or you can use the side button)
 
 - Allow a way to NOT have Quick Encounters turn Actor links into a Quick Encounter Journal Entry
     - save with the Journal Entry as a flag; but then how do you turn it on again?
-- Allow you to use Compendium entries as well as Actors
+
 - If you drag a Journal Entry to the Scene, then intercept to change the icon etc.
     - Partially done: could identify it's a Quick Encounter from the inclusion of Actor links
         but perhaps a better approach would be with a flag that was set
 - Improve the way the Journal Entry gets built to do more with the template and handlebars
+
 - After Actor links: Show individual XP and whether tokens have been placed dynamically
     - probably requires re-rendering
     - place in a custom companion dialog
-- Scan Journal Entries to turn into Actor links and Quick Encounters
+
+More sophisticated monster entries:
+    - Scan Journal Entries to turn into Actor links and Quick Encounters
+    - Allow die rolls before the Actor links for dynamic generation
+    - Allow dynamic generation of which monsters (use a RollTable?)
+Show which Journal Entries have Quick Encounters in the Journal list
+
+- After combat, show the XP and XP-per-player token 
+
+
 
 >>> When you close/delete the Combat Tracker, pop up a dialog with info about the XP and XP per Player token
     - make this another option
@@ -59,6 +67,9 @@ FIXED (v0.5.3)  If you press the Quick Encounters button in a QE Journal, get an
                     - needs to check that the button and Div isn't already there
                     - was this happening in 0.6.6? No
                     - Delete any existing dynamic QE sections and re-create them
+FIXED? in 0.6.0: v0.5.0 Sometimes the Combat Tracker is not ready in time - need to increase the timeout and maybe check if it's been rendered
+                        - happens when the image is not local but an http link
+FIXED in 0.6.0b: v0.5.4: Should check for QE.HowToUse.TITLE in deciding whether to pop up an extra Tutorial
 
 ## COMPLETED FEATURES
 (v0.4.0): If you're on a different scene, pops a dialog to check that you want to switch scenes
@@ -78,3 +89,4 @@ v0.5.0 Make the embedded button smaller - width of the text and centered
 (0.5.3b) Move the Tutorial completely into lang/
 (0.5.3c) Move asking about creating a Map Note to when you want to run the Encounter; otherwise put a note in the dynamic section
 (0.5.3d) Add Freeze "captured" tokens option (as to whether Token Mold is allowed to change the tokens after they're saved)
+v0.6.0 Allows you to import Actors dynamically by using Compendium entries (but note it will re-import the Actor every time)

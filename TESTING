@@ -1,9 +1,9 @@
 TESTING WITH FOUNDRY 0.7.6
 
 TUTORIAL
-1. Press Quick Encounter button with nothing selected -> should pop up Tutorial 				OK
-2. With Tutorial open, repeat #1 -> should keep existing Tutorial 					NO - Fixed in 0.6	
-3. Close Tutorial -> should delete the Journal Entry                                					OK
+1. Press Quick Encounter button with nothing selected -> should pop up Tutorial 			             	OK
+2. With Tutorial open, repeat #1 -> should keep existing Tutorial                 	                -Bugged in 0.5.4; works in 0.6.0
+3. Close Tutorial -> should delete the Journal Entry                                					      OK
 4. Open some Journal Entries with no embedded Actors, press QE button -> should open Tutorial   		OK
 5. Open multiple Journal Entries with embedded Actors, press QE button -> should run the Encounter		OK	
 6. Leave Tutorial Window open; create another Journal Entry, Save, and then close - should be kept		OK
@@ -25,3 +25,8 @@ USE, MOVING, DELETION
 1. Delete Note; should warn there is no Note when you open the Journal Entry 				OK (in test case because it's on two maps)
 2. Move Note - Actor tokens should be created at the position of the Note					OK
 3. Start on another Scene and run an Encounter - should switch scenes     					OK	
+
+-------------
+RUN AN ENCOUNTER (0.6.0 only)
+1. Add a Compendium Entry "Dire Wolf" - get "Query returned multiple entries"		     BUG in 0.7.4 (QE 0.6)
+2. Random encounters (1d4+2)
