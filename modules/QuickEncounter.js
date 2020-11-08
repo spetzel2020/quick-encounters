@@ -59,7 +59,8 @@
 6-Nov-2020      v0.5.5:  When you close/delete the Combat Tracker, pop up a dialog with info about the XP and XP per Player token
                 Add a config option to turn this on/off (displayEncounterXPAfterCombat) provided this is DND5E
                 Remove implicit localize in name&hint for config options
-7-Nov-2020      v0.5.5: Rename putXPInChat to computeTotalXP                
+7-Nov-2020      v0.5.5: Rename putXPInChat to computeTotalXP      
+                v0.5.5b: Tweak the dialog message          
 */
 
 
