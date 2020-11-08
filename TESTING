@@ -1,25 +1,27 @@
+TESTING WITH FOUNDRY 0.7.6
+
 TUTORIAL
-1. Press Quick Encounter button with nothing selected -> should pop up Tutorial     - OK in Foundry 0.7.3
-2. With Tutorial open, repeat #1 -> should keep existing Tutorial                  - OK in Foundry 0.7.3
-3. Close Tutorial -> should delete the Journal Entry                                 - OK in Foundry 0.7.3
-4. Open some Journal Entries with no embedded Actors, press QE button -> should open Tutorial    - OK in Foundry 0.7.3
-5. Open multiple Journal Entries with embedded Actors, press QE button -> should run the Encounter    - OK in Foundry 0.7.3
-6. Leave Tutorial Window open; create another Journal Entry, Save, and then close - should be kept  - OK in Foundry 0.7.3
+1. Press Quick Encounter button with nothing selected -> should pop up Tutorial 				OK
+2. With Tutorial open, repeat #1 -> should keep existing Tutorial 					NO - Fixed in 0.6	
+3. Close Tutorial -> should delete the Journal Entry                                					OK
+4. Open some Journal Entries with no embedded Actors, press QE button -> should open Tutorial   		OK
+5. Open multiple Journal Entries with embedded Actors, press QE button -> should run the Encounter		OK	
+6. Leave Tutorial Window open; create another Journal Entry, Save, and then close - should be kept		OK
     - was being deleted in 0.5.2 because it was finding the Tutorial Window
 
 
 METHOD 1
-1. Select one friendly token and press QE button -> should ask if you want to add to JE       - OK in Foundry 0.7.3
-2. Select multiple friendly and neutral tokens -> should ask...                               - OK in Foundry 0.7.3
-3. Select one hostile token and press QE button -> adds to JE                                 - OK in Foundry 0.7.3
-4. Select multiple hostile and neutral tokens and press QE button -> adds to JE                  - OK in Foundry 0.7.3
+1. Select one friendly token and press QE button -> should ask if you want to add to JE			OK
+2. Select multiple friendly and neutral tokens -> should ask...						            OK
+3. Select one hostile token and press QE button -> adds to JE						            OK
+4. Select multiple hostile and neutral tokens and press QE button -> adds to JE 				OK
 
 
 METHOD 2
-1. Add Actors to a Journal Entry ; should re-render with embedded QE button                   - OK in Foundry 0.7.3
+1. Add Actors to a Journal Entry ; should re-render with embedded QE button 				OK
 
 
 USE, MOVING, DELETION
-1. Delete Note; should get recreated next time you close the Journal Entry            - OK in Foundry 0.7.3
-2. Move Note - Actor tokens should be created at the position of the Note                 - OK in Foundry 0.7.3
-3. Start on another Scene and run an Encounter - should switch scenes                         - OK in Foundry 0.7.3
+1. Delete Note; should warn there is no Note when you open the Journal Entry 				OK (in test case because it's on two maps)
+2. Move Note - Actor tokens should be created at the position of the Note					OK
+3. Start on another Scene and run an Encounter - should switch scenes     					OK	
