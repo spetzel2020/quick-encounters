@@ -31,6 +31,11 @@
   "QE.HowToUse.WhatNow" : "<h2>What Now?</h2><p>You can just close this Journal Entry as is and it will be deleted automagically!</p><p>Or you can delete all this text and turn it into your first Quick Encounter Journal Entry by following Method 2 above. Good luck!</p>",
   "QE.FreezeCapturedTokens.NAME" : "Freeze \"captured\" tokens",
   "QE.FreezeCapturedTokens.HINT" : "Existing tokens that you save into a Quick Encounter will not be changed (for example by TokenMold) when you run the Encounter. Clear the checkbox if you want to allow TokenMold or other programs to change tokens' name, HP, or other stats. This setting does not affect tokens newly generated from Actor links.",
+  "QE.DisplayXPAfterCombat.NAME" : "Display XP after Combat",
+  "QE.DisplayXPAfterCombat.HINT": "When you press End Combat or delete Combat Tracker, display total XP of Hostile tokens and XP per Player token",
+  "QE.XPtoAward.TITLE" : "XP to award",
+  "QE.XPtoAward.TOTAL" : "XP computed for Hostile tokens: ",
+  "QE.XPtoAward.PERPLAYER": "<br>(Non-player Friendly or Neutral not-included)<br>XP per player: "
   "QE.UseEmbeddedMethod.NAME" : "Use older embedded method",
   "QE.UseEmbeddedMethod.HINT" : "Use the older Quick Encounters design which embeds the tokens, actors, and Quick Encounters button directly in the Journal Entry."
 }

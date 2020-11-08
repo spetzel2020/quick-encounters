@@ -60,6 +60,12 @@
 15-Oct-2020     v0.6.0c: Handle multipliers that are dice rolls, e.g. 1d4+2 Vampire Spawn
                 (Note they must be in Foundry [[/r 1d4+2]] form  to be recognized)
 15-Oct-2020     v0.6.1: Prototype embedded vs companion dialog methods
+6-Nov-2020      v0.5.5:  When you close/delete the Combat Tracker, pop up a dialog with info about the XP and XP per Player token
+                Add a config option to turn this on/off (displayEncounterXPAfterCombat) provided this is DND5E
+                Remove implicit localize in name&hint for config options
+7-Nov-2020      v0.5.5: Rename putXPInChat to computeTotalXP      
+                v0.5.5b: Tweak the dialog
+
 */
 
 
@@ -87,10 +93,19 @@ export class QuickEncounter {
             type: String
         });
         game.settings.register(MODULE_NAME, "freezeCapturedTokens", {
-            name: game.i18n.localize("QE.FreezeCapturedTokens.NAME"),
-            hint: game.i18n.localize("QE.FreezeCapturedTokens.HINT"),
+            name: "QE.FreezeCapturedTokens.NAME",
+            hint: "QE.FreezeCapturedTokens.HINT",
             scope: "world",
             config: true,
+            default: true,
+            type: Boolean
+        });
+        game.settings.register(MODULE_NAME, "displayXPAfterCombat", {
+            name: "QE.DisplayXPAfterCombat.NAME",
+            hint: "QE.DisplayXPAfterCombat.HINT",
+            scope: "world",
+            config: true,
+            visible: game.system.id === "dnd5e",
             default: true,
             type: Boolean
         });
@@ -192,14 +207,11 @@ export class QuickEncounter {
 //NOTE: -------- This code chunk should enable us to drag additional encounters or tokens to a single Journal Entry if necessary
 //FIXME: Replace all this with a renderTemplate section using handlebars
         let content = game.i18n.localize("QE.Instructions.CONTENT");
-        let xpTotal = 0;
         let combatants = [];
         for (const tokenActorID of tokenActorIDs) {
             const tokens = controlledTokens.filter(t => t.actor.id === tokenActorID);
             //0.4.1: 5e specific: find XP for this number of this actor
-            const numTokens = tokens.length;
             const xp = QuickEncounter.getActorXP(tokens[0].actor);
-            xpTotal += numTokens * xp;
             const xpString = xp ? `(${xp}XP each)`: "";
             content += `<li>${tokens.length}@Actor[${tokenActorID}]{${tokens[0].name}} ${xpString}</li>`;
             combatants.push({
@@ -208,7 +220,6 @@ export class QuickEncounter {
                 xp : xpString
             });
         }
-//--------------
 
         const scene = controlledTokens[0].scene;
         const journalData = {
@@ -218,7 +229,7 @@ export class QuickEncounter {
             type: "encounter",
             types: "base"
         }
-        var journalEntry = await JournalEntry.create(journalData);
+        let journalEntry = await JournalEntry.create(journalData);
 
         //Record the scene for the tokens as a convenience
         await journalEntry.setFlag(MODULE_NAME,SCENE_ID_FLAG_KEY, scene.id);
@@ -257,7 +268,7 @@ export class QuickEncounter {
         if ((game.system.id !== "dnd5e") || !actor) {return null;}
         try {
             return actor.data.data.details.xp.value;
-        } catch(err) {
+        } catch (err) {
             return null;
         }
     }
@@ -284,7 +295,7 @@ export class QuickEncounter {
             type: "encounter",
             types: "base"
         }
-        var journalEntry = await JournalEntry.create(journalData);
+        let journalEntry = await JournalEntry.create(journalData);
 
         const ejSheet = new JournalSheet(journalEntry);
         ejSheet.render(true);
@@ -407,7 +418,7 @@ export class QuickEncounter {
 
 
 
-    /** Run the Quick Encounter (by using the embedded button or the side button)
+    /* Run the Quick Encounter (by using the embedded button or the side button)
     */
     static async runFromEmbeddedButton(qeJournalSheet) {
         const quickEncounter = QuickEncounter.extractQuickEncounter(qeJournalSheet);
@@ -444,10 +455,10 @@ export class QuickEncounter {
 
         //The frozen flag indicates if we should reset token data after creating the tokens
         let extractedActorTokenData = await QuickEncounter.createTokenDataFromActors(extractedActors, coords);
-        if (extractedActorTokenData) {extractedActorTokenData.forEach((td) => {td.frozen = false;})}
+        if (extractedActorTokenData) {extractedActorTokenData.forEach(td => {td.frozen = false;})}
         //v0.5.3d: Check the value of setting "freezeCapturedTokens"
         const freezeCapturedTokens = game.settings.get(MODULE_NAME, "freezeCapturedTokens");
-        if (savedTokensData) {savedTokensData.forEach((td) => {td.frozen = freezeCapturedTokens;})}
+        if (savedTokensData) {savedTokensData.forEach(td => {td.frozen = freezeCapturedTokens;})}
 
         //v0.5.1 If we have more actors than saved tokens, create more tokens
         //If we have fewer actors than saved tokens, skip some
@@ -463,10 +474,7 @@ export class QuickEncounter {
             const eaTokensData = extractedActorTokenData.filter(eatd => eatd.actorId === ea.actorID);
             const savedTokensForThisActorID = savedTokensData ? savedTokensData.filter(std => std.actorId === ea.actorID) : null;
 
-            if (!savedTokensForThisActorID) {
-                //No saved tokens - just use the Actor data
-                combinedTokenData = combinedTokenData.concat(eaTokensData);
-            } else {
+            if (savedTokensForThisActorID) {
                 const numExcessActors = eaTokensData.length - savedTokensForThisActorID.length;
                 if (numExcessActors >= 0) {
                     //if excessActors > 0 take all of the saved tokens and then as many as necessary from the extracted Actor tokens
@@ -476,6 +484,9 @@ export class QuickEncounter {
                     //Take all possible saved tokens up to the number
                     combinedTokenData = combinedTokenData.concat(savedTokensForThisActorID.slice(0, eaTokensData.length));
                 }
+            } else {
+                //No saved tokens - just use the Actor data
+                combinedTokenData = combinedTokenData.concat(eaTokensData);
             }
         }
 
@@ -487,25 +498,6 @@ export class QuickEncounter {
         setTimeout(() => {
             QuickEncounter.createCombat(createdTokens);
         },200);
-    }
-
-//DEPRECATED
-    static async putXPInChat(createdTokens) {
-        if ((game.system.id !== "dnd5e") || !createdTokens) {return;}
-        let totalXP = null;
-        for (const token of createdTokens) {
-            totalXP += QuickEncounter.getActorXP(token.actor);
-        }
-        if (totalXP) {
-            const chatMessageData = {
-                user: game.user,
-                whisperTo: game.user,
-                visible : true,
-                content : `Total XP: ${totalXP}`
-            }
-            const chatMessage = await ChatMessage.create(chatMessageData);
-            //Post is unnecessary because create calls onCreate which calls postOne
-        }
     }
 
     static async noMapNoteDialog(qeJournalEntry) {
@@ -672,6 +664,61 @@ export class QuickEncounter {
 
     }
 
+    static async onDeleteCombat(combat, options, userId) {
+        //Only works with 5e
+        //If the display XP option is set, work out how many defeated foes and how many Player tokens
+        const shouldDisplayXPAfterCombat = game.settings.get(MODULE_NAME, "displayXPAfterCombat");
+        if (!shouldDisplayXPAfterCombat || !combat) {return;}
+
+        //Get list of non-friendly NPCs
+        const nonFriendlyNPCTokens = combat.turns.filter(t => ((t.token.disposition === TOKEN_DISPOSITIONS.HOSTILE) && (!t.actor || !t.players.length)));
+        //And of player-owned tokens
+        const pcTokens = combat.turns.filter(t => (t.actor && t.players.length));
+
+        //Now compute total XP and XP per player
+        if (!nonFriendlyNPCTokens || !nonFriendlyNPCTokens.length || !pcTokens) {return;}
+        const totalXP = await QuickEncounter.computeTotalXP(nonFriendlyNPCTokens);
+        if (!totalXP) {return;}
+        const xpPerPlayer = pcTokens.length ? totalXP/pcTokens.length : null;
+        let content = game.i18n.localize("QE.XPtoAward.TOTAL") + totalXP;
+        if (xpPerPlayer) {content += (game.i18n.localize("QE.XPtoAward.PERPLAYER") + xpPerPlayer);}
+
+        EncounterNote.dialogPrompt({
+            title: game.i18n.localize("QE.XPtoAward.TITLE"),
+            content: content,
+            label: "",
+            callback: () => { console.log(`XP to award ${content}`); },
+            options: {
+                top: window.innerHeight - 350,
+                left: window.innerWidth - 720,
+                width: 400,
+                jQuery: false
+            }
+        });
+    }
+
+
+
+    static async computeTotalXP(tokens) {
+        if ((game.system.id !== "dnd5e") || !tokens) { return; }
+        let totalXP = null;
+        for (const token of tokens) {
+            totalXP += QuickEncounter.getActorXP(token.actor);
+        }
+        return totalXP;
+        /*        
+                if (totalXP) {
+                    const chatMessageData = {
+                        user: game.user,
+                        whisperTo: game.user,
+                        visible : true,
+                        content : `Total XP: ${totalXP}`
+                    }
+                    const chatMessage = await ChatMessage.create(chatMessageData);
+                    //Post is unnecessary because create calls onCreate which calls postOne
+                }
+        */
+    }
 
 }
 
@@ -740,3 +787,6 @@ Hooks.on('closeJournalSheet', async (journalSheet, html) => {
 
 Hooks.on("init", QuickEncounter.init);
 Hooks.on('getSceneControlButtons', QuickEncounter.getSceneControlButtons);
+Hooks.on("deleteCombat", (combat, options, userId) => {
+    QuickEncounter.onDeleteCombat(combat, options, userId);
+});

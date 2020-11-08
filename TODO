@@ -33,6 +33,9 @@ Show which Journal Entries have Quick Encounters in the Journal list
 
 
 
+>>> When you close/delete the Combat Tracker, pop up a dialog with info about the XP and XP per Player token
+    - make this another option
+
 
 
 ## FIXED BUGS
