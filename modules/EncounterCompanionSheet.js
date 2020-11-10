@@ -9,7 +9,6 @@ Reused as EncounterCompanionSheet
 
 export class EncounterCompanionSheet extends Application {
     constructor(combatants, options = {}) {
-        //This is the standard constructor that just passes through to JournalSheet
         super(options);
         if (!game.user.isGM) {return;}
         this.combatants = combatants;
@@ -23,13 +22,12 @@ export class EncounterCompanionSheet extends Application {
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
             id : game.i18n.localize("QE.id"),
-            title : game.i18n.localize("QE.NAME"),
+            title : game.i18n.localize("QE.Name"),
             template : "modules/quick-encounters/templates/quick-encounters-companion.html",
             closeOnSubmit : false,
             popOut : true,
             width : 510,
-            height : "auto",
-            classes : ["QuickEncounter", "EncounterCompanionSheet"]
+            height : "auto"
         });
     }
 
@@ -43,13 +41,20 @@ export class EncounterCompanionSheet extends Application {
     _getHeaderButtons() {
         let buttons = super._getHeaderButtons();
         let closeButtonIndex = buttons.findIndex(button => {return button.label === "Close";});
-        if (closeButtonIndex !== undefined) {
+        if (closeButtonIndex) {
             buttons[closeButtonIndex].label = "Save & Close";
         }
 
         return buttons;
     }
 
+
+    /** @override */
+    async getData() {
+        return {
+           combatants: this.combatants
+        };
+    }
 
     /** @override */
     async _updateObject(event, formData) {

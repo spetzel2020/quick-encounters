@@ -35,7 +35,7 @@
   "QE.DisplayXPAfterCombat.HINT": "When you press End Combat or delete Combat Tracker, display total XP of Hostile tokens and XP per Player token",
   "QE.XPtoAward.TITLE" : "XP to award",
   "QE.XPtoAward.TOTAL" : "XP computed for Hostile tokens: ",
-  "QE.XPtoAward.PERPLAYER": "<br>(Non-player Friendly or Neutral not-included)<br>XP per player: "
+  "QE.XPtoAward.PERPLAYER": "<br>(Non-player Friendly or Neutral not-included)<br>XP per player: ",
   "QE.UseEmbeddedMethod.NAME" : "Use older embedded method",
   "QE.UseEmbeddedMethod.HINT" : "Use the older Quick Encounters design which embeds the tokens, actors, and Quick Encounters button directly in the Journal Entry."
 }

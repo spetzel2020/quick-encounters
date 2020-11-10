@@ -65,6 +65,7 @@
                 Remove implicit localize in name&hint for config options
 7-Nov-2020      v0.5.5: Rename putXPInChat to computeTotalXP      
                 v0.5.5b: Tweak the dialog
+9-Nov-2020      v0.6.1b: Use optional chaining to reduce chained tests for null                
 
 */
 
@@ -163,7 +164,7 @@ export class QuickEncounter {
         //Method 1: Get the selected tokens and the scene
         //Exclude friendly tokens unless you say yes to the dialog
         const controlledTokens = Array.from(canvas.tokens.controlled);
-        const controlledFriendlyTokens = controlledTokens.filter(t => t.data.disposition === TOKEN_DISPOSITIONS.FRIENDLY );
+        const controlledFriendlyTokens = controlledTokens.filter(t => t.data?.disposition === TOKEN_DISPOSITIONS.FRIENDLY );
         if (controlledTokens && controlledTokens.length) {
             if (controlledFriendlyTokens && controlledFriendlyTokens.length) {
                 Dialog.confirm({
@@ -171,7 +172,7 @@ export class QuickEncounter {
                   content: game.i18n.localize("QE.IncludeFriendlies.CONTENT"),
                   yes: () => {QuickEncounter.createFromTokens(controlledTokens)},
                   no: () => {
-                      const controlledNonFriendlyTokens = controlledTokens.filter(t => t.data.disposition !== TOKEN_DISPOSITIONS.FRIENDLY );
+                      const controlledNonFriendlyTokens = controlledTokens.filter(t => t.data?.disposition !== TOKEN_DISPOSITIONS.FRIENDLY );
                       if (controlledNonFriendlyTokens.length) {QuickEncounter.createFromTokens(controlledNonFriendlyTokens);}
                   }
                 });
@@ -211,13 +212,17 @@ export class QuickEncounter {
         for (const tokenActorID of tokenActorIDs) {
             const tokens = controlledTokens.filter(t => t.actor.id === tokenActorID);
             //0.4.1: 5e specific: find XP for this number of this actor
+            const numTokens = tokens.length;
             const xp = QuickEncounter.getActorXP(tokens[0].actor);
             const xpString = xp ? `(${xp}XP each)`: "";
             content += `<li>${tokens.length}@Actor[${tokenActorID}]{${tokens[0].name}} ${xpString}</li>`;
             combatants.push({
                 num : numTokens,
                 name : tokens[0].name,
-                xp : xpString
+                xp : xpString,
+                img: tokens[0].data?.img,
+                tokens: tokens,
+                actorName: tokens[0].actor?.data?.token?.name
             });
         }
 
@@ -239,8 +244,10 @@ export class QuickEncounter {
         ejSheet.render(true);
 
         //v0.6.1: Also pop open a companion dialog with details about what tokens have been placed and XP
-        const companionSheet = new EncounterCompanionSheet(combatants);
-        companionSheet.render(true);
+        if (!game.settings.get(MODULE_NAME, "useEmbeddedMethod")) {
+            const companionSheet = new EncounterCompanionSheet(combatants);
+            companionSheet.render(true);
+        }
 
 
         //Delete the existing tokens (because they will be replaced)

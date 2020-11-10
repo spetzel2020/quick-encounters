@@ -148,6 +148,7 @@ Hooks.on(`renderEncounterNoteConfig`, async (noteConfig, html, data) => {
 //NOT YET IMPLEMENTED
 //If you drag a Quick Encounter Journal Entry to the Scene, then intercept it to render it similarly,
 //but this time allow you to change stuff
+/*
 Hooks.on(`renderNoteConfig`, async (noteConfig, html, data) => {
     const note = noteConfig.object;
     const journalEntry = note.entry;
@@ -171,3 +172,4 @@ Hooks.on(`renderNoteConfig`, async (noteConfig, html, data) => {
     noteConfig.activateListeners(newInnerHtml);
     noteConfig.intercepted = true;
 });
+*/

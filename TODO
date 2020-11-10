@@ -3,7 +3,7 @@
 ## BUGS
 v0.5.0 You still see and hear HP rolling with Token Mold, even though the saved tokens are not changed
 v0.5.3 NOT A BUG? In Foundry 0.7.3, doesn't create saved tokens correctly if they were made from a non-standard Actor
-
+v0.6.1 Remove unused styles from .css
 
 ## FEATURES
 >>> Add to Settings:
@@ -29,12 +29,9 @@ More sophisticated monster entries:
     - Allow dynamic generation of which monsters (use a RollTable?)
 Show which Journal Entries have Quick Encounters in the Journal list
 
-- After combat, show the XP and XP-per-player token 
+- If you open a Quick Encounter Journal Entry and then select token(s) and press the Quick Encounters button, should add the tokens to the existing QE 
 
 
-
->>> When you close/delete the Combat Tracker, pop up a dialog with info about the XP and XP per Player token
-    - make this another option
 
 
 
@@ -89,4 +86,5 @@ v0.5.0 Make the embedded button smaller - width of the text and centered
 (0.5.3b) Move the Tutorial completely into lang/
 (0.5.3c) Move asking about creating a Map Note to when you want to run the Encounter; otherwise put a note in the dynamic section
 (0.5.3d) Add Freeze "captured" tokens option (as to whether Token Mold is allowed to change the tokens after they're saved)
+(In 0.5.5)  After combat, show the XP and XP-per-player token - can be enabled/disabled with new Setting
 v0.6.0 Allows you to import Actors dynamically by using Compendium entries (but note it will re-import the Actor every time)
