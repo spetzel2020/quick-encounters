@@ -17,7 +17,7 @@ Keeps your Scene map clean and your encounters simple by saving tokens/Actors in
 * For Roving Encounters move a single Map Note, not many tokens
 * Save your player tokens at the entrance to a new Scene too!
 
-Quick Encounters works well with [TokenMold](https://github.com/Moerill/token-mold#token-mold) to vary your tokens names, HP, etc (although TokenMold is not required for Quick Encounters). Quick Encounters also previews the XP for each group of hostiles If using dnd5e)
+Quick Encounters works well with [TokenMold](https://github.com/Moerill/token-mold#token-mold) to vary your tokens names, HP, etc (although TokenMold is not required for Quick Encounters). Quick Encounters also previews the XP for each group of hostiles if using dnd5e)
 
 # Install
 1. Go to the "Add-on Modules" tab in Foundry Setup
@@ -27,7 +27,7 @@ Quick Encounters works well with [TokenMold](https://github.com/Moerill/token-mo
 # Using Quick Encounters
 ## Method 1 (like Fantasy Grounds "Encounters")
 1. Drag your Hostile tokens to the map and select them
-2. Then press the Quick Encounters button and your tokens and their positions are saved into a Quick Encounter Journal Entry
+2. Then press the Quick Encounters button (in the Basic Controls palette on the left) and your tokens and their positions are saved into a Quick Encounter Journal Entry
 3. Close the Journal Entry and you will see a Quick Encounter Map Note
 4. Press "Save Map Note" to automatically place a single map pin on the Scene map.
 5. To run your Quick Encounter, simply double-click the map pin and click the "Add to Combat Tracker" button; all your saved tokens will be positioned on the map and added to the combat tracker, ready to fight!

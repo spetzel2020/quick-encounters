@@ -4,39 +4,40 @@ import {QuickEncounter} from './QuickEncounter.js';
 Reused as EncounterCompanionSheet
 15-Oct-2020     Re-created
 9-Nov-2020      v0.6.1d: Change constructor to take combinedTokenData (will be a template for actor-generated data)
+10-Nov-2020     v0.6.1e: Pass quickEncounter so we can key off extracted Actors not tokens
 */
 
 
-export class EncounterCompanionSheet extends Application {
-    constructor(combinedTokenData, options = {}) {
+export class EncounterCompanionSheet extends FormApplication {
+    constructor(journalSheet, quickEncounter, totalXPLine, options = {}) {
         super(options);
-        if (!game.user.isGM) {return;}
+        if (!game.user.isGM || !quickEncounter) {return;}
 
-        //Get the unique Actors represented
-        let tokenActorIDs =new Set();
-        for (const token of combinedTokenData) {
-            tokenActorIDs.add(token.actorId);
-        }
+        const extractedActors = quickEncounter.extractedActors;
+        const extractedActorTokenData = quickEncounter.extractedActorTokenData;     //this is just sparse array with the correct numbers
+        const savedTokensData = QuickEncounter.getSavedTokensData(quickEncounter);
+        const combinedTokenData = QuickEncounter.combineTokenData(extractedActors, extractedActorTokenData, savedTokensData);
 
         let combatants = [];
-        for (const tokenActorID of tokenActorIDs) {
-            const tokens = combinedTokenData.filter(t => t.actorId === tokenActorID);
+        for (const eActor of extractedActors) {
+            const actor = game.actors.get(eActor.actorID);
+            const tokens = combinedTokenData.filter(t => t.actorId === eActor.actorID);
             //0.4.1: 5e specific: find XP for this number of this actor
-            const numTokens = tokens.length;
-            const xp = QuickEncounter.getActorXP(tokens[0].actor);
+            const xp = QuickEncounter.getActorXP(actor);
             const xpString = xp ? `(${xp}XP each)`: "";
             combatants.push({
-                num : numTokens,
-                name : tokens[0].name,
+                num : eActor.numActors,
+                name : actor.name,
                 xp : xpString,
-                img: tokens[0].img,
+                img: actor.img,
                 tokens: tokens,
-                actorName: tokens[0].name //tokens[0].actor?.data?.token?.name
+                actorName: actor.name //tokens[0].actor?.data?.token?.name
             });
         }
 
+        this.journalSheet = journalSheet;
         this.combatants = combatants;
-
+        this.totalXPLine = totalXPLine;
         game.users.apps.push(this)
     }
 
@@ -64,25 +65,34 @@ export class EncounterCompanionSheet extends Application {
     /** @override */
     _getHeaderButtons() {
         let buttons = super._getHeaderButtons();
-        let closeButtonIndex = buttons.findIndex(button => {return button.label === "Close";});
-        if (closeButtonIndex) {
+        let closeButtonIndex = buttons.findIndex(button => button.label === "Close");
+        if (closeButtonIndex !== null) {
             buttons[closeButtonIndex].label = "Save & Close";
         }
 
         return buttons;
     }
 
+    /** @override */
+    activateListeners(html) {
+        super.activateListeners(html);
+        html.find('button[name="addToCombatTracker"]').click(() => {
+            QuickEncounter.runFromEmbeddedButton(this.journalSheet);
+        });
+    }
+
 
     /** @override */
     async getData() {
         return {
-           combatants: this.combatants
+           combatants: this.combatants,
+           totalXPLine : this.totalXPLine
         };
     }
 
     /** @override */
     async _updateObject(event, formData) {
-        return super._updateObject(event, formData);
+//FIXME: Implement this to save changes to stored tokens etc in the Journal Sheet
     }
 
 

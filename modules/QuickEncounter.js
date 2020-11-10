@@ -302,7 +302,6 @@ export class QuickEncounter {
 
         const content = howToUseJournalEntry;
 
-        const scene = canvas.viewed;
         const journalData = {
             folder: null,
             name: title,
@@ -729,6 +728,7 @@ export class QuickEncounter {
 }
 
 
+/** HOOKS */
 //Add a listener for the embedded Encounter button and record the scene if we can
 Hooks.on(`renderJournalSheet`, async (journalSheet, html) => {
     if (!game.user.isGM) {return;}
@@ -751,7 +751,11 @@ Hooks.on(`renderJournalSheet`, async (journalSheet, html) => {
             //Only include non-character tokens in XP
             if (actorXP && (actor.data.type === "npc")) {
                 if (!totalXP) {totalXP = 0;}
-                totalXP += eActor.numActors * actorXP;
+                //Allow for numActors being a roll (e.g. [[/r 1d4]]) in which case we ignore the XP
+                //although we probably should provide a range or average
+                if (typeof eActor.numActors === "number") {
+                    totalXP += eActor.numActors * actorXP;
+                }
             }
         }
         let totalXPLine = null;
@@ -766,29 +770,23 @@ Hooks.on(`renderJournalSheet`, async (journalSheet, html) => {
         }
 
         //v0.6.1: Also pop open a companion dialog with details about what tokens have been placed and XP
-        const extractedActorTokenData = quickEncounter.extractedActorTokenData;     //this is just sparse array with the correct numbers
-        const savedTokensData = QuickEncounter.getSavedTokensData(quickEncounter);
-        const combinedTokenData = QuickEncounter.combineTokenData(extractedActors, extractedActorTokenData, savedTokensData);
         if (game.settings.get(MODULE_NAME, "useEmbeddedMethod")) {
             const qeJournalEntryIntro = await renderTemplate('modules/quick-encounters/templates/qeJournalEntryIntro.html', {totalXPLine, noMapNoteWarning});
             html.find('.editor-content').prepend(qeJournalEntryIntro);
+            //If there's an embedded button, then add a listener
+            html.find('button[name="addToCombatTracker"]').click(() => {
+                QuickEncounter.runFromEmbeddedButton(journalSheet);
+            });
         } else {
-            const companionSheet = new EncounterCompanionSheet(combinedTokenData);
+            const companionSheet = new EncounterCompanionSheet(journalSheet, quickEncounter, totalXPLine);
             companionSheet.render(true);
+            journalSheet.companionSheet = companionSheet;
         }
 
-
     }
-
-    //If there's an embedded button, then add a listener
-    html.find('button[name="addToCombatTracker"]').click(() => {
-        QuickEncounter.runFromEmbeddedButton(journalSheet)
-    });
-});
+});//end Hooks.on("renderJournalSheet")
 
 
-
-/** HOOKS */
 //The Journal Sheet  looks to see if this is the Tutorial and deletes the Journal Entry if so
 //Placing a map Note is moved to when you actually run the Encounter
 Hooks.on('closeJournalSheet', async (journalSheet, html) => {
@@ -801,6 +799,12 @@ Hooks.on('closeJournalSheet', async (journalSheet, html) => {
         //This is the tutorial Journal Entry
         //v0.4.0 Check that we haven't already deleted this (because onDelete -> close)
         if (game.journal.get(journalEntry.id)) {await JournalEntry.delete(journalEntry.id);}
+    }
+
+    //v0.6.1: If there's a companion dialog open, close that too
+    if (journalSheet.companionSheet) {
+        journalSheet.companionSheet.close();
+        delete journalSheet.companionSheet;
     }
 });
 
