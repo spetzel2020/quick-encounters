@@ -66,7 +66,12 @@
 7-Nov-2020      v0.5.5: Rename putXPInChat to computeTotalXP      
                 v0.5.5b: Tweak the dialog
 9-Nov-2020      v0.6.1b: Use optional chaining to reduce chained tests for null                
-
+                v0.6.1d: Add isSavedToken flag to generated tokens to distinguish between those generated from Actors and those saved
+                createTokenDataFromActors(): Added setting isSavedToken=false
+                Removed frozen flag and push that into createTokens where we can use isSavedToken
+                NOTE: There should be no upgrade issue here since we do not save this flag - we regenerate it from saved tokenData
+                - Increase random placing of generated (not saved) tokens to +/- one full grid square
+                - Refactor Map Note related functions to EncounterNote: switchToMapNoteScene(), noMapNoteDialog(), mapNoteIsPlaced()
 */
 
 
@@ -158,6 +163,15 @@ export class QuickEncounter {
         }
     }
 
+    static getSavedTokensData(quickEncounter) {
+        //0.6.1: To be backward compatible, set the isSavedToken flag for pre-0.6 saved tokens
+        let savedTokensData = quickEncounter?.savedTokensData;
+        if (savedTokensData) {
+            savedTokensData.forEach(td => {td.isSavedToken = true;});
+        }
+        return savedTokensData;
+    }
+
     static createOrRun() {
         //Called when you press the Quick Encounters button (fist) from the sidebar
         //If you are controlling tokens, it assumes that's the Encounter you want to create
@@ -242,13 +256,7 @@ export class QuickEncounter {
 
         const ejSheet = new JournalSheet(journalEntry);
         ejSheet.render(true);
-
-        //v0.6.1: Also pop open a companion dialog with details about what tokens have been placed and XP
-        if (!game.settings.get(MODULE_NAME, "useEmbeddedMethod")) {
-            const companionSheet = new EncounterCompanionSheet(combatants);
-            companionSheet.render(true);
-        }
-
+        //0.6.1: This will also pop-open a companion sheet if you have that setting
 
         //Delete the existing tokens (because they will be replaced)
         for (const token of controlledTokens) {
@@ -350,17 +358,28 @@ export class QuickEncounter {
         const mapNote = journalEntry.sceneNote;
         //0.6 this now potentially includes Compendium links
         const extractedActors = QuickEncounter.extractActors(journalSheet.element);
-        const existingTokens =  journalEntry.getFlag(MODULE_NAME, TOKENS_FLAG_KEY);
+        const savedTokensData =  journalEntry.getFlag(MODULE_NAME, TOKENS_FLAG_KEY);
 
         //Minimum Quick Encounter has a Journal Entry, and tokens or actors (or 0.6 Compendium which turns into Actors)
         //If there isn't a map Note we may need to switch scenes
-        if (journalEntry && ((extractedActors && extractedActors.length) || (existingTokens && existingTokens.length))
+        if (journalEntry && ((extractedActors && extractedActors.length) || (savedTokensData && savedTokensData.length))
             ) {
+            //0.6.1d: Create a template array so we can tell how many saved vs. generated tokens we will have at display time
+            //(without actually extracting Actor/Compendium data every time)
+            let extractedActorTokenData = [];          
+            for (const eActor of extractedActors) {
+                const numActors = QuickEncounter.getNumActors(eActor, {rollRandom: false});
+                for (let iToken=0; iToken < numActors; iToken++ ) {
+                    extractedActorTokenData.push({actorId: eActor.actorID});
+                }
+            }
+
             const quickEncounter = {
                 journalEntry : journalEntry,
                 mapNote : mapNote,
                 extractedActors : extractedActors,
-                existingTokens : existingTokens
+                savedTokensData : savedTokensData,
+                extractedActorTokenData : extractedActorTokenData
             }
             return quickEncounter;
         } else {
@@ -403,13 +422,12 @@ export class QuickEncounter {
                         }
                     } else {
                         const possibleInts = prevSibling.textContent.match(intReg);
-                        multiplier = parseInt(possibleInts ? possibleInts[0] : "1");
+                        multiplier = parseInt(possibleInts ? possibleInts[0] : "1",10);
                     }
                 }
 
                 //If this is a Compendium, then that may use either data-lookup or data-id depending on the index
                 //Although in Foundry 0.7.4 I can't find _replaceCompendiumLink any more
-                const actorID =
                 extractedActors.push({
                     numActors : multiplier  ? multiplier : 1,
                     dataPackName : dataPackName,                    //if non-null then this is a Compendium reference
@@ -426,6 +444,10 @@ export class QuickEncounter {
 
 
     /* Run the Quick Encounter (by using the embedded button or the side button)
+        - Recall the saved tokens data
+        - Generate additional token data from the number of Actors
+        - Create and place the tokens
+        - Add them to the Combat Tracker
     */
     static async runFromEmbeddedButton(qeJournalSheet) {
         const quickEncounter = QuickEncounter.extractQuickEncounter(qeJournalSheet);
@@ -439,10 +461,11 @@ export class QuickEncounter {
         //- Extract the actors (if any)
         //- Find the encounter location based on the Note position
         //- Create tokens (or use existing ones if they exist)
+//Should be able to refactor this to make it a true Quick Encounter instance
         const qeJournalEntry = quickEncounter.journalEntry;
         let mapNote = quickEncounter.mapNote;
         const extractedActors = quickEncounter.extractedActors;
-        const savedTokensData = quickEncounter.existingTokens;
+        const savedTokensData = QuickEncounter.getSavedTokensData(quickEncounter);
 
 
         //EITHER take saved tokens and reposition them, OR create tokens from embedded Actors
@@ -451,8 +474,8 @@ export class QuickEncounter {
         // Switch to the correct scene if confirmed
         const qeScene = QuickEncounter.getEncounterScene(qeJournalEntry);
         //If there isn't a Map Note anywhere, prompt to create one in the center of the view
-        if (!qeScene) {QuickEncounter.noMapNoteDialog(qeJournalEntry);}
-        const isPlaced = await QuickEncounter.mapNoteIsPlaced(qeScene, qeJournalEntry);
+        if (!qeScene) {EncounterNote.noMapNoteDialog(qeJournalEntry);}
+        const isPlaced = await EncounterNote.mapNoteIsPlaced(qeScene, qeJournalEntry);
         if (!isPlaced ) {return;}
 
         //Something is desperately wrong if this is null
@@ -460,13 +483,28 @@ export class QuickEncounter {
         const coords = {x: mapNote.data.x, y: mapNote.data.y}
         canvas.tokens.activate();
 
-        //The frozen flag indicates if we should reset token data after creating the tokens
+        //0.6.1: createTokenDataFromActors() sets isSavedToken=false
         let extractedActorTokenData = await QuickEncounter.createTokenDataFromActors(extractedActors, coords);
-        if (extractedActorTokenData) {extractedActorTokenData.forEach(td => {td.frozen = false;})}
-        //v0.5.3d: Check the value of setting "freezeCapturedTokens"
-        const freezeCapturedTokens = game.settings.get(MODULE_NAME, "freezeCapturedTokens");
-        if (savedTokensData) {savedTokensData.forEach(td => {td.frozen = freezeCapturedTokens;})}
 
+        if (savedTokensData) {
+            savedTokensData.forEach(td => {
+                td.isSavedToken = true;
+            })
+        }
+
+        const combinedTokenData = QuickEncounter.combineTokenData(extractedActors, extractedActorTokenData, savedTokensData);
+
+        //Now create the Tokens
+        const createdTokens = await QuickEncounter.createTokens(combinedTokenData);
+
+        //And add them to the Combat Tracker (wait 200ms for drawing to finish)
+        setTimeout(() => {
+            QuickEncounter.createCombat(createdTokens);
+        },200);
+    }
+
+
+    static combineTokenData(extractedActors,  extractedActorTokenData, savedTokensData ) {
         //v0.5.1 If we have more actors than saved tokens, create more tokens
         //If we have fewer actors than saved tokens, skip some
         let combinedTokenData = [];
@@ -496,60 +534,7 @@ export class QuickEncounter {
                 combinedTokenData = combinedTokenData.concat(eaTokensData);
             }
         }
-
-
-        //Now create the Tokens
-        const createdTokens = await QuickEncounter.createTokens(combinedTokenData);
-
-        //And add them to the Combat Tracker (wait 200ms for drawing to finish)
-        setTimeout(() => {
-            QuickEncounter.createCombat(createdTokens);
-        },200);
-    }
-
-    static async noMapNoteDialog(qeJournalEntry) {
-        Dialog.confirm({
-            title: game.i18n.localize("QE.NoMapNote.TITLE"),
-            content : game.i18n.localize("QE.NoMapNote.CONTENT"),
-            yes : async () => {
-                EncounterNote.place(qeJournalEntry, {placeDefault : true});
-                return true;
-            }
-        });
-    }
-
-
-    static async mapNoteIsPlaced(qeScene, qeJournalEntry) {
-        //Get the scene for this Quick Encounter (can't use sceneNote if we're in the wrong scene)
-        if (!qeScene || !qeJournalEntry) {return false;}
-        //If we're viewing the relevant scene and the map note was placed, then good
-        if (qeJournalEntry.sceneNote) {return true;}
-
-        //Otherwise ask if you want to switch to the scene - default is No/false
-        let shouldSwitch = false;
-        await Dialog.confirm({
-            title: game.i18n.localize("QE.SwitchScene.TITLE"),
-            content : `${game.i18n.localize("QE.SwitchScene.CONTENT")} ${qeScene.name}?`,
-            //0.5.0 Need the Yes response to wait until we are in the correct scene (so don't make it async)
-            //and in particular, the Journal Note has been drawn
-            yes : () => shouldSwitch = true,
-            no : () => shouldSwitch = false
-        });
-        if (shouldSwitch) {return await QuickEncounter.switchToMapNoteScene(qeScene, qeJournalEntry);}
-        else {return false;}
-    }
-
-    static async switchToMapNoteScene(qeScene, qeJournalEntry) {
-        if (!qeScene) {return null;}
-        await qeScene.view();
-        //bail out if the Map Note hasn't been placed after 2s
-        let timer = null;
-        for (let count=0; count<10; count++) {
-            timer = setTimeout(() => {},200);
-            if (qeJournalEntry.sceneNote) {break;}
-        }
-        clearTimeout(timer);
-        return qeJournalEntry.sceneNote;
+        return combinedTokenData;
     }
 
 
@@ -569,12 +554,31 @@ export class QuickEncounter {
         return null;
     }
 
+    static getNumActors(extractedActor, options={}) {
+        //Get the number of actors including rolling if options.rollRandom=true
+        let multiplier = extractedActor.numActors;
+        //If numActors didn't/doesn't convert then just create 1 token
+        let numActors = 1;
+
+        if (multiplier) {
+            if (typeof multiplier === "number") {
+                numActors = multiplier;
+            } else if ((typeof multiplier === "string") && Roll.validate(multiplier) && options?.rollRandom) {
+                //v0.6: Pass the multiplier to the roll formula, which allows for a digit or a formula
+                let r= new Roll(multiplier);
+                r.evaluate();
+                numActors = r.total ? r.total : 1;
+            } 
+        }
+
+        return numActors;
+    }
+
     static async createTokenDataFromActors(extractedActors, coords) {
         if (!extractedActors || !extractedActors.length || !coords) {return;}
         const gridSize = canvas.dimensions.size;
         let expandedTokenData = [];
         for (let eActor of extractedActors) {
-            let multiplier = eActor.numActors;
             let actor = null;
             //v0.6 Need to check whether this is a direct Actor reference or from a Compendium
             if (eActor.dataPackName) {
@@ -589,28 +593,16 @@ export class QuickEncounter {
             }
             if (!actor) {continue;}     //possibly will happen with Compemdium
 
-             //If numActors didn't convert then just create 1 token
-             let numActors;
-             if (!multiplier) {
-                 numActors = 1;
-             } else if (typeof multiplier === "number") {
-                 numActors = multiplier;
-             } else if ((typeof multiplier === "string") && Roll.validate(multiplier)) {
-                 //v0.6: Pass the multiplier to the roll formula, which allows for a digit or a formula
-                 let r= new Roll(multiplier);
-                 r.evaluate();
-                 numActors = r.total ? r.total : 1;
-             } else {
-                 numActors = 1;
-             }
+            const numActors = QuickEncounter.getNumActors(eActor, {rollRandom : true});
 
              for (let iActor=1; iActor <= numActors; iActor++) {
                  //Slightly vary the (x,y) coords so we don't pile all the tokens on top of each other and make them hard to find
                  let tokenData = {
                      name : eActor.name,
-                     x: coords.x + (Math.random() * gridSize) - gridSize/2, //adjust position within +/-5,
-                     y: coords.y + (Math.random() * gridSize) - gridSize/2, //adjust position within +/-5,
-                     hidden: true
+                     x: coords.x + (Math.random() * 2*gridSize) - gridSize, //adjust position within +/- full grid increment,
+                     y: coords.y + (Math.random() * 2*gridSize) - gridSize, //adjust position within +/- full grid increment,
+                     hidden: true,
+                     isSavedToken : false
                  }
                  //Use the prototype token from the Actors
                  tokenData = mergeObject(actor.data.token, tokenData, {inplace: false});
@@ -630,20 +622,27 @@ export class QuickEncounter {
         2. Positioning the token relative to the drop point (whereas we do it relative to a Map Note or previous position)
         3. Randomizing the token image if that is provided in the Prototype Token
 */
-        //v0.5.0 Skip a second call to Token Mold if you are using Method 1 with saved tokens
+        //v0.6.1d: If it's a savedToken (one that was "captured" then check if it should be frozen as is or regenerated for example by Token Mold)
+        //Actor-generated tokens are always generated
+        //v0.5.3d: Check the value of setting "freezeCapturedTokens"
+        const freezeCapturedTokens = game.settings.get(MODULE_NAME, "freezeCapturedTokens");
+
+        //v0.5.0 Clone the token data so if the token is "frozen" change from TokenMold (for example) can be recovered
         //Also, use the ability of Token.create to handle an array
-        //Have to clone the expandedTokenData because it gets (potentially) updated by Token Mold
         //Annoyingly, Token.create returns a single token if you passed in a single element array
         const tempCreatedTokens = await Token.create(duplicate(expandedTokenData));
         let createdTokens = tempCreatedTokens.length ? tempCreatedTokens : [tempCreatedTokens];
         //v0.5.0: Now reset the token data in case it was adjusted (e.g. by Token Mold), just for those that are frozen
+        //v0.6.1d: If freezeCapturedTokens = true, then reset the savedTokens
         for (let i=0; i<expandedTokenData.length; i++) {
-            if (expandedTokenData[i].frozen) {
+            if (freezeCapturedTokens && expandedTokenData[i].isSavedToken) {
                 createdTokens[i] = await createdTokens[i].update(expandedTokenData[i]);
             }
         }
         return createdTokens;
     }
+
+
 
     static async createCombat(createdTokens) {
         if (!createdTokens || !createdTokens.length) {return;}
@@ -765,8 +764,19 @@ Hooks.on(`renderJournalSheet`, async (journalSheet, html) => {
         if (!qeScene) {
             noMapNoteWarning = `${game.i18n.localize("QE.AddToCombatTracker.NoMapNote")}`;
         }
-        const qeJournalEntryIntro = await renderTemplate('modules/quick-encounters/templates/qeJournalEntryIntro.html', {totalXPLine, noMapNoteWarning});
-        html.find('.editor-content').prepend(qeJournalEntryIntro);
+
+        //v0.6.1: Also pop open a companion dialog with details about what tokens have been placed and XP
+        const extractedActorTokenData = quickEncounter.extractedActorTokenData;     //this is just sparse array with the correct numbers
+        const savedTokensData = QuickEncounter.getSavedTokensData(quickEncounter);
+        const combinedTokenData = QuickEncounter.combineTokenData(extractedActors, extractedActorTokenData, savedTokensData);
+        if (game.settings.get(MODULE_NAME, "useEmbeddedMethod")) {
+            const qeJournalEntryIntro = await renderTemplate('modules/quick-encounters/templates/qeJournalEntryIntro.html', {totalXPLine, noMapNoteWarning});
+            html.find('.editor-content').prepend(qeJournalEntryIntro);
+        } else {
+            const companionSheet = new EncounterCompanionSheet(combinedTokenData);
+            companionSheet.render(true);
+        }
+
 
     }
 
@@ -776,6 +786,9 @@ Hooks.on(`renderJournalSheet`, async (journalSheet, html) => {
     });
 });
 
+
+
+/** HOOKS */
 //The Journal Sheet  looks to see if this is the Tutorial and deletes the Journal Entry if so
 //Placing a map Note is moved to when you actually run the Encounter
 Hooks.on('closeJournalSheet', async (journalSheet, html) => {

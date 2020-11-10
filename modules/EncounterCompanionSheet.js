@@ -1,16 +1,40 @@
-import {MODULE_NAME} from './QuickEncounter.js';
+import {QuickEncounter} from './QuickEncounter.js';
 
 /*
 Reused as EncounterCompanionSheet
 15-Oct-2020     Re-created
-
+9-Nov-2020      v0.6.1d: Change constructor to take combinedTokenData (will be a template for actor-generated data)
 */
 
 
 export class EncounterCompanionSheet extends Application {
-    constructor(combatants, options = {}) {
+    constructor(combinedTokenData, options = {}) {
         super(options);
         if (!game.user.isGM) {return;}
+
+        //Get the unique Actors represented
+        let tokenActorIDs =new Set();
+        for (const token of combinedTokenData) {
+            tokenActorIDs.add(token.actorId);
+        }
+
+        let combatants = [];
+        for (const tokenActorID of tokenActorIDs) {
+            const tokens = combinedTokenData.filter(t => t.actorId === tokenActorID);
+            //0.4.1: 5e specific: find XP for this number of this actor
+            const numTokens = tokens.length;
+            const xp = QuickEncounter.getActorXP(tokens[0].actor);
+            const xpString = xp ? `(${xp}XP each)`: "";
+            combatants.push({
+                num : numTokens,
+                name : tokens[0].name,
+                xp : xpString,
+                img: tokens[0].img,
+                tokens: tokens,
+                actorName: tokens[0].name //tokens[0].actor?.data?.token?.name
+            });
+        }
+
         this.combatants = combatants;
 
         game.users.apps.push(this)

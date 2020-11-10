@@ -6,7 +6,7 @@
                 <div>
                     <img class='actor-portrait' src="{{this.img}}" title="{{this.actorName}}" id="{{this.id}}"/>
                     {{#each this.tokens}}
-                        <input type="checkbox">
+                        <input type="checkbox" {{#if this.isSavedToken}}{{checked}}{{/if}}>
                     {{/each}}
                 </div>
             {{/each}}

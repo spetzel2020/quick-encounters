@@ -14,6 +14,7 @@ Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tra
 26-Sep-2020     v0.5.0: Use QuickEncounter.switchToMapNoteScene
 27-Sep-2020     v0.5.0: Bypass the Note Config sheet - just create it and allow for updating later
                 v0.5.0: NYI: Base code for Hook on renderNoteCOnfig to change it to look like a QE Note (but need a way of determining a QE Note)
+9-Nov-2020      v0.6.1: Refactor Map Note related functions here: switchToMapNoteScene(), noMapNoteDialog(), mapNoteIsPlaced()
 */
 
 
@@ -133,6 +134,53 @@ export class EncounterNote {
             const newNote = await EncounterNote.create(qeJournalEntry, noteAnchor);
         }
     }
+
+
+    static async switchToMapNoteScene(qeScene, qeJournalEntry) {
+        if (!qeScene) {return null;}
+        await qeScene.view();
+        //bail out if the Map Note hasn't been placed after 2s
+        let timer = null;
+        for (let count=0; count<10; count++) {
+            timer = setTimeout(() => {},200);
+            if (qeJournalEntry.sceneNote) {break;}
+        }
+        clearTimeout(timer);
+        return qeJournalEntry.sceneNote;
+    }
+
+    static async noMapNoteDialog(qeJournalEntry) {
+        Dialog.confirm({
+            title: game.i18n.localize("QE.NoMapNote.TITLE"),
+            content : game.i18n.localize("QE.NoMapNote.CONTENT"),
+            yes : async () => {
+                EncounterNote.place(qeJournalEntry, {placeDefault : true});
+                return true;
+            }
+        });
+    }
+
+
+    static async mapNoteIsPlaced(qeScene, qeJournalEntry) {
+        //Get the scene for this Quick Encounter (can't use sceneNote if we're in the wrong scene)
+        if (!qeScene || !qeJournalEntry) {return false;}
+        //If we're viewing the relevant scene and the map note was placed, then good
+        if (qeJournalEntry.sceneNote) {return true;}
+
+        //Otherwise ask if you want to switch to the scene - default is No/false
+        let shouldSwitch = false;
+        await Dialog.confirm({
+            title: game.i18n.localize("QE.SwitchScene.TITLE"),
+            content : `${game.i18n.localize("QE.SwitchScene.CONTENT")} ${qeScene.name}?`,
+            //0.5.0 Need the Yes response to wait until we are in the correct scene (so don't make it async)
+            //and in particular, the Journal Note has been drawn
+            yes : () => {shouldSwitch = true},
+            no : () => {shouldSwitch = false}
+        });
+        if (shouldSwitch) {return await EncounterNote.switchToMapNoteScene(qeScene, qeJournalEntry);}
+        else {return false;}
+    }
+
 
 }
 
