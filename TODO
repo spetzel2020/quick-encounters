@@ -26,16 +26,22 @@ More sophisticated monster entries:
 Show which Journal Entries have Quick Encounters in the Journal list
 
 >>> If you have the Journal Entry open, and are using the Companion sheet, then the QE button opens the Companion Sheet
+    - or perhaps a simple link would work
 >>> If you open a Quick Encounter Journal Entry and then select token(s) and press the Quick Encounters button, should add the tokens to the existing QE 
     - Alternatively if you have Companion Dialog open, can drag it there? - not sure you can drag tokens into a Journal Sheet
     - Can you drag an additional Actor into the QE Journal Entry? (so that it is added to the existing)
 
 >>>>Make [Save] work
-
+    - For now, manually update the JE
+    - Store in JE flags
+    - Next version, sync to JE
+    - Or JE-by-JE option to use new method; or global option   
+        - Sync methods: Manual, JE-to-Companion, Companion-to-JE
+>>>Re-test with COmpendium links (they will break things)
 
 ## REFACTORING
 - Remove unused styles from .css
-
+- Make QuickEncounter more oo; create around the quickEncounter that is stored in the Journal Entry
 
 
 

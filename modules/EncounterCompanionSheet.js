@@ -14,31 +14,45 @@ export class EncounterCompanionSheet extends FormApplication {
         super(options);
         if (!game.user.isGM || !quickEncounter) {return;}
 
+        //This version comes from the flags (this also uses the savedTokenData)
+        const savedTokensData = quickEncounter.savedTokensData;
+        const combatantsFromQuickEncounter = quickEncounter.combatants;
+//FIXME: This should all be encapsulated in extractQuickEncounter
+        //Thie version of the Quick Encounter is what is extracted from in the Journal Entry
         const extractedActors = quickEncounter.extractedActors;
         const extractedActorTokenData = quickEncounter.extractedActorTokenData;     //this is just sparse array with the correct numbers
-        const savedTokensData = QuickEncounter.getSavedTokensData(quickEncounter);
         const combinedTokenData = QuickEncounter.combineTokenData(extractedActors, extractedActorTokenData, savedTokensData);
 
+        //v0.6.1: If combatantsFromQuickEncounter is already set, then use that
         let combatants = [];
-        for (const eActor of extractedActors) {
-            const actor = game.actors.get(eActor.actorID);
-            const tokens = combinedTokenData.filter(t => t.actorId === eActor.actorID);
+        if (combatantsFromQuickEncounter && combatantsFromQuickEncounter.length) {
+            combatants = combatantsFromQuickEncounter;
+//FIXME: We need a way of generating the tokens             
+        } else {
+            for (const eActor of extractedActors) {
+                const tokens = combinedTokenData.filter(t => t.actorId === eActor.actorID);
+
+                combatants.push({
+                    num : eActor.numActors,
+                    actorId: eActor.actorID,
+                    tokens: tokens
+                });
+            }
+        }
+
+        //Regardless of how we built combatants, fill in derived data for display
+        combatants?.forEach((c, i) => {
+            const actor = game.actors.get(c.actorId);
             //0.4.1: 5e specific: find XP for this number of this actor
             const xp = QuickEncounter.getActorXP(actor);
             const xpString = xp ? `(${xp}XP each)`: "";
-            combatants.push({
-                num : eActor.numActors,
-                numType : typeof eActor.numActors,
-                name : actor.name,
-                actorId: eActor.actorID,
-                xp : xpString,
-                img: actor.img,
-                tokens: tokens,
-                actorName: actor.name //tokens[0].actor?.data?.token?.name
-            });
-        }
+            combatants[i].img = actor?.img;
+            combatants[i].actorName = actor?.name;
+            combatants[i].xp = xpString;
+            combatants[i].numType = typeof c.num;
+        });
 
-        this.journalSheet = journalSheet;
+        this.quickEncounter = quickEncounter;
         this.combatants = combatants;
         this.totalXPLine = totalXPLine;
         game.users.apps.push(this)
@@ -55,7 +69,7 @@ export class EncounterCompanionSheet extends FormApplication {
             closeOnSubmit : false,
             submitOnClose : false,
             popOut : true,
-            width : 510,
+            width : 530,
             height : "auto"
         });
     }
@@ -81,7 +95,7 @@ export class EncounterCompanionSheet extends FormApplication {
     activateListeners(html) {
         super.activateListeners(html);
         html.find('button[name="addToCombatTracker"]').click(() => {
-            QuickEncounter.runFromEmbeddedButton(this.journalSheet);
+            QuickEncounter.run(this.quickEncounter);
         });
     }
 
@@ -97,17 +111,29 @@ export class EncounterCompanionSheet extends FormApplication {
     /** @override */
     async _updateObject(event, formData) {
 //FIXME: Implement this to save changes to stored tokens etc in the Journal Sheet
-        //Capture changes in the number of Actors
+        //Capture changes in the number of Actors or new Actors added
+        let wasChanged = false;
         for (const [actorId, numActors] of Object.entries(formData)) {
+            let combatantWasChanged = false;
             const iCombatant = this.combatants.findIndex(c => c.actorId === actorId);
-            if (iCombatant !== null) {this.combatants[iCombatant].numActors = numActors;
+            if (iCombatant === null) {
+                //New combatant
+                combatantWasChanged = true;
+                
+            } else {
+                combatantWasChanged = (this.combatants[iCombatant].numActors === numActors);
+                if (combatantWasChanged) {this.combatants[iCombatant].numActors = numActors;}
+            }
+            wasChanged = wasChanged || combatantWasChanged;
         }
 
-        //TODO: Capture new Actors added
+        //If wasChanged, then update the info into JE flags
 
-        //TODO: Capture tokens removed
 
-        
+
+//TODO: Capture tokens removed
+
+
     }
 
 

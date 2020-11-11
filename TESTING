@@ -30,3 +30,8 @@ USE, MOVING, DELETION
 RUN AN ENCOUNTER (0.6.0 only)
 1. Add a Compendium Entry "Dire Wolf" - get "Query returned multiple entries"		     BUG in 0.7.4 (QE 0.6)
 2. Random encounters (1d4+2)
+
+BACKWARDS COMPATIBILITY
+1. Check that previously created encounters work with new Setting "Use old embedded method" = TRUE
+2. Check that previously created encounters work with new Setting "Use old embedded method" = FALSE
+3. Create a new Encounter with the "Use old embedded method" = TRUE

@@ -5,7 +5,7 @@
   "QE.Welcome" : "Welcome to Quick Encounters v0.6.1",
   "QE.Description": "Pin your Encounters to the Scene or in the Journal and run them with one click!<h4>Method 1:</h4><p>Place and select your hostile tokens and click the <i class='fas fa-fist-raised'></i>Quick Encounter button to save them into an Encounter Journal Entry. To run the Encounter, double-click the Combat icon and click the Run Quick Encounter button</p><h4>Method 2:</h4><p>Create a Journal Entry with your descriptive text. Drag Actors into the Journal Entry. Drag the Journal Entry to the desired Encounter location on your map. To run the Encounter, select the Map Note, or open the Encounter Journal Entry and click the Quick Encounters button",
   "QE.Instructions.CONTENT" : "<strong>Your tokens and their positions have been saved in this Journal Entry and replaced with a single Quick Encounter Note.</strong><br><br>To run the Quick Encounter, double-click the Map Note icon and then click the Run Quick Encounter button.<br><br><h3>Quick Encounter</h3><p><i>Add a description of the Quick Encounter for you or your players:</i></p><br>",
-  "QE.TotalXP.CONTENT" : "<br>Total for this Encounter:",
+  "QE.TotalXP.CONTENT" : "<br>Encounter total (not including random):",
   "QE.AddToCombatTracker.INTRO" : "<h3>Quick Encounter</h3><p>Quick Encounters dynamically added this section because there are embedded Actors. Click the button to add <strong>all</strong> embedded Actors/stored Tokens to the Scene and Combat Tracker.</p>",
   "QE.AddToCombatTracker.NoMapNote" : "<p><strong>WARNING: There's no Map Note to place this Quick Encounter around. You need to add one before you can run it</strong></p>",
   "QE.AddToCombatTracker.BUTTON" : "Run Quick Encounter",
@@ -36,9 +36,9 @@
   "QE.XPtoAward.TITLE" : "XP to award",
   "QE.XPtoAward.TOTAL" : "XP computed for Hostile tokens: ",
   "QE.XPtoAward.PERPLAYER": "<br>(Non-player Friendly or Neutral not-included)<br>XP per player: ",
-  "QE.UseEmbeddedMethod.NAME" : "Use older embedded method",
+  "QE.UseEmbeddedMethod.NAME" : "Use old embedded method",
   "QE.UseEmbeddedMethod.HINT" : "Use the older Quick Encounters design which embeds the tokens, actors, and Quick Encounters button directly in the Journal Entry.",
-  "QE.CompanionDialog.INTRO" : "Checkmarks show which Actors have saved tokens. You can change the number of Actors or drag new Actors here.",
+  "QE.CompanionDialog.INTRO" : "Checkmarks show which Actors have saved tokens. You can change the number of Actors or drag new Actors here.<br><strong>WARNING: </strong>Changes you make here will not (yet) synchronize with the Journal Entry",
   "QE.CompanionDialog.Save.BUTTON" : "Save",
-   "QE.CompanionDialog.PS" : "<p><i>This is the new Quick Encounters companion dialog. Check <strong>Use older embedded method</strong> in Settings if you want to switch back.</i></p>"
+   "QE.CompanionDialog.PS" : "<p><i>This is the new Quick Encounters companion dialog. Check </i><strong>Use older embedded method</strong><i> in Settings if you want to switch back.</i></p>"
 }

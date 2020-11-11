@@ -72,6 +72,7 @@
                 NOTE: There should be no upgrade issue here since we do not save this flag - we regenerate it from saved tokenData
                 - Increase random placing of generated (not saved) tokens to +/- one full grid square
                 - Refactor Map Note related functions to EncounterNote: switchToMapNoteScene(), noMapNoteDialog(), mapNoteIsPlaced()
+11-Nov-2020     v0.6.1f: runFromEmbeddedButton: REMOVED (replaced with direct call since we always have the quickEncounter)                
 */
 
 
@@ -79,10 +80,10 @@ import {EncounterNote} from './EncounterNote.js';
 import {EncounterCompanionSheet} from './EncounterCompanionSheet.js';
 
 export const MODULE_NAME = "quick-encounters";
+
 export const SCENE_ID_FLAG_KEY = "sceneID";
 export const TOKENS_FLAG_KEY = "tokens";
-export const TOTAL_XP_KEY = "totalXP";
-export const EMBEDDED_ACTORS_KEY = "embeddedActors";
+export const COMBATANTS_FLAG_KEY = "combatants";
 
 export function deleteAllEQMapNotes(text="Unknown") {
     QuickEncounter.deleteAllEQMapNotes(text);
@@ -161,15 +162,6 @@ export class QuickEncounter {
                 iNote--;
             }
         }
-    }
-
-    static getSavedTokensData(quickEncounter) {
-        //0.6.1: To be backward compatible, set the isSavedToken flag for pre-0.6 saved tokens
-        let savedTokensData = quickEncounter?.savedTokensData;
-        if (savedTokensData) {
-            savedTokensData.forEach(td => {td.isSavedToken = true;});
-        }
-        return savedTokensData;
     }
 
     static createOrRun() {
@@ -353,19 +345,23 @@ export class QuickEncounter {
     }
 
     static extractQuickEncounter(journalSheet) {
-        const journalEntry = journalSheet.entity;
+        const journalEntry = journalSheet?.entity;
+        if (!journalEntry) {return;}
+
         const mapNote = journalEntry.sceneNote;
         //0.6 this now potentially includes Compendium links
         const extractedActors = QuickEncounter.extractActors(journalSheet.element);
         const savedTokensData =  journalEntry.getFlag(MODULE_NAME, TOKENS_FLAG_KEY);
+        const combatants = journalEntry.getFlag(MODULE_NAME, COMBATANTS_FLAG_KEY);
+        //v0.6.1: Backwards compatibility - set the isSavedToken flga
+        savedTokensData?.forEach(td => {td.isSavedToken = true;});
 
         //Minimum Quick Encounter has a Journal Entry, and tokens or actors (or 0.6 Compendium which turns into Actors)
         //If there isn't a map Note we may need to switch scenes
-        if (journalEntry && ((extractedActors && extractedActors.length) || (savedTokensData && savedTokensData.length))
-            ) {
+        if ((extractedActors && extractedActors.length) || (savedTokensData && savedTokensData.length)) {
             //0.6.1d: Create a template array so we can tell how many saved vs. generated tokens we will have at display time
             //(without actually extracting Actor/Compendium data every time)
-            let extractedActorTokenData = [];          
+            const extractedActorTokenData = [];          
             for (const eActor of extractedActors) {
                 const numActors = QuickEncounter.getNumActors(eActor, {rollRandom: false});
                 for (let iToken=0; iToken < numActors; iToken++ ) {
@@ -378,7 +374,9 @@ export class QuickEncounter {
                 mapNote : mapNote,
                 extractedActors : extractedActors,
                 savedTokensData : savedTokensData,
-                extractedActorTokenData : extractedActorTokenData
+                extractedActorTokenData : extractedActorTokenData,
+                combatants : combatants
+
             }
             return quickEncounter;
         } else {
@@ -442,16 +440,12 @@ export class QuickEncounter {
 
 
 
-    /* Run the Quick Encounter (by using the embedded button or the side button)
+    /* RUN the Quick Encounter (by using the embedded button or the side button)
         - Recall the saved tokens data
         - Generate additional token data from the number of Actors
         - Create and place the tokens
         - Add them to the Combat Tracker
     */
-    static async runFromEmbeddedButton(qeJournalSheet) {
-        const quickEncounter = QuickEncounter.extractQuickEncounter(qeJournalSheet);
-        await QuickEncounter.run(quickEncounter);
-    }
 
     static async run(quickEncounter) {
         if (!quickEncounter) {return;}
@@ -464,7 +458,7 @@ export class QuickEncounter {
         const qeJournalEntry = quickEncounter.journalEntry;
         let mapNote = quickEncounter.mapNote;
         const extractedActors = quickEncounter.extractedActors;
-        const savedTokensData = QuickEncounter.getSavedTokensData(quickEncounter);
+        const savedTokensData = quickEncounter.savedTokensData;
 
 
         //EITHER take saved tokens and reposition them, OR create tokens from embedded Actors
@@ -775,7 +769,7 @@ Hooks.on(`renderJournalSheet`, async (journalSheet, html) => {
             html.find('.editor-content').prepend(qeJournalEntryIntro);
             //If there's an embedded button, then add a listener
             html.find('button[name="addToCombatTracker"]').click(() => {
-                QuickEncounter.runFromEmbeddedButton(journalSheet);
+                QuickEncounter.run(quickEncounter);
             });
         } else {
             const companionSheet = new EncounterCompanionSheet(journalSheet, quickEncounter, totalXPLine);
