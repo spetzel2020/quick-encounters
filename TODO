@@ -25,13 +25,12 @@ More sophisticated monster entries:
 
 Show which Journal Entries have Quick Encounters in the Journal list
 
-- If you open a Quick Encounter Journal Entry and then select token(s) and press the Quick Encounters button, should add the tokens to the existing QE 
+>>> If you have the Journal Entry open, and are using the Companion sheet, then the QE button opens the Companion Sheet
+>>> If you open a Quick Encounter Journal Entry and then select token(s) and press the Quick Encounters button, should add the tokens to the existing QE 
+    - Alternatively if you have Companion Dialog open, can drag it there? - not sure you can drag tokens into a Journal Sheet
+    - Can you drag an additional Actor into the QE Journal Entry? (so that it is added to the existing)
 
-More on v0.6.1:
-DONE Intro text in Companion dialog
-- Run Quick Encounter button in Companion dialog
-- Extract real Actor name, not generated name
-DONE- Close the Companion dialog when you close the Journal Entry   
+>>>>Make [Save] work
 
 
 ## REFACTORING
@@ -95,3 +94,5 @@ v0.5.0 Make the embedded button smaller - width of the text and centered
 v0.6.0 Allows you to import Actors dynamically by using Compendium entries (but note it will re-import the Actor every time)
 v0.6.0     - Allow die rolls before the Actor links for dynamic generation
 v0.6.1 - After Actor links: Show individual XP and whether tokens have been placed dynamically - placed in a custom companion dialog
+v0.6.1 Close Companion Dialog when you close QE Journal Sheet
+v0.6.1 Change Close to Cancel in CompanionDialog

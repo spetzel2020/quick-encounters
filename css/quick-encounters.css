@@ -1,5 +1,4 @@
 #QEContainers {
-    display: flex;
     height: auto;
     width: 100%;
     min-height: 200px;
@@ -30,7 +29,6 @@
     margin: 0 auto;
 }
 #QEContainers .actor-portrait {
-    flex: 0 1 auto;
     width: 50px;
     height: 50px
 }
@@ -42,6 +40,11 @@
     transform: translate(-50%, -50%);
     -ms-transform: translate(-50%, -50%);
 }
+#QEContainers .num-actors {
+    width: 40px;
+}
+
+
 #QEContainers .actor-container:hover .actor-portrait {
     opacity: 0.3;
 }

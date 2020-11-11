@@ -18,7 +18,7 @@
   }],
   "esmodules" : ["modules/QuickEncounter.js","modules/EncounterNote.js","modules/EncounterCompanionSheet.js"
   ],
-    "styles" : ["css/quick-encounters.css"],
+  "styles": ["css/quick-encounters.css"],
   "readme": "https://github.com/spetzel2020/quick-encounters/blob/v0.6.1/README.md",
   "bugs": "https://github.com/spetzel2020/quick-encounters/issues",
   "changelog": "https://github.com/spetzel2020/quick-encounters/blob/v0.6.1/CHANGELOG.md",

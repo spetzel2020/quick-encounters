@@ -5,6 +5,7 @@ Reused as EncounterCompanionSheet
 15-Oct-2020     Re-created
 9-Nov-2020      v0.6.1d: Change constructor to take combinedTokenData (will be a template for actor-generated data)
 10-Nov-2020     v0.6.1e: Pass quickEncounter so we can key off extracted Actors not tokens
+                v0.6.1f: Change Close to Cancel in dialog (to show it doesn't save) - use i18n tags
 */
 
 
@@ -27,7 +28,9 @@ export class EncounterCompanionSheet extends FormApplication {
             const xpString = xp ? `(${xp}XP each)`: "";
             combatants.push({
                 num : eActor.numActors,
+                numType : typeof eActor.numActors,
                 name : actor.name,
+                actorId: eActor.actorID,
                 xp : xpString,
                 img: actor.img,
                 tokens: tokens,
@@ -50,6 +53,7 @@ export class EncounterCompanionSheet extends FormApplication {
             title : game.i18n.localize("QE.Name"),
             template : "modules/quick-encounters/templates/quick-encounters-companion.html",
             closeOnSubmit : false,
+            submitOnClose : false,
             popOut : true,
             width : 510,
             height : "auto"
@@ -65,9 +69,9 @@ export class EncounterCompanionSheet extends FormApplication {
     /** @override */
     _getHeaderButtons() {
         let buttons = super._getHeaderButtons();
-        let closeButtonIndex = buttons.findIndex(button => button.label === "Close");
+        let closeButtonIndex = buttons.findIndex(button => button.label === game.i18n.localize("Close"));
         if (closeButtonIndex !== null) {
-            buttons[closeButtonIndex].label = "Save & Close";
+            buttons[closeButtonIndex].label = game.i18n.localize("Cancel");
         }
 
         return buttons;
@@ -93,6 +97,17 @@ export class EncounterCompanionSheet extends FormApplication {
     /** @override */
     async _updateObject(event, formData) {
 //FIXME: Implement this to save changes to stored tokens etc in the Journal Sheet
+        //Capture changes in the number of Actors
+        for (const [actorId, numActors] of Object.entries(formData)) {
+            const iCombatant = this.combatants.findIndex(c => c.actorId === actorId);
+            if (iCombatant !== null) {this.combatants[iCombatant].numActors = numActors;
+        }
+
+        //TODO: Capture new Actors added
+
+        //TODO: Capture tokens removed
+
+        
     }
 
 
