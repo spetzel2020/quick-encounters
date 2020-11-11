@@ -1,10 +1,11 @@
 <form>
     <div id="QEContainers">
         <header>{{{localize 'QE.CompanionDialog.INTRO'}}}</header>
+        <hr>
         <div class="flexcol">
             {{#each combatants}}
                 <div>
-                    <input type="{{this.numType}}" name="{{this.actorId}}" class="num-actors" id="{{this.actorId}}" value={{this.num}} step=1 min="0">
+                    <input type="{{this.numType}}" name="{{this.actorId}}" class="num-actors" id="{{this.actorId}}" value={{this.numActors}} step=1 min="0">
                     x {{this.actorName}} {{this.xp}}
                 </div>
                 <div>
@@ -15,7 +16,7 @@
                 </div>
             {{/each}}
         </div>
-        {{{totalXPLine}}}
+        {{{totalXPLine}}}<br>
         <div class="flexrow">
             <button type="button" name="addToCombatTracker"><i class="fas fa-fist-raised"></i>
                 {{localize 'QE.AddToCombatTracker.BUTTON'}}

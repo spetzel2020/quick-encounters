@@ -72,7 +72,8 @@
                 NOTE: There should be no upgrade issue here since we do not save this flag - we regenerate it from saved tokenData
                 - Increase random placing of generated (not saved) tokens to +/- one full grid square
                 - Refactor Map Note related functions to EncounterNote: switchToMapNoteScene(), noMapNoteDialog(), mapNoteIsPlaced()
-11-Nov-2020     v0.6.1f: runFromEmbeddedButton: REMOVED (replaced with direct call since we always have the quickEncounter)                
+11-Nov-2020     v0.6.1f: runFromEmbeddedButton: REMOVED (replaced with direct call since we always have the quickEncounter)   
+                v0.6.1g: REMOVED addTokenDataToJournalEntry() - one-liner only called from one other function             
 */
 
 
@@ -265,9 +266,6 @@ export class QuickEncounter {
         for (const token of controlledTokens) {
             controlledTokensData.push(token.data);
         }
-        await QuickEncounter.addTokenDataToJournalEntry(qeJournalEntry, controlledTokensData);
-    }
-    static async addTokenDataToJournalEntry(qeJournalEntry, controlledTokensData) {
         await qeJournalEntry.setFlag(MODULE_NAME, TOKENS_FLAG_KEY, controlledTokensData);
     }
 
@@ -772,7 +770,7 @@ Hooks.on(`renderJournalSheet`, async (journalSheet, html) => {
                 QuickEncounter.run(quickEncounter);
             });
         } else {
-            const companionSheet = new EncounterCompanionSheet(journalSheet, quickEncounter, totalXPLine);
+            const companionSheet = new EncounterCompanionSheet(quickEncounter, totalXPLine);
             companionSheet.render(true);
             journalSheet.companionSheet = companionSheet;
         }

@@ -1,4 +1,4 @@
-import {QuickEncounter} from './QuickEncounter.js';
+import {QuickEncounter, MODULE_NAME, COMBATANTS_FLAG_KEY} from './QuickEncounter.js';
 
 /*
 Reused as EncounterCompanionSheet
@@ -6,11 +6,12 @@ Reused as EncounterCompanionSheet
 9-Nov-2020      v0.6.1d: Change constructor to take combinedTokenData (will be a template for actor-generated data)
 10-Nov-2020     v0.6.1e: Pass quickEncounter so we can key off extracted Actors not tokens
                 v0.6.1f: Change Close to Cancel in dialog (to show it doesn't save) - use i18n tags
+11-Nov-2020     v0.6.1g: Remove journalSheet from constructor                
 */
 
 
 export class EncounterCompanionSheet extends FormApplication {
-    constructor(journalSheet, quickEncounter, totalXPLine, options = {}) {
+    constructor(quickEncounter, totalXPLine, options = {}) {
         super(options);
         if (!game.user.isGM || !quickEncounter) {return;}
 
@@ -33,7 +34,7 @@ export class EncounterCompanionSheet extends FormApplication {
                 const tokens = combinedTokenData.filter(t => t.actorId === eActor.actorID);
 
                 combatants.push({
-                    num : eActor.numActors,
+                    numActors : eActor.numActors,
                     actorId: eActor.actorID,
                     tokens: tokens
                 });
@@ -49,7 +50,7 @@ export class EncounterCompanionSheet extends FormApplication {
             combatants[i].img = actor?.img;
             combatants[i].actorName = actor?.name;
             combatants[i].xp = xpString;
-            combatants[i].numType = typeof c.num;
+            combatants[i].numType = typeof c.numActors;
         });
 
         this.quickEncounter = quickEncounter;
@@ -121,14 +122,16 @@ export class EncounterCompanionSheet extends FormApplication {
                 combatantWasChanged = true;
                 
             } else {
-                combatantWasChanged = (this.combatants[iCombatant].numActors === numActors);
+                combatantWasChanged = (this.combatants[iCombatant].numActors !== numActors);
                 if (combatantWasChanged) {this.combatants[iCombatant].numActors = numActors;}
             }
             wasChanged = wasChanged || combatantWasChanged;
         }
 
         //If wasChanged, then update the info into JE flags
-
+        if (wasChanged) {
+            await this.quickEncounter?.journalEntry?.setFlag(MODULE_NAME, COMBATANTS_FLAG_KEY, this.combatants);
+        }
 
 
 //TODO: Capture tokens removed
