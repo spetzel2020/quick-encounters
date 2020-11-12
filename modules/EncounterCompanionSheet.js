@@ -96,7 +96,7 @@ export class EncounterCompanionSheet extends FormApplication {
     activateListeners(html) {
         super.activateListeners(html);
         html.find('button[name="addToCombatTracker"]').click(() => {
-            QuickEncounter.run(this.quickEncounter);
+            this.quickEncounter?.run();
         });
     }
 

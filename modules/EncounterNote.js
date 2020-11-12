@@ -66,7 +66,7 @@ export class EncounterNote {
         const scene = QuickEncounter.getEncounterScene(journalEntry);
         if (scene) {
             //Find the corresponding Map note - have to switch to the correct scene first
-            if (!await QuickEncounter.switchToMapNoteScene(scene, journalEntry)) {return;}
+            if (!await EncounterNote.switchToMapNoteScene(scene, journalEntry)) {return;}
             const note = journalEntry.sceneNote;
             const noteName = note.name;
 

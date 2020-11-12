@@ -73,7 +73,10 @@
                 - Increase random placing of generated (not saved) tokens to +/- one full grid square
                 - Refactor Map Note related functions to EncounterNote: switchToMapNoteScene(), noMapNoteDialog(), mapNoteIsPlaced()
 11-Nov-2020     v0.6.1f: runFromEmbeddedButton: REMOVED (replaced with direct call since we always have the quickEncounter)   
-                v0.6.1g: REMOVED addTokenDataToJournalEntry() - one-liner only called from one other function             
+                v0.6.1g: REMOVED addTokenDataToJournalEntry() - one-liner only called from one other function     
+                v0.6.1h: More o.o. approach with QuickEncounter instantiation - but allow for backward compatibility        
+                If you have token(s) selected AND a Quick Encounter Journal Entry open, ask if you want to run it or add the token to it
+                Added QEDialog.buttons3() for 3-button dialog
 */
 
 
@@ -91,6 +94,23 @@ export function deleteAllEQMapNotes(text="Unknown") {
 }
 
 export class QuickEncounter {
+    constructor(qeData) {
+        if (!qeData) {return;}
+        this.journalEntry = qeData.journalEntry;
+        this.mapNote = qeData.mapNote;
+        this.extractedActors = qeData.extractedActors;
+        
+        if (qeData.savedTokensData) {
+            qeData.savedTokensData.forEach(td => {
+                td.isSavedToken = true;
+            })
+        }
+        this.savedTokensData = qeData.savedTokensData;
+        this.extractedActorTokenData = qeData.extractedActorTokenData;
+        this.combatants = qeData.combatants;
+    }
+
+
     static init() {
         game.settings.register(MODULE_NAME, "quickEncountersVersion", {
             name: "Quick Encounters Version",
@@ -167,34 +187,43 @@ export class QuickEncounter {
 
     static createOrRun() {
         //Called when you press the Quick Encounters button (fist) from the sidebar
-        //If you are controlling tokens, it assumes that's the Encounter you want to create
+        //If you are controlling tokens, it assumes that's the Encounter you want to create unless (0.6.1) you have an open Quick Encounter
         //Method 1: Get the selected tokens and the scene
         //Exclude friendly tokens unless you say yes to the dialog
         const controlledTokens = Array.from(canvas.tokens.controlled);
-        const controlledFriendlyTokens = controlledTokens.filter(t => t.data?.disposition === TOKEN_DISPOSITIONS.FRIENDLY );
+        const controlledNonFriendlyTokens = controlledTokens?.filter(t => t.data?.disposition !== TOKEN_DISPOSITIONS.FRIENDLY );
+        const controlledFriendlyTokens = controlledTokens?.filter(t => t.data?.disposition === TOKEN_DISPOSITIONS.FRIENDLY );
+        const quickEncounter = QuickEncounter.findCandidateJournalEntry();
+
+        //v0.6.1 If you have both controlledNonFriendly tokens AND an open Quick Encounter, ask if you want to add to it
         if (controlledTokens && controlledTokens.length) {
-            if (controlledFriendlyTokens && controlledFriendlyTokens.length) {
+            if (quickEncounter && controlledNonFriendlyTokens && controlledNonFriendlyTokens.length) {
+                QEDialog.buttons3({
+                    title: game.i18n.localize("QE.AddToQuickEncounter.TITLE"),
+                    content: game.i18n.localize("QE.AddToQuickEncounter.CONTENT"),
+                    button1cb: () => {quickEncounter.run();},
+                    button2cb: () => {quickEncounter.addTokens(controlledTokens)},
+                    button3cb: () => { QuickEncounter.createFromTokens(controlledTokens)},
+                    buttonLabels : ["QE.AddToQuickEncounter.RUN",  "QE.AddToQuickEncounter.ADD",  "QE.AddToQuickEncounter.CREATE"]
+                });
+            } else if (controlledFriendlyTokens && controlledFriendlyTokens.length) {
                 Dialog.confirm({
                   title: game.i18n.localize("QE.IncludeFriendlies.TITLE"),
                   content: game.i18n.localize("QE.IncludeFriendlies.CONTENT"),
                   yes: () => {QuickEncounter.createFromTokens(controlledTokens)},
                   no: () => {
-                      const controlledNonFriendlyTokens = controlledTokens.filter(t => t.data?.disposition !== TOKEN_DISPOSITIONS.FRIENDLY );
                       if (controlledNonFriendlyTokens.length) {QuickEncounter.createFromTokens(controlledNonFriendlyTokens);}
                   }
                 });
             } else {
                 QuickEncounter.createFromTokens(controlledTokens);
             }
-
+        } else if (quickEncounter) {
+            //Run the open Quick Encounter
+            quickEncounter.run();
         } else {
-            //Method 2: Check for an open Journal with embedded Actors and a map Note
-            const quickEncounter = QuickEncounter.findCandidateJournalEntry();
-            if (quickEncounter) {QuickEncounter.run(quickEncounter);}
-            else {
-                //No selected tokens or open Journal Entry
-                QuickEncounter.showTutorialJournalEntry();
-            }
+            //No selected tokens or open Journal Entry => show/reshow the Tutorial
+            QuickEncounter.showTutorialJournalEntry();
         }
     }
 
@@ -272,7 +301,7 @@ export class QuickEncounter {
     static getActorXP(actor) {
         if ((game.system.id !== "dnd5e") || !actor) {return null;}
         try {
-            return actor.data.data.details.xp.value;
+            return actor.data?.data?.details?.xp?.value;
         } catch (err) {
             return null;
         }
@@ -366,16 +395,15 @@ export class QuickEncounter {
                     extractedActorTokenData.push({actorId: eActor.actorID});
                 }
             }
-
-            const quickEncounter = {
+            const qeData = {
                 journalEntry : journalEntry,
                 mapNote : mapNote,
                 extractedActors : extractedActors,
                 savedTokensData : savedTokensData,
                 extractedActorTokenData : extractedActorTokenData,
                 combatants : combatants
-
             }
+            const quickEncounter = new QuickEncounter(qeData);
             return quickEncounter;
         } else {
             return null;
@@ -445,18 +473,16 @@ export class QuickEncounter {
         - Add them to the Combat Tracker
     */
 
-    static async run(quickEncounter) {
-        if (!quickEncounter) {return;}
+    async run() {
         //0.4.0 Refactored so that both buttons (embedded or external) come here
         //You open the Journal and press the button
         //- Extract the actors (if any)
         //- Find the encounter location based on the Note position
         //- Create tokens (or use existing ones if they exist)
-//Should be able to refactor this to make it a true Quick Encounter instance
-        const qeJournalEntry = quickEncounter.journalEntry;
-        let mapNote = quickEncounter.mapNote;
-        const extractedActors = quickEncounter.extractedActors;
-        const savedTokensData = quickEncounter.savedTokensData;
+        const qeJournalEntry = this.journalEntry;
+        let mapNote = this.mapNote;
+        const extractedActors = this.extractedActors;
+        const savedTokensData = this.savedTokensData;   //constructor now ensures isSavedToken is set
 
 
         //EITHER take saved tokens and reposition them, OR create tokens from embedded Actors
@@ -476,12 +502,6 @@ export class QuickEncounter {
 
         //0.6.1: createTokenDataFromActors() sets isSavedToken=false
         let extractedActorTokenData = await QuickEncounter.createTokenDataFromActors(extractedActors, coords);
-
-        if (savedTokensData) {
-            savedTokensData.forEach(td => {
-                td.isSavedToken = true;
-            })
-        }
 
         const combinedTokenData = QuickEncounter.combineTokenData(extractedActors, extractedActorTokenData, savedTokensData);
 
@@ -668,9 +688,9 @@ export class QuickEncounter {
         if (!shouldDisplayXPAfterCombat || !combat) {return;}
 
         //Get list of non-friendly NPCs
-        const nonFriendlyNPCTokens = combat.turns.filter(t => ((t.token.disposition === TOKEN_DISPOSITIONS.HOSTILE) && (!t.actor || !t.players.length)));
+        const nonFriendlyNPCTokens = combat.turns?.filter(t => ((t.token?.disposition === TOKEN_DISPOSITIONS.HOSTILE) && (!t.actor || !t.players?.length)));
         //And of player-owned tokens
-        const pcTokens = combat.turns.filter(t => (t.actor && t.players.length));
+        const pcTokens = combat.turns?.filter(t => (t.actor && t.players?.length));
 
         //Now compute total XP and XP per player
         if (!nonFriendlyNPCTokens || !nonFriendlyNPCTokens.length || !pcTokens) {return;}
@@ -718,6 +738,47 @@ export class QuickEncounter {
     }
 
 }
+
+export class QEDialog extends Dialog {
+    static async buttons3({title, content, button1cb, button2cb, button3cb, buttonLabels, options={}}) {
+            return new Promise((resolve, reject) => {
+        const dialog = new this({
+            title: title,
+            content: content,
+            buttons: {
+            button1: {
+                icon: null,
+                label: game.i18n.localize(buttonLabels[0]),
+                callback: html => {
+                const result = button1cb ? button1cb(html) : true;
+                resolve(result);
+                }
+            },
+            button2: {
+                icon: null,
+                label: game.i18n.localize(buttonLabels[1]),
+                callback: html => {
+                const result = button2cb ? button2cb(html) : false;
+                resolve(result);
+                }
+            },
+            button3: {
+                icon: null,
+                label: game.i18n.localize(buttonLabels[2]),
+                callback: html => {
+                const result = button3cb ? button3cb(html) : false;
+                resolve(result);
+                }
+            }
+            },
+            default: "button1",
+            close: () => reject
+        }, options);
+        dialog.render(true);
+        });
+    }
+}
+
 
 
 /** HOOKS */
@@ -767,7 +828,7 @@ Hooks.on(`renderJournalSheet`, async (journalSheet, html) => {
             html.find('.editor-content').prepend(qeJournalEntryIntro);
             //If there's an embedded button, then add a listener
             html.find('button[name="addToCombatTracker"]').click(() => {
-                QuickEncounter.run(quickEncounter);
+                quickEncounter.run();
             });
         } else {
             const companionSheet = new EncounterCompanionSheet(quickEncounter, totalXPLine);
