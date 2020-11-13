@@ -15,30 +15,22 @@ export class EncounterCompanionSheet extends FormApplication {
         super(options);
         if (!game.user.isGM || !quickEncounter) {return;}
 
-        //This version comes from the flags (this also uses the savedTokenData)
-        const savedTokensData = quickEncounter.savedTokensData;
-        const combatantsFromQuickEncounter = quickEncounter.combatants;
 //FIXME: This should all be encapsulated in extractQuickEncounter
         //Thie version of the Quick Encounter is what is extracted from in the Journal Entry
         const extractedActors = quickEncounter.extractedActors;
-        const extractedActorTokenData = quickEncounter.extractedActorTokenData;     //this is just sparse array with the correct numbers
-        const combinedTokenData = QuickEncounter.combineTokenData(extractedActors, extractedActorTokenData, savedTokensData);
+        const extractedActorTokenData = quickEncounter.generateTemplateExtractedActorTokenData();     //this is just sparse array with the correct numbers
+        const combinedTokenData = quickEncounter.combineTokenData(extractedActorTokenData);
 
-        //v0.6.1: If combatantsFromQuickEncounter is already set, then use that
+//FIXME: We need a way of generating the tokens      
         let combatants = [];
-        if (combatantsFromQuickEncounter && combatantsFromQuickEncounter.length) {
-            combatants = combatantsFromQuickEncounter;
-//FIXME: We need a way of generating the tokens             
-        } else {
-            for (const eActor of extractedActors) {
-                const tokens = combinedTokenData.filter(t => t.actorId === eActor.actorID);
+        for (const eActor of extractedActors) {
+            const tokens = combinedTokenData.filter(t => t.actorId === eActor.actorID);
 
-                combatants.push({
-                    numActors : eActor.numActors,
-                    actorId: eActor.actorID,
-                    tokens: tokens
-                });
-            }
+            combatants.push({
+                numActors : eActor.numActors,
+                actorId: eActor.actorID,
+                tokens: tokens
+            });
         }
 
         //Regardless of how we built combatants, fill in derived data for display
