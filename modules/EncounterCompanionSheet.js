@@ -9,6 +9,7 @@ Reused as EncounterCompanionSheet
 11-Nov-2020     v0.6.1g: Remove journalSheet from constructor    
 14-Nov-2020     v0.6.1l: If you change the # Actors to 0, remove the Actor completely
 15-Nov-2020     v0.6.1m: Pass event from clicking Run
+                v0.6.1n: If we removed all the Actors, then remove the whole Quick Encounter
 */
 
 
@@ -137,7 +138,12 @@ export class EncounterCompanionSheet extends FormApplication {
             this.combatants.forEach(c => {
                 savedTokensData = savedTokensData.concat(c.tokens.filter(t => t.isSavedToken));
             });
-            this.quickEncounter?.update({extractedActors : extractedActors, savedTokensData: savedTokensData});
+            //If we removed all the Actors, then remove the whole Quick Encounter
+            if (extractedActors.length) {
+                this.quickEncounter?.update({extractedActors : extractedActors, savedTokensData: savedTokensData});
+            } else {
+                this.quickEncounter?.remove();
+            }
         }
 
 

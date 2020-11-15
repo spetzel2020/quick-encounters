@@ -87,6 +87,7 @@
                 serialize/deserialize QuickEncounter using JSON    
 14-Nov-2020     0.6.1l: update(): ADDED to receive changes from Companion dialog
 15-Nov-2020     0.6.1m: Alt-Run makes all tokens invisible; Ctrl-Run makes them all Visible
+                0.6.1n: If we removed all the Actors, then remove the whole Quick Encounter
 */
 
 
@@ -142,6 +143,10 @@ export class QuickEncounter {
         mergeObject(this, newQEData);
         //Update into Journal Entry
         this.serializeIntoJournalEntry();
+    }
+    async remove() {
+        const qeJournalEntry = game.journal.get(this.journalEntryId);
+        await qeJournalEntry?.setFlag(MODULE_NAME, QE_JSON_FLAG_KEY, null);
     }
 
     static init() {
