@@ -1,4 +1,10 @@
 # Release Notes
+## NEW in 0.6
+- Companion dialog which shows which actors have saved tokens and which will be generated
+- Add tokens to existing Quick Encounters (open the Journal Entry, select the token(s), and click the Quick Encounter button)
+- Keyboard modifiers when you Run the Quick Encounter: Alt adds all invisible; Ctrl adds all visible
+- Use dice rolls for number of Actors
+- GM display of Combat XP and per player token
 
 ## 0.6.1
 - NEW! Companion dialog which shows which actors have saved tokens and which will be generated
