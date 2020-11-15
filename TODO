@@ -3,19 +3,21 @@
 ## BUGS
 v0.5.0 You still see and hear HP rolling with Token Mold, even though the saved tokens are not changed
 v0.5.3 NOT A BUG? In Foundry 0.7.3, doesn't create saved tokens correctly if they were made from a non-standard Actor
-0.6.1 The XP to award dialog box shows for everyone when you delete the Combat Tracker 
-    - also need to show the calculation? maybe with checkboxes
-    - 
+    - XP to award dialog should have checkboxes for who awards XP and who gets it
+v0.6.1 Intro Je is no longer accurate with Companion Dialog method
+v0.6.1: Can't change numeric field to die roll - try removing the actor and re-adding from the Journal Entry    
+        - won't work because once there is a Quick Encounter you can't get rid of it 
+v0.6.1: If you 0 out all Actors then remove the Quick Encounter completely        
 
 ## FEATURES
 Add to Settings:
-    - Make newly created tokens (Method 2) Invisible [maybe if you press Alt while running the Quick Encounter button]
     - Create the Quick Encounter section in a QE Journal Entry (otherwise you have to use the sidebar button)
     - Option to have to specifically designate a Journal Entry as a Quick Encounter (or you can use the side button)
 
 - Allow a way to NOT have Quick Encounters turn Actor links into a Quick Encounter Journal Entry
     - save with the Journal Entry as a flag; but then how do you turn it on again?
-    embed a QE Journal Entry
+    - embed a QE Journal Entry
+>>> Add a link to open the Companion Sheet in Journal Entries    
 
 - If you drag a Journal Entry to the Scene, then intercept to change the icon etc.
     - Partially done: could identify it's a Quick Encounter from the inclusion of Actor links
@@ -28,30 +30,22 @@ More sophisticated monster entries:
 
 Show which Journal Entries have Quick Encounters in the Journal list
 
->>> If you have the Journal Entry open, and are using the Companion sheet, then the QE button opens the Companion Sheet
-    - or perhaps a simple link would work (otherwise we're overloading the QE button a lot)
->>> If you open a Quick Encounter Journal Entry and then select token(s) and press the Quick Encounters button, should add the tokens to the existing QE 
-    - Alternatively if you have Companion Dialog open, can drag it there? - not sure you can drag tokens into a Journal Sheet
-    - Can you drag an additional Actor into the QE Journal Entry? (so that it is added to the existing)
 
->>>>Make [Save] work
-    - For now, manually update the JE
-    - Store in JE flags
-    - Next version, sync to JE
+
+
+- Editing Companion dialog
     - Or JE-by-JE option to use new method; or global option   
         - Sync methods: Manual, JE-to-Companion, Companion-to-JE
 - When the Companion dialog opens - show the token position as TEMPORARY tokens on the map - allow them to be moved or deleted    
-- Need to have a Delete or Clear option to start over
 >>>Re-test with COmpendium links (they will break things)
-
->>>Provide instructions that if you want 2+ Encounters you can always just embed them in the Narrative Journal Entry
-
 
 
 ## REFACTORING
 - Remove unused styles from .css
-- Make QuickEncounter more oo; create around the quickEncounter that is stored in the Journal Entry
 
+
+DOCS
+- Edit the Intro Journal Entry
 
 
 ## FIXED BUGS
@@ -86,6 +80,7 @@ FIXED (v0.5.3)  If you press the Quick Encounters button in a QE Journal, get an
 FIXED? in 0.6.0: v0.5.0 Sometimes the Combat Tracker is not ready in time - need to increase the timeout and maybe check if it's been rendered
                         - happens when the image is not local but an http link
 FIXED in 0.6.0b: v0.5.4: Should check for QE.HowToUse.TITLE in deciding whether to pop up an extra Tutorial
+FIXED in 0.6.1 The XP to award dialog box no longer shows for everyone when you delete the Combat Tracker 
 
 ## COMPLETED FEATURES
 (v0.4.0): If you're on a different scene, pops a dialog to check that you want to switch scenes
@@ -111,3 +106,7 @@ v0.6.0     - Allow die rolls before the Actor links for dynamic generation
 v0.6.1 - After Actor links: Show individual XP and whether tokens have been placed dynamically - placed in a custom companion dialog
 v0.6.1 Close Companion Dialog when you close QE Journal Sheet
 v0.6.1 Change Close to Cancel in CompanionDialog
+v0.6.1 If you open a Quick Encounter Journal Entry and then select token(s) and press the Quick Encounters button, adds the tokens to the existing QE 
+        - Change # actors to 0 to remove the Actor completely
+v0.6.1  - Alt-Run should add ALL tokens Invisible; Ctrl-Run makes them all visible
+v0.6.1 - Make QuickEncounter more oo; create around the quickEncounter that is stored in the Journal Entry

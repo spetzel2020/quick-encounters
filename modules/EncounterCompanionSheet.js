@@ -8,6 +8,7 @@ Reused as EncounterCompanionSheet
                 v0.6.1f: Change Close to Cancel in dialog (to show it doesn't save) - use i18n tags
 11-Nov-2020     v0.6.1g: Remove journalSheet from constructor    
 14-Nov-2020     v0.6.1l: If you change the # Actors to 0, remove the Actor completely
+15-Nov-2020     v0.6.1m: Pass event from clicking Run
 */
 
 
@@ -88,8 +89,8 @@ export class EncounterCompanionSheet extends FormApplication {
     /** @override */
     activateListeners(html) {
         super.activateListeners(html);
-        html.find('button[name="addToCombatTracker"]').click(() => {
-            this.quickEncounter?.run();
+        html.find('button[name="addToCombatTracker"]').click(event => {
+            this.quickEncounter?.run(event);
         });
     }
 
