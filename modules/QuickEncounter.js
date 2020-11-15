@@ -84,7 +84,8 @@
 13-Nov-2020     0.6.1k: createOrRun(): RENAMED to runAddOrCreate()    
                 addTokens(): Add udpateJournalEntryById() to serialize updated quickEncounter  
                 extractQuickEncounter(): If quickEncounter is stored, then use that  
-                serialize/deserialize QuickEncounter using JSON        
+                serialize/deserialize QuickEncounter using JSON    
+14-Nov-2020     0.6.1l: update(): ADDED to receive changes from Companion dialog
 */
 
 
@@ -117,7 +118,7 @@ export class QuickEncounter {
         this.scene = qeData.savedTokensData ? qeData.savedTokensData[0]?.scene : null;
     }
     
-    async serializeQuickEncounterIntoJournalEntry() {
+    async serializeIntoJournalEntry() {
         const qeJournalEntry = game.journal.get(this.journalEntryId);
         //v0.6.1 - store created quickEncounter - but can't store object, so serialize data
         const qeJSON = JSON.stringify(this);
@@ -135,6 +136,11 @@ export class QuickEncounter {
             console.log(`Invalid JSON: ${qeJSON}`);
         }
         return quickEncounter;
+    }
+    update(newQEData) {
+        mergeObject(this, newQEData);
+        //Update into Journal Entry
+        this.serializeIntoJournalEntry();
     }
 
     static init() {
@@ -275,9 +281,10 @@ export class QuickEncounter {
             //0.4.1: 5e specific: find XP for this number of this actor
             const numTokens = tokensData.length;
 
+            //findIndex() returns -1 if not found
             const extractedActorIndex = this.extractedActors?.findIndex(eActor => eActor.actorID === tokenActorID);
             //Option 1. We don't find this actor - then add a new Actor
-            if ((extractedActorIndex === undefined) || (extractedActorIndex === null)) {
+            if (extractedActorIndex < 0) {
                 const actor = game.actors.get(tokenActorID);
                 const newExtractedActor = {
                     numActors : numTokens,
@@ -301,7 +308,7 @@ export class QuickEncounter {
         }
 
         //v0.6.1k Update the created/changed QuickEncounter into the Journal Entry
-        this.serializeQuickEncounterIntoJournalEntry();
+        this.serializeIntoJournalEntry();
     }
 
 
@@ -346,7 +353,7 @@ export class QuickEncounter {
 //FIXME: Better process for setting this - maybe a setter        
         quickEncounter.journalEntryId = journalEntry.id;
         //v0.6.1k Update the created/changed QuickEncounter into the Journal Entry
-        quickEncounter.serializeQuickEncounterIntoJournalEntry();
+        quickEncounter.serializeIntoJournalEntry();
     }
 
 

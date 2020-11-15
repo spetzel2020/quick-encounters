@@ -43,7 +43,7 @@
   "QE.XPtoAward.PERPLAYER": "<br>(Non-player Friendly or Neutral not-included)<br>XP per player: ",
   "QE.UseEmbeddedMethod.NAME" : "Use old embedded method",
   "QE.UseEmbeddedMethod.HINT" : "Use the older Quick Encounters design which embeds the tokens, actors, and Quick Encounters button directly in the Journal Entry.",
-  "QE.CompanionDialog.INTRO" : "Checkmarks show which Actors have saved tokens. You can change the number of Actors or drag new Actors here.<br><strong>WARNING: </strong>Changes you make here will not (yet) synchronize with the Journal Entry",
+  "QE.CompanionDialog.INTRO" : "Checkmarks show which Actors have saved tokens; to save more, select them on the Scene and press the Quick Encounter (fist) button. You can also change the number of existing Actors below (change to 0 to remove an Actor).<br><strong>WARNING: </strong>Changes you make here will not (yet) synchronize with the Journal Entry",
   "QE.CompanionDialog.Save.BUTTON" : "Save",
    "QE.CompanionDialog.PS" : "<p><i>This is the new Quick Encounters companion dialog. Check </i><strong>Use older embedded method</strong><i> in Settings if you want to switch back.</i></p>"
 }

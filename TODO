@@ -41,6 +41,7 @@ Show which Journal Entries have Quick Encounters in the Journal list
     - Or JE-by-JE option to use new method; or global option   
         - Sync methods: Manual, JE-to-Companion, Companion-to-JE
 - When the Companion dialog opens - show the token position as TEMPORARY tokens on the map - allow them to be moved or deleted    
+- Need to have a Delete or Clear option to start over
 >>>Re-test with COmpendium links (they will break things)
 
 >>>Provide instructions that if you want 2+ Encounters you can always just embed them in the Narrative Journal Entry

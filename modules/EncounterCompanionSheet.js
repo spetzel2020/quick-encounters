@@ -1,4 +1,4 @@
-import {QuickEncounter, MODULE_NAME, COMBATANTS_FLAG_KEY} from './QuickEncounter.js';
+import {QuickEncounter} from './QuickEncounter.js';
 
 /*
 Reused as EncounterCompanionSheet
@@ -6,7 +6,8 @@ Reused as EncounterCompanionSheet
 9-Nov-2020      v0.6.1d: Change constructor to take combinedTokenData (will be a template for actor-generated data)
 10-Nov-2020     v0.6.1e: Pass quickEncounter so we can key off extracted Actors not tokens
                 v0.6.1f: Change Close to Cancel in dialog (to show it doesn't save) - use i18n tags
-11-Nov-2020     v0.6.1g: Remove journalSheet from constructor                
+11-Nov-2020     v0.6.1g: Remove journalSheet from constructor    
+14-Nov-2020     v0.6.1l: If you change the # Actors to 0, remove the Actor completely
 */
 
 
@@ -103,7 +104,6 @@ export class EncounterCompanionSheet extends FormApplication {
 
     /** @override */
     async _updateObject(event, formData) {
-//FIXME: Implement this to save changes to stored tokens etc in the Journal Sheet
         //Capture changes in the number of Actors or new Actors added
         let wasChanged = false;
         for (const [actorId, numActors] of Object.entries(formData)) {
@@ -120,9 +120,23 @@ export class EncounterCompanionSheet extends FormApplication {
             wasChanged = wasChanged || combatantWasChanged;
         }
 
-        //If wasChanged, then update the info into JE flags
+        //If wasChanged, then update the info into the Quick Encounter
         if (wasChanged) {
-            await this.quickEncounter?.journalEntry?.setFlag(MODULE_NAME, COMBATANTS_FLAG_KEY, this.combatants);
+            //Reconstitute extractedActors and update it, removing those with numActors=0
+            const extractedActors = this.combatants.filter(c => c.numActors > 0).map(c => {
+                return {
+                    numActors : c.numActors,
+                    dataPackName : null,              //if non-null then this is a Compendium reference
+                    actorID : c.actorId,           //If Compendium sometimes this is the reference
+                    name :c.name
+                }
+            });
+            //Update the tokens if zeroed out
+            let savedTokensData = [];
+            this.combatants.forEach(c => {
+                savedTokensData = savedTokensData.concat(c.tokens.filter(t => t.isSavedToken));
+            });
+            this.quickEncounter?.update({extractedActors : extractedActors, savedTokensData: savedTokensData});
         }
 
 
