@@ -18,13 +18,13 @@ export class EncounterCompanionSheet extends FormApplication {
         super(options);
         if (!game.user.isGM || !quickEncounter) {return;}
 
-//FIXME: This should all be encapsulated in extractQuickEncounter
+//FIXME: Should be able to get this more directly from the quickEncounter
         //Thie version of the Quick Encounter is what is extracted from in the Journal Entry
         const extractedActors = quickEncounter.extractedActors;
         const extractedActorTokenData = quickEncounter.generateTemplateExtractedActorTokenData();     //this is just sparse array with the correct numbers
         const combinedTokenData = quickEncounter.combineTokenData(extractedActorTokenData);
 
-//FIXME: We need a way of generating the tokens      
+  
         let combatants = [];
         for (const eActor of extractedActors) {
             const tokens = combinedTokenData.filter(t => t.actorId === eActor.actorID);
@@ -130,17 +130,15 @@ export class EncounterCompanionSheet extends FormApplication {
                     numActors : c.numActors,
                     dataPackName : null,              //if non-null then this is a Compendium reference
                     actorID : c.actorId,           //If Compendium sometimes this is the reference
-                    name :c.name
+                    name :c.name,
+                    savedTokensData : c.tokens.filter(td => td.isSavedToken)
                 }
             });
-            //Update the tokens if zeroed out
-            let savedTokensData = [];
-            this.combatants.forEach(c => {
-                savedTokensData = savedTokensData.concat(c.tokens.filter(t => t.isSavedToken));
-            });
+            //0.6.1o: The saved tokens for a removed ExtractedActor will now be discarded also
+
             //If we removed all the Actors, then remove the whole Quick Encounter
             if (extractedActors.length) {
-                this.quickEncounter?.update({extractedActors : extractedActors, savedTokensData: savedTokensData});
+                this.quickEncounter?.update({extractedActors : extractedActors});
             } else {
                 this.quickEncounter?.remove();
             }

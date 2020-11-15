@@ -38,7 +38,8 @@ Show which Journal Entries have Quick Encounters in the Journal list
 
 ## REFACTORING
 - Remove unused styles from .css
-
+>>> Store saved tokens with the Actors so they don't have to be reconstituted
+- addTokens: Could just add the tokens one by one rather than filtering etc.
 
 DOCS
 - Edit the Intro Journal Entry

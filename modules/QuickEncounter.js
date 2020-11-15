@@ -88,6 +88,10 @@
 14-Nov-2020     0.6.1l: update(): ADDED to receive changes from Companion dialog
 15-Nov-2020     0.6.1m: Alt-Run makes all tokens invisible; Ctrl-Run makes them all Visible
                 0.6.1n: If we removed all the Actors, then remove the whole Quick Encounter
+                0.6.1o: init(): Remove localized version of QE.Version (which can't be read at this point); add MODULE_VERSION
+                Store MODULE_VERSION in the Quick Encounter qeData just in case we make future changes to how it's encoded
+                deserializFromJournalEntry(): Push savedTokensData into extractedActors
+                extractQuickEncounter(): Code old method with qeVersion=0.5
 */
 
 
@@ -95,6 +99,7 @@ import {EncounterNote} from './EncounterNote.js';
 import {EncounterCompanionSheet} from './EncounterCompanionSheet.js';
 
 export const MODULE_NAME = "quick-encounters";
+export const MODULE_VERSION = "0.6.1";
 
 export const SCENE_ID_FLAG_KEY = "sceneID";
 export const TOKENS_FLAG_KEY = "tokens";
@@ -109,34 +114,47 @@ export class QuickEncounter {
     constructor(qeData) {
         if (!qeData) {return;}
         this.journalEntryId = qeData.journalEntryId;
+        //In v0.6 this contains savedTokensData
         this.extractedActors = qeData.extractedActors ?? [];
         
-        if (qeData.savedTokensData) {
-            qeData.savedTokensData.forEach(td => {
-                td.isSavedToken = true;
-            })
+        //VERSION 0.5 (or <= 0.6)
+        if (!qeData.qeVersion || qeData.qeVersion < 0.6) {
+            //savedTokensData used to be stored separately
+            if (qeData.savedTokensData) {
+                qeData.savedTokensData.forEach(td => {
+                    td.isSavedToken = true;
+                })
+                this.extractedActors.forEach((eActor,i) => {
+                    this.extractActors[i].savedTokensData = qeData.savedTokensData.filter(td => (td.actorId === eActor.actorID));
+                });
+            }
         }
-        this.savedTokensData = qeData.savedTokensData;
-        this.scene = qeData.savedTokensData ? qeData.savedTokensData[0]?.scene : null;
+        //this.scene = qeData.savedTokensData ? qeData.savedTokensData[0]?.scene : null;
     }
     
     async serializeIntoJournalEntry() {
         const qeJournalEntry = game.journal.get(this.journalEntryId);
         //v0.6.1 - store created quickEncounter - but can't store object, so serialize data
+        this.qeVersion = MODULE_VERSION;
         const qeJSON = JSON.stringify(this);
         await qeJournalEntry?.setFlag(MODULE_NAME, QE_JSON_FLAG_KEY, qeJSON);
     }
     static deserializeFromJournalEntry(journalEntry) {
-        let quickEncounter = new QuickEncounter();
+        let quickEncounter = new QuickEncounter();  //makes sure it has functions etc.
         let qeJSON = journalEntry?.getFlag(MODULE_NAME, QE_JSON_FLAG_KEY);
         if (qeJSON) try {
             const quickEncounterFromData = JSON.parse(qeJSON);
             quickEncounter = mergeObject(quickEncounter, quickEncounterFromData);
-            //v0.6.1: Backwards compatibility - set the isSavedToken flga
-            quickEncounter.savedTokensData?.forEach(td => {td.isSavedToken = true;});
+            //v0.6.1: Backwards compatibility - set the isSavedToken flag
+            quickEncounter.extractedActors?.forEach(eActor => {
+                eActor.savedTokensData?.forEach(td => {td.isSavedToken = true;});
+            });
+
         } catch {
             console.log(`Invalid JSON: ${qeJSON}`);
         }
+        //quickEncounter will ALWAYS be non-null, but we want to make sure it has data
+        if (!quickEncounter.extractedActors) {quickEncounter = null;}
         return quickEncounter;
     }
     update(newQEData) {
@@ -155,7 +173,7 @@ export class QuickEncounter {
             hint: "",
             scope: "system",
             config: false,
-            default: game.i18n.localize("QE.Version"),
+            default: MODULE_VERSION,
             type: String
         });
         game.settings.register(MODULE_NAME, "freezeCapturedTokens", {
@@ -273,17 +291,18 @@ export class QuickEncounter {
         for (const token of controlledTokens) {
             controlledTokensData.push(token.data);
         }
-        this.savedTokensData = this.savedTokensData ? this.savedTokensData.concat(controlledTokensData) : controlledTokensData;
+        let newSavedTokensData = controlledTokensData;
+        this.extractedActors.forEach(eActor => {newSavedTokensData = newSavedTokensData.concat(eActor.savedTokensData)});
 
         //Find set of distinct actors
         let tokenActorIDs = new Set();
-        for (const tokenData of this.savedTokensData) {
+        for (const tokenData of newSavedTokensData) {
             tokenActorIDs.add(tokenData.actorId);
         }
 
         //And compare against the saved list of Actors to adjust numbers if necessary
         for (const tokenActorID of tokenActorIDs) {
-            const tokensData = this.savedTokensData.filter(t => t.actorId === tokenActorID);
+            const tokensData = newSavedTokensData.filter(t => t.actorId === tokenActorID);
             //0.4.1: 5e specific: find XP for this number of this actor
             const numTokens = tokensData.length;
 
@@ -296,16 +315,20 @@ export class QuickEncounter {
                     numActors : numTokens,
                     dataPackName : null,              //if non-null then this is a Compendium reference
                     actorID : tokenActorID,           //If Compendium sometimes this is the reference
-                    name : actor?.name
+                    name : actor?.name,
+                    savedTokensData : tokensData
                 }
                 this.extractedActors.push(newExtractedActor);
             } else if (typeof this.extractedActors[extractedActorIndex].numActors === "number") {
                 //Option 2: if we now have more tokens than actors, expand the number of actors
                 if (this.extractedActors[extractedActorIndex].numActors < numTokens) {this.extractedActors[extractedActorIndex].numActors = numTokens;}
                 //Option 3: If we have fewer saved tokens that is ok - now we have one extra
+                this.extractedActors[extractedActorIndex].savedTokensData = tokensData;
             } else {
                 //In this case the numActors is a diceroll, so we don't change numActors
+                this.extractedActors[extractedActorIndex].savedTokensData = tokensData;
             }
+
         }
 
         //Delete the existing tokens (because they will be replaced)
@@ -446,8 +469,8 @@ export class QuickEncounter {
         //0.6.1k: If quickEncounter is stored, extract that - but you can't store the actual object
         let quickEncounter = QuickEncounter.deserializeFromJournalEntry(journalEntry);
         //If we just got a template Quick Encounter then we need to try the old way
-        if (!quickEncounter?.extractedActors) {
-            //Extract it the old way
+        if (!quickEncounter) {
+            //Extract it the old (v0.5) way
             //0.6 this now potentially includes Compendium links
             const extractedActors = QuickEncounter.extractActors(journalSheet.element);
             const savedTokensData =  journalEntry.getFlag(MODULE_NAME, TOKENS_FLAG_KEY);
@@ -458,6 +481,7 @@ export class QuickEncounter {
             //If there isn't a map Note we may need to switch scenes
             if ((extractedActors && extractedActors.length) || (savedTokensData && savedTokensData.length)) {
                 const qeData = {
+                    qeVersion : 0.5,
                     journalEntryId : journalEntry.id,
                     extractedActors : extractedActors,
                     savedTokensData : savedTokensData
@@ -581,10 +605,11 @@ export class QuickEncounter {
         //v0.5.1 Create both from the embedded Actors and any saved Tokens and then attempt to reconcile
         //First cut: If you have more actors than saved tokens of that actor (including none), then generate
         //If we have no savedTokens, do none of this checking
+        //v0.6.1: savedTokensData is stored with each actor
 
         for (const ea of this.extractedActors) {
             const eaTokensData = extractedActorTokenData.filter(eatd => eatd.actorId === ea.actorID);
-            const savedTokensForThisActorID = this.savedTokensData ? this.savedTokensData.filter(std => std.actorId === ea.actorID) : null;
+            const savedTokensForThisActorID = ea.savedTokensData;
 
             if (savedTokensForThisActorID) {
                 const numExcessActors = eaTokensData.length - savedTokensForThisActorID.length;
