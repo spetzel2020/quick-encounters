@@ -3,16 +3,19 @@
 ## BUGS
 v0.5.0 You still see and hear HP rolling with Token Mold, even though the saved tokens are not changed
 v0.5.3 NOT A BUG? In Foundry 0.7.3, doesn't create saved tokens correctly if they were made from a non-standard Actor
-
+0.6.1 The XP to award dialog box shows for everyone when you delete the Combat Tracker 
+    - also need to show the calculation? maybe with checkboxes
+    - 
 
 ## FEATURES
->>> Add to Settings:
-    - Make newly created tokens (Method 2) Invisible
+Add to Settings:
+    - Make newly created tokens (Method 2) Invisible [maybe if you press Alt while running the Quick Encounter button]
     - Create the Quick Encounter section in a QE Journal Entry (otherwise you have to use the sidebar button)
     - Option to have to specifically designate a Journal Entry as a Quick Encounter (or you can use the side button)
 
 - Allow a way to NOT have Quick Encounters turn Actor links into a Quick Encounter Journal Entry
     - save with the Journal Entry as a flag; but then how do you turn it on again?
+    embed a QE Journal Entry
 
 - If you drag a Journal Entry to the Scene, then intercept to change the icon etc.
     - Partially done: could identify it's a Quick Encounter from the inclusion of Actor links
@@ -26,7 +29,7 @@ More sophisticated monster entries:
 Show which Journal Entries have Quick Encounters in the Journal list
 
 >>> If you have the Journal Entry open, and are using the Companion sheet, then the QE button opens the Companion Sheet
-    - or perhaps a simple link would work
+    - or perhaps a simple link would work (otherwise we're overloading the QE button a lot)
 >>> If you open a Quick Encounter Journal Entry and then select token(s) and press the Quick Encounters button, should add the tokens to the existing QE 
     - Alternatively if you have Companion Dialog open, can drag it there? - not sure you can drag tokens into a Journal Sheet
     - Can you drag an additional Actor into the QE Journal Entry? (so that it is added to the existing)
@@ -37,7 +40,12 @@ Show which Journal Entries have Quick Encounters in the Journal list
     - Next version, sync to JE
     - Or JE-by-JE option to use new method; or global option   
         - Sync methods: Manual, JE-to-Companion, Companion-to-JE
+- When the Companion dialog opens - show the token position as TEMPORARY tokens on the map - allow them to be moved or deleted    
 >>>Re-test with COmpendium links (they will break things)
+
+>>>Provide instructions that if you want 2+ Encounters you can always just embed them in the Narrative Journal Entry
+
+
 
 ## REFACTORING
 - Remove unused styles from .css

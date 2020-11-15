@@ -81,6 +81,10 @@
                 Remove extractedActorTokenData as a class parameter and make it generated (either in template or full form)           
                 - generateTemplateExtractedActorTokenData() or generateFullExtractedActorTokenData() (renamed from createTokenDataFromActors)
                 - make combineTokenData() an instance method
+13-Nov-2020     0.6.1k: createOrRun(): RENAMED to runAddOrCreate()    
+                addTokens(): Add udpateJournalEntryById() to serialize updated quickEncounter  
+                extractQuickEncounter(): If quickEncounter is stored, then use that  
+                serialize/deserialize QuickEncounter using JSON        
 */
 
 
@@ -92,7 +96,7 @@ export const MODULE_NAME = "quick-encounters";
 export const SCENE_ID_FLAG_KEY = "sceneID";
 export const TOKENS_FLAG_KEY = "tokens";
 export const COMBATANTS_FLAG_KEY = "combatants";
-export const QE_FLAG_KEY = "quickEncounter";
+export const QE_JSON_FLAG_KEY = "quickEncounter";
 
 export function deleteAllEQMapNotes(text="Unknown") {
     QuickEncounter.deleteAllEQMapNotes(text);
@@ -101,7 +105,7 @@ export function deleteAllEQMapNotes(text="Unknown") {
 export class QuickEncounter {
     constructor(qeData) {
         if (!qeData) {return;}
-        this.journalEntryId = qeData.journalEntry?.id;
+        this.journalEntryId = qeData.journalEntryId;
         this.extractedActors = qeData.extractedActors ?? [];
         
         if (qeData.savedTokensData) {
@@ -110,10 +114,28 @@ export class QuickEncounter {
             })
         }
         this.savedTokensData = qeData.savedTokensData;
-        this.combatants = qeData.combatants;
+        this.scene = qeData.savedTokensData ? qeData.savedTokensData[0]?.scene : null;
     }
-
-
+    
+    async serializeQuickEncounterIntoJournalEntry() {
+        const qeJournalEntry = game.journal.get(this.journalEntryId);
+        //v0.6.1 - store created quickEncounter - but can't store object, so serialize data
+        const qeJSON = JSON.stringify(this);
+        await qeJournalEntry?.setFlag(MODULE_NAME, QE_JSON_FLAG_KEY, qeJSON);
+    }
+    static deserializeFromJournalEntry(journalEntry) {
+        let quickEncounter = new QuickEncounter();
+        let qeJSON = journalEntry?.getFlag(MODULE_NAME, QE_JSON_FLAG_KEY);
+        if (qeJSON) try {
+            const quickEncounterFromData = JSON.parse(qeJSON);
+            quickEncounter = mergeObject(quickEncounter, quickEncounterFromData);
+            //v0.6.1: Backwards compatibility - set the isSavedToken flga
+            quickEncounter.savedTokensData?.forEach(td => {td.isSavedToken = true;});
+        } catch {
+            console.log(`Invalid JSON: ${qeJSON}`);
+        }
+        return quickEncounter;
+    }
 
     static init() {
         game.settings.register(MODULE_NAME, "quickEncountersVersion", {
@@ -164,7 +186,7 @@ export class QuickEncounter {
                 toggle: false,
                 button: true,
                 visible: game.user.isGM,
-                onClick: () => QuickEncounter.createOrRun()
+                onClick: () => QuickEncounter.runAddOrCreate()
             });
             notesButton.tools.push({
                 name: "deleteEncounters",
@@ -189,7 +211,7 @@ export class QuickEncounter {
         }
     }
 
-    static createOrRun() {
+    static runAddOrCreate() {
         //Called when you press the Quick Encounters button (fist) from the sidebar
         //If you are controlling tokens, it assumes that's the Encounter you want to create unless (0.6.1) you have an open Quick Encounter
         //Method 1: Get the selected tokens and the scene
@@ -253,9 +275,9 @@ export class QuickEncounter {
             //0.4.1: 5e specific: find XP for this number of this actor
             const numTokens = tokensData.length;
 
-            const extractedActor = this.extractedActors?.find(eActor => eActor.actorID === tokenActorID);
+            const extractedActorIndex = this.extractedActors?.findIndex(eActor => eActor.actorID === tokenActorID);
             //Option 1. We don't find this actor - then add a new Actor
-            if (!extractedActor) {
+            if ((extractedActorIndex === undefined) || (extractedActorIndex === null)) {
                 const actor = game.actors.get(tokenActorID);
                 const newExtractedActor = {
                     numActors : numTokens,
@@ -264,16 +286,23 @@ export class QuickEncounter {
                     name : actor?.name
                 }
                 this.extractedActors.push(newExtractedActor);
-            } else if (typeof extractedActor.numActors === "number") {
+            } else if (typeof this.extractedActors[extractedActorIndex].numActors === "number") {
                 //Option 2: if we now have more tokens than actors, expand the number of actors
-                if (extractedActor.numActors < numTokens) {extractedActor.numActors = numTokens;}
-                //Option 3: If we have fewer saved tokens that is ok
+                if (this.extractedActors[extractedActorIndex].numActors < numTokens) {this.extractedActors[extractedActorIndex].numActors = numTokens;}
+                //Option 3: If we have fewer saved tokens that is ok - now we have one extra
             } else {
                 //In this case the numActors is a diceroll, so we don't change numActors
             }
         }
-    }
 
+        //Delete the existing tokens (because they will be replaced)
+        for (const token of controlledTokens) {
+            canvas.tokens.deleteMany([token.id]);
+        }
+
+        //v0.6.1k Update the created/changed QuickEncounter into the Journal Entry
+        this.serializeQuickEncounterIntoJournalEntry();
+    }
 
 
     /** Method 1: createFromTokens
@@ -285,10 +314,8 @@ export class QuickEncounter {
         if (!controlledTokens) {return;}
 
 //Seems inelegant - especially since we'd like to update the journalEntry        
-        let quickEncounter = new QuickEncounter({});      
+        let quickEncounter = new QuickEncounter({});    //empty QuickEncounter   
         quickEncounter.addTokens(controlledTokens);     //This will also update extractedActors etc.
-
-        const scene = controlledTokens[0]?.scene;
 
         //Create a new JournalEntry - the corresponding map note gets automatically created too
 //FIXME: Replace all this with a renderTemplate section using handlebars
@@ -302,15 +329,12 @@ export class QuickEncounter {
 
         const journalData = {
             folder: null,
-            name:  `Quick Encounter: ${scene.name}`,
+            name:  `Quick Encounter: ${quickEncounter.scene?.name}`,
             content: content,
             type: "encounter",
             types: "base"
         }
         let journalEntry = await JournalEntry.create(journalData);
-
-        //Record the scene for the tokens as a convenience
-        await journalEntry.setFlag(MODULE_NAME,SCENE_ID_FLAG_KEY, scene.id);
 
         const ejSheet = new JournalSheet(journalEntry);
         ejSheet.render(true);   //0.6.1: This will also pop-open a companion sheet if you have that setting
@@ -321,20 +345,11 @@ export class QuickEncounter {
         //Update the Quick Encounter with the Journal Entry info
 //FIXME: Better process for setting this - maybe a setter        
         quickEncounter.journalEntryId = journalEntry.id;
-        //quickEncounter.mapNote = journal
-        await QuickEncounter.updateJournalEntry(journalEntry, quickEncounter);
-        //Delete the existing tokens (because they will be replaced)
-        for (const token of controlledTokens) {
-            canvas.tokens.deleteMany([token.id]);
-        }
+        //v0.6.1k Update the created/changed QuickEncounter into the Journal Entry
+        quickEncounter.serializeQuickEncounterIntoJournalEntry();
     }
 
-    static async updateJournalEntry(qeJournalEntry, quickEncounter) {
-        //For backward compatibility - should be able to get rid of this
-        await qeJournalEntry.setFlag(MODULE_NAME, TOKENS_FLAG_KEY, quickEncounter.savedTokensData);
-        //v0.6.1 - store created quickEncounter
-        await qeJournalEntry.setFlag(MODULE_NAME, QE_FLAG_KEY, quickEncounter);
-    }
+
 
     static getActorXP(actor) {
         if ((game.system.id !== "dnd5e") || !actor) {return null;}
@@ -415,29 +430,29 @@ export class QuickEncounter {
         const journalEntry = journalSheet?.entity;
         if (!journalEntry) {return;}
 
-        const mapNote = journalEntry.sceneNote;
-        //0.6 this now potentially includes Compendium links
-        const extractedActors = QuickEncounter.extractActors(journalSheet.element);
-        const savedTokensData =  journalEntry.getFlag(MODULE_NAME, TOKENS_FLAG_KEY);
-        const combatants = journalEntry.getFlag(MODULE_NAME, COMBATANTS_FLAG_KEY);
-        //v0.6.1: Backwards compatibility - set the isSavedToken flga
-        savedTokensData?.forEach(td => {td.isSavedToken = true;});
+        //0.6.1k: If quickEncounter is stored, extract that - but you can't store the actual object
+        let quickEncounter = QuickEncounter.deserializeFromJournalEntry(journalEntry);
+        //If we just got a template Quick Encounter then we need to try the old way
+        if (!quickEncounter?.extractedActors) {
+            //Extract it the old way
+            //0.6 this now potentially includes Compendium links
+            const extractedActors = QuickEncounter.extractActors(journalSheet.element);
+            const savedTokensData =  journalEntry.getFlag(MODULE_NAME, TOKENS_FLAG_KEY);
+            //v0.6.1: Backwards compatibility - set the isSavedToken flga
+            savedTokensData?.forEach(td => {td.isSavedToken = true;});
 
-        //Minimum Quick Encounter has a Journal Entry, and tokens or actors (or 0.6 Compendium which turns into Actors)
-        //If there isn't a map Note we may need to switch scenes
-        if ((extractedActors && extractedActors.length) || (savedTokensData && savedTokensData.length)) {
-            const qeData = {
-                journalEntry : journalEntry,
-                mapNote : mapNote,
-                extractedActors : extractedActors,
-                savedTokensData : savedTokensData,
-                combatants : combatants
+            //Minimum Quick Encounter has a Journal Entry, and tokens or actors (or 0.6 Compendium which turns into Actors)
+            //If there isn't a map Note we may need to switch scenes
+            if ((extractedActors && extractedActors.length) || (savedTokensData && savedTokensData.length)) {
+                const qeData = {
+                    journalEntryId : journalEntry.id,
+                    extractedActors : extractedActors,
+                    savedTokensData : savedTokensData
+                }
+                quickEncounter = new QuickEncounter(qeData);
             }
-            const quickEncounter = new QuickEncounter(qeData);
-            return quickEncounter;
-        } else {
-            return null;
-        }
+        }//end if !quickEncounter
+        return quickEncounter;
     }
 
     static extractActors(html) {
@@ -613,19 +628,7 @@ export class QuickEncounter {
         return numActors;
     }
 
-    generateTemplateExtractedActorTokenData() {
-        //0.6.1d: Create a template array so we can tell how many saved vs. generated tokens we will have at display time
-        //(without actually extracting Actor/Compendium data every time)
-        const extractedActorTokenData = [];          
-        for (const eActor of this.extractedActors) {
-            const numActors = QuickEncounter.getNumActors(eActor, {rollRandom: false});
-            for (let iToken=0; iToken < numActors; iToken++ ) {
-                extractedActorTokenData.push({actorId: eActor.actorID, isSavedToken : false});
-            }
-        }
-        return extractedActorTokenData;
-    }
-
+    
     static async getActor(eActor) {
         //Could be from Actors or Compendium
         //v0.6 Need to check whether this is a direct Actor reference or from a Compendium
@@ -639,6 +642,20 @@ export class QuickEncounter {
             actor = game.actors.get(eActor.actorID);
         }
         return actor;
+    }
+
+
+    generateTemplateExtractedActorTokenData() {
+        //0.6.1d: Create a template array so we can tell how many saved vs. generated tokens we will have at display time
+        //(without actually extracting Actor/Compendium data every time)
+        const extractedActorTokenData = [];          
+        for (const eActor of this.extractedActors) {
+            const numActors = QuickEncounter.getNumActors(eActor, {rollRandom: false});
+            for (let iToken=0; iToken < numActors; iToken++ ) {
+                extractedActorTokenData.push({actorId: eActor.actorID, isSavedToken : false});
+            }
+        }
+        return extractedActorTokenData;
     }
 
     async generateFullExtractedActorTokenData(coords) {
