@@ -92,6 +92,8 @@
                 Store MODULE_VERSION in the Quick Encounter qeData just in case we make future changes to how it's encoded
                 deserializFromJournalEntry(): Push savedTokensData into extractedActors
                 extractQuickEncounter(): Code old method with qeVersion=0.5
+                v0.6.2a: addTokens(): Ignore undefined savedTokens from old method
+                Make useEmbeddedMethod=false the default going forward
 */
 
 
@@ -99,7 +101,7 @@ import {EncounterNote} from './EncounterNote.js';
 import {EncounterCompanionSheet} from './EncounterCompanionSheet.js';
 
 export const MODULE_NAME = "quick-encounters";
-export const MODULE_VERSION = "0.6.1";
+export const MODULE_VERSION = "0.6.2";
 
 export const SCENE_ID_FLAG_KEY = "sceneID";
 export const TOKENS_FLAG_KEY = "tokens";
@@ -198,7 +200,7 @@ export class QuickEncounter {
             hint: game.i18n.localize("QE.UseEmbeddedMethod.HINT"),
             scope: "world",
             config: true,
-            default: true,  //True during Beta
+            default: false,  
             type: Boolean
         });
     }
@@ -292,7 +294,10 @@ export class QuickEncounter {
             controlledTokensData.push(token.data);
         }
         let newSavedTokensData = controlledTokensData;
-        this.extractedActors.forEach(eActor => {newSavedTokensData = newSavedTokensData.concat(eActor.savedTokensData)});
+        this.extractedActors.forEach(eActor => {
+            //0.6.2: Bug: Old embedded method was concatenating undefined savedTokensData
+            if (eActor.savedTokensData) newSavedTokensData = newSavedTokensData.concat(eActor.savedTokensData)
+        });
 
         //Find set of distinct actors
         let tokenActorIDs = new Set();

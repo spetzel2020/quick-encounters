@@ -6,6 +6,10 @@
 - Use dice rolls for number of Actors
 - GM display of Combat XP and per player token
 
+## 0.6.2
+- Bug fix: An existing Quick Encounter with no saved tokens was adding null tokens
+- Edit Tutorial to reflect new abilities
+
 ## 0.6.1
 - Companion dialog which shows which actors have saved tokens and which will be generated
 - Add tokens to existing Quick Encounters (open the Journal Entry, select the token(s), and click the Quick Encounter button)

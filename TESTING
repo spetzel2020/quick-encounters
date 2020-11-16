@@ -1,37 +1,40 @@
-TESTING WITH FOUNDRY 0.7.6
+TESTING WITH FOUNDRY 0.7.7
 
 TUTORIAL
 1. Press Quick Encounter button with nothing selected -> should pop up Tutorial 			             	OK
-2. With Tutorial open, repeat #1 -> should keep existing Tutorial                 	                -Bugged in 0.5.4; works in 0.6.0
-3. Close Tutorial -> should delete the Journal Entry                                					      OK
-4. Open some Journal Entries with no embedded Actors, press QE button -> should open Tutorial   		OK
-5. Open multiple Journal Entries with embedded Actors, press QE button -> should run the Encounter		OK	
-6. Leave Tutorial Window open; create another Journal Entry, Save, and then close - should be kept		OK
+2. With Tutorial open, repeat #1 -> should keep existing Tutorial                 	                        OK
+3. Close Tutorial -> should delete the Journal Entry                                					    OK
+4. Open some Journal Entries with no embedded Actors, press QE button -> should open Tutorial   		    OK
+5. Open multiple Journal Entries with embedded Actors, press QE button -> should run the Encounter		    OK	
+6. Leave Tutorial Window open; create another Journal Entry, Save, and then close - should be kept		    OK
     - was being deleted in 0.5.2 because it was finding the Tutorial Window
 
 
 METHOD 1
-1. Select one friendly token and press QE button -> should ask if you want to add to JE			OK
+1. Select one friendly token and press QE button -> should ask if you want to add to JE			            BUG - Not creating Note
 2. Select multiple friendly and neutral tokens -> should ask...						            OK
 3. Select one hostile token and press QE button -> adds to JE						            OK
 4. Select multiple hostile and neutral tokens and press QE button -> adds to JE 				OK
 
-
 METHOD 2
-1. Add Actors to a Journal Entry ; should re-render with embedded QE button 				OK
-
+1. Add Actors to a Journal Entry ; should re-render with embedded QE button 				                OK
 
 USE, MOVING, DELETION
-1. Delete Note; should warn there is no Note when you open the Journal Entry 				OK (in test case because it's on two maps)
-2. Move Note - Actor tokens should be created at the position of the Note					OK
-3. Start on another Scene and run an Encounter - should switch scenes     					OK	
+1. Delete Note; should warn there is no Note when you open the Journal Entry 				?? (in test case because it's on two maps)
+2. Move Note - Actor tokens should be created at the position of the Note			        ??
+3. Start on another Scene and run an Encounter - should switch scenes     					??	
 
 -------------
-RUN AN ENCOUNTER (0.6.0 only)
-1. Add a Compendium Entry "Dire Wolf" - get "Query returned multiple entries"		     BUG in 0.7.4 (QE 0.6)
-2. Random encounters (1d4+2)
 
-BACKWARDS COMPATIBILITY
+NEW FEATURES IN 0.6
+1. Open a vanilla Journal Entry, select tokens, and press the QE button to turn this into a QE          BUG - Should open an ADD vs. CREATE dialog
+2. Random encounters (1d4+2)
+3. Alt- or Ctrl- Run to force invisible or visible
+4. Show total XP and XP per player token to GM                                                  OK
+5. Add a Compendium Entry "Dire Wolf" - get "Query returned multiple entries"		            BUG in 0.7.4 (QE 0.6)
+
+USE OLD EMBEDDED METHOD
+Verify above tests with Use old = TRUE and Use old = FALSE
 1. Check that previously created encounters work with new Setting "Use old embedded method" = TRUE
 2. Check that previously created encounters work with new Setting "Use old embedded method" = FALSE
 3. Create a new Encounter with the "Use old embedded method" = TRUE

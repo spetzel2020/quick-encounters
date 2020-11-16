@@ -3,9 +3,10 @@
 ## BUGS
 v0.5.0 You still see and hear HP rolling with Token Mold, even though the saved tokens are not changed
 v0.5.3 NOT A BUG? In Foundry 0.7.3, doesn't create saved tokens correctly if they were made from a non-standard Actor
-    - XP to award dialog should have checkboxes for who awards XP and who gets it
-v0.6.1 Intro Je is no longer accurate with Companion Dialog method
+
 v0.6.1: Can't change numeric field to die roll - try removing the actor and re-adding from the Journal Entry    
+v0.6.1: Scene not being saved or displayed
+v0.6.1: Note not being created - probably because scene is not calculated
        
 
 ## FEATURES
@@ -21,7 +22,8 @@ Add to Settings:
 - If you drag a Journal Entry to the Scene, then intercept to change the icon etc.
     - Partially done: could identify it's a Quick Encounter from the inclusion of Actor links
         but perhaps a better approach would be with a flag that was set
-- Improve the way the Journal Entry gets built to do more with the template and handlebars
+
+- XP to award dialog should have checkboxes for who awards XP and who gets it
 
 More sophisticated monster entries:
     - Scan Journal Entries to turn into Actor links and Quick Encounters
@@ -38,11 +40,11 @@ Show which Journal Entries have Quick Encounters in the Journal list
 
 ## REFACTORING
 - Remove unused styles from .css
->>> Store saved tokens with the Actors so they don't have to be reconstituted
 - addTokens: Could just add the tokens one by one rather than filtering etc.
+- Improve the way the Journal Entry gets built to do more with the template and handlebars
 
 DOCS
-- Edit the Intro Journal Entry
+
 
 
 ## FIXED BUGS
@@ -80,6 +82,7 @@ FIXED in 0.6.0b: v0.5.4: Should check for QE.HowToUse.TITLE in deciding whether 
 FIXED in 0.6.1 The XP to award dialog box no longer shows for everyone when you delete the Combat Tracker 
         - won't work because once there is a Quick Encounter you can't get rid of it 
 FIXED in 0.6.1: If you 0 out all Actors then remove the Quick Encounter completely 
+FIXED in v0.6.1 Intro Je is no longer accurate with Companion Dialog method
 
 ## COMPLETED FEATURES
 (v0.4.0): If you're on a different scene, pops a dialog to check that you want to switch scenes
@@ -109,3 +112,4 @@ v0.6.1 If you open a Quick Encounter Journal Entry and then select token(s) and 
         - Change # actors to 0 to remove the Actor completely
 v0.6.1  - Alt-Run should add ALL tokens Invisible; Ctrl-Run makes them all visible
 v0.6.1 - Make QuickEncounter more oo; create around the quickEncounter that is stored in the Journal Entry
+v0.6.1 Store saved tokens with the Actors so they don't have to be reconstituted
