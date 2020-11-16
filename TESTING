@@ -28,7 +28,7 @@ USE, MOVING, DELETION
 
 NEW FEATURES IN 0.6
 0. OPen QE with Companion Dialog and Run
-1. Open a vanilla Journal Entry, select tokens, and press the QE button to turn this into a QE              BUG - Should open an ADD vs. CREATE dialog
+1. Open a vanilla Journal Entry, select tokens, and press the QE button to turn this into a QE              Should open an ADD vs. CREATE dialog
 2. Random encounters (1d4+2)                                                                                OK
 3. Alt- or Ctrl- Run to force invisible or visible                                                          OK
 4. Show total XP and XP per player token to GM                                                              OK
@@ -41,3 +41,10 @@ Verify above tests with Use Companion Dialog = TRUE and Use Companion Dialog = F
 3. Create a new Encounter with the "Use new Companion Dialog" = FALSE
 
 CHECK VISIBILITY FOR A PLAYER
+
+BUG FIXES
+FIXED in 0.6.3: 0.6.2: Flip the Old Embedded Setting to "Use Companion Dialog" ; add note about it becoming the default
+FIXED in 0.6.3 v0.6.1: Can't change numeric field to die roll - will need to validate 
+TEST: FIXED in 0.6.3b v0.6.2: XP award should be rounded in post-combat dialog
+TEST: FIXED in v0.6.2: Warning about Map Note in the Journal Entry
+        - move the creation of the Map Note before the render of the Journal Entry so you don't get a spurious warning
