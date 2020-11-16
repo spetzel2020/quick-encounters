@@ -131,7 +131,7 @@ export class EncounterNote {
         if (canvas.grid.hitArea.contains(noteAnchor.x, noteAnchor.y) ) {
             // Create a Note; we don't pop-up the Note sheet because we really want this Note to be placed
             //(they can always edit it afterwards)
-            const newNote = await EncounterNote.create(quickEncounter, noteAnchor);
+            await EncounterNote.create(quickEncounter, noteAnchor);
         }
     }
 

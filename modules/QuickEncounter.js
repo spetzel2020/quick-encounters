@@ -96,6 +96,7 @@
                 Make useEmbeddedMethod=false the default going forward
                 v0.6.2b: Bug fix: Use game.scenes.viewed to populate the name of the created Journal Entry
                 Add a try/catch around tokens.update (because of problems with missing data)
+                v0.6.3: Switch Use Embedded OPtion to Use Companion Dialog option
 */
 
 
@@ -103,7 +104,7 @@ import {EncounterNote} from './EncounterNote.js';
 import {EncounterCompanionSheet} from './EncounterCompanionSheet.js';
 
 export const MODULE_NAME = "quick-encounters";
-export const MODULE_VERSION = "0.6.2";
+export const MODULE_VERSION = "0.6.3";
 
 export const SCENE_ID_FLAG_KEY = "sceneID";
 export const TOKENS_FLAG_KEY = "tokens";
@@ -197,12 +198,12 @@ export class QuickEncounter {
             default: true,
             type: Boolean
         });
-        game.settings.register(MODULE_NAME, "useEmbeddedMethod", {
-            name: game.i18n.localize("QE.UseEmbeddedMethod.NAME"),
-            hint: game.i18n.localize("QE.UseEmbeddedMethod.HINT"),
+        game.settings.register(MODULE_NAME, "useCompanionDialog", {
+            name: game.i18n.localize("QE.UseCompanionDialog.NAME"),
+            hint: game.i18n.localize("QE.UseCompanionDialog.HINT"),
             scope: "world",
             config: true,
-            default: false,  
+            default: true,  
             type: Boolean
         });
     }
@@ -381,17 +382,18 @@ export class QuickEncounter {
             types: "base"
         }
         let journalEntry = await JournalEntry.create(journalData);
-
         const ejSheet = new JournalSheet(journalEntry);
-        ejSheet.render(true);   //0.6.1: This will also pop-open a companion sheet if you have that setting
 
         //Update the Quick Encounter with the Journal Entry info
 //FIXME: Better process for setting this - maybe a setter        
         quickEncounter.journalEntryId = journalEntry.id;
         //v0.6.1k Update the created/changed QuickEncounter into the Journal Entry
         quickEncounter.serializeIntoJournalEntry();
+
         //And create the Map Note (otherwise it will ask when you close the Journal Entry)
-        EncounterNote.place(quickEncounter);
+        await EncounterNote.place(quickEncounter);
+        //v0.6.3: Show the Journal Sheet last so it can see the Map Note
+        ejSheet.render(true);   //0.6.1: This will also pop-open a companion sheet if you have that setting
     }
 
 
@@ -937,21 +939,22 @@ Hooks.on(`renderJournalSheet`, async (journalSheet, html) => {
         if (!qeScene) {
             noMapNoteWarning = `${game.i18n.localize("QE.AddToCombatTracker.NoMapNote")}`;
         }
-
+        
+        let qeJournalEntryIntro = "";
         //v0.6.1: Also pop open a companion dialog with details about what tokens have been placed and XP
-        if (game.settings.get(MODULE_NAME, "useEmbeddedMethod")) {
-            const qeJournalEntryIntro = await renderTemplate('modules/quick-encounters/templates/qeJournalEntryIntro.html', {totalXPLine, noMapNoteWarning});
-            html.find('.editor-content').prepend(qeJournalEntryIntro);
-            //If there's an embedded button, then add a listener
-            html.find('button[name="addToCombatTracker"]').click(event => {
-                quickEncounter.run(event);
-            });
-        } else {
+        if (game.settings.get(MODULE_NAME, "useCompanionDialog")) {
             const companionSheet = new EncounterCompanionSheet(quickEncounter, totalXPLine);
             companionSheet.render(true);
             journalSheet.companionSheet = companionSheet;
+            qeJournalEntryIntro = noMapNoteWarning;
+        } else {
+            qeJournalEntryIntro = await renderTemplate('modules/quick-encounters/templates/qeJournalEntryIntro.html', {totalXPLine, noMapNoteWarning});
         }
-
+        html.find('.editor-content').prepend(qeJournalEntryIntro);
+        //If there's an embedded button, then add a listener
+        html.find('button[name="addToCombatTracker"]').click(event => {
+            quickEncounter.run(event);
+        });
     }
 });//end Hooks.on("renderJournalSheet")
 

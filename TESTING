@@ -21,8 +21,8 @@ METHOD 2
 
 USE, MOVING, DELETION
 1. Delete Note; should warn there is no Note when you open the Journal Entry 				                MISSING from Journal Entry
-2. Move Note - Actor tokens should be created at the position of the Note			                        ??
-3. Start on another Scene and run an Encounter - should switch scenes     					                ??	
+2. Move Note - Actor tokens should be created at the position of the Note			                        OK
+3. Start on another Scene and run an Encounter - should switch scenes     					                OK	
 
 -------------
 
@@ -32,10 +32,12 @@ NEW FEATURES IN 0.6
 2. Random encounters (1d4+2)                                                                                OK
 3. Alt- or Ctrl- Run to force invisible or visible                                                          OK
 4. Show total XP and XP per player token to GM                                                              OK
-5. Add a Compendium Entry "Dire Wolf" - get "Query returned multiple entries"		            BUG in 0.7.4 (QE 0.6)
+5. Add a Compendium Entry "Dire Wolf" - get "Query returned multiple entries"		                        BUG in 0.7.4 (QE 0.6)
 
 USE OLD EMBEDDED METHOD
-Verify above tests with Use old = TRUE and Use old = FALSE
-1. Check that previously created encounters work with new Setting "Use old embedded method" = TRUE
-2. Check that previously created encounters work with new Setting "Use old embedded method" = FALSE
-3. Create a new Encounter with the "Use old embedded method" = TRUE
+Verify above tests with Use Companion Dialog = TRUE and Use Companion Dialog = FALSE
+1. Check that previously created encounters work with new Setting = TRUE
+2. Check that previously created encounters work with new Setting = FALSE
+3. Create a new Encounter with the "Use new Companion Dialog" = FALSE
+
+CHECK VISIBILITY FOR A PLAYER

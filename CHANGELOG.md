@@ -6,6 +6,8 @@
 - Use dice rolls for number of Actors
 - GM display of Combat XP and per player token
 
+## 0.6.3
+- Switch Use Embedded to Use Companion Dialog
 ## 0.6.2
 - Bug fix: An existing Quick Encounter with no saved tokens was adding null tokens
 - Edit Tutorial to reflect new abilities
