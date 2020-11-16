@@ -1,4 +1,4 @@
-import {QuickEncounter} from './QuickEncounter.js';
+import {QuickEncounter, dieRollReg} from './QuickEncounter.js';
 
 /*
 Reused as EncounterCompanionSheet
@@ -10,6 +10,8 @@ Reused as EncounterCompanionSheet
 14-Nov-2020     v0.6.1l: If you change the # Actors to 0, remove the Actor completely
 15-Nov-2020     v0.6.1m: Pass event from clicking Run
                 v0.6.1n: If we removed all the Actors, then remove the whole Quick Encounter
+16-Nov-2020     v0.6.3b: Make "number" field a String so we can handle die rolls, a number, and nothing (which means remove the actor)                
+                         Add validation and warning if you make a mistake
 */
 
 
@@ -106,18 +108,39 @@ export class EncounterCompanionSheet extends FormApplication {
 
     /** @override */
     async _updateObject(event, formData) {
-        //Capture changes in the number of Actors or new Actors added
+        const checkIntReg = /^[0-9]*$/;   
+        //Capture changes in the number of Actors or new Actors added (currently not possible through this dialog)
         let wasChanged = false;
-        for (const [actorId, numActors] of Object.entries(formData)) {
+        for (let [actorId, numActors] of Object.entries(formData)) {
             let combatantWasChanged = false;
-            const iCombatant = this.combatants.findIndex(c => c.actorId === actorId);
-            if (iCombatant === null) {
+            const iCombatant = this.combatants.findIndex(c => c.actorId === actorId);   //returns -1 if nothing found
+            if (iCombatant === -1) {
                 //New combatant
                 combatantWasChanged = true;
                 
             } else {
+                numActors = numActors.trim();   //trim off whitespace
                 combatantWasChanged = (this.combatants[iCombatant].numActors !== numActors);
-                if (combatantWasChanged) {this.combatants[iCombatant].numActors = numActors;}
+                if (combatantWasChanged) {
+                    //Validate that the change is ok
+                    //Option 1: You cleared the field or spaced it out
+                    if ((numActors === null) || (numActors === "")) {
+                        this.combatants[iCombatant].numActors = 0;
+                    } else if (dieRollReg.test(numActors)) {
+                        //Option 2: This is a dice roll (not guaranteed because it could just contain a dieRoll)
+                        this.combatants[iCombatant].numActors = numActors;
+                    } else if (checkIntReg.test(numActors)) {
+                        const multiplier = parseInt(numActors,10);
+                        if (!Number.isNaN(multiplier)) {
+                             this.combatants[iCombatant].numActors = multiplier;
+                        }
+                       
+                    } else {
+                        //otherwise leave unchanged - should pop up a dialog or highlight the field in red
+                        const warning = game.i18n.localize("QE.CompanionDialog.InvalidNumActors.WARNING") + " " + numActors;
+                        ui.notifications.warn(warning);
+                    }
+                }
             }
             wasChanged = wasChanged || combatantWasChanged;
         }
@@ -125,12 +148,13 @@ export class EncounterCompanionSheet extends FormApplication {
         //If wasChanged, then update the info into the Quick Encounter
         if (wasChanged) {
             //Reconstitute extractedActors and update it, removing those with numActors=0
-            const extractedActors = this.combatants.filter(c => c.numActors > 0).map(c => {
+            //Accept any non-numeric; blank has been replaced with 0
+            const extractedActors = this.combatants.filter(c => (typeof c.numActors !== "number") || (c.numActors > 0)).map(c => {
                 return {
                     numActors : c.numActors,
-                    dataPackName : null,              //if non-null then this is a Compendium reference
+                    dataPackName : c.dataPackName, //if non-null then this is a Compendium reference
                     actorID : c.actorId,           //If Compendium sometimes this is the reference
-                    name :c.name,
+                    name : c.name,
                     savedTokensData : c.tokens.filter(td => td.isSavedToken)
                 }
             });

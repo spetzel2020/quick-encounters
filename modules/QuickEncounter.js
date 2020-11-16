@@ -97,6 +97,7 @@
                 v0.6.2b: Bug fix: Use game.scenes.viewed to populate the name of the created Journal Entry
                 Add a try/catch around tokens.update (because of problems with missing data)
                 v0.6.3: Switch Use Embedded OPtion to Use Companion Dialog option
+16-Nov-2020     v0.6.3b: onDeleteCombat(): Round computed XP per player                
 */
 
 
@@ -106,14 +107,12 @@ import {EncounterCompanionSheet} from './EncounterCompanionSheet.js';
 export const MODULE_NAME = "quick-encounters";
 export const MODULE_VERSION = "0.6.3";
 
-export const SCENE_ID_FLAG_KEY = "sceneID";
 export const TOKENS_FLAG_KEY = "tokens";
-export const COMBATANTS_FLAG_KEY = "combatants";
 export const QE_JSON_FLAG_KEY = "quickEncounter";
 
-export function deleteAllEQMapNotes(text="Unknown") {
-    QuickEncounter.deleteAllEQMapNotes(text);
-}
+
+//Matches "ndx+/-m" with/without spaces at the beginning of the string
+export const dieRollReg = /^([0-9]+\s*d[4,6,8,10,12](?:\s*[+,-]\s*[0-9]+)*)/;
 
 export class QuickEncounter {
     constructor(qeData) {
@@ -510,7 +509,7 @@ export class QuickEncounter {
 
         const extractedActors = [];
         const intReg = "([0-9]+)[^0-9]*$"; //Matches last "number followed by non-number at the end of a string"
-        const dieRollReg = /([0-9]+\s*d[4,6,8,10,12](?:\s*\+\s*[0-9]+))/;
+
         entityLinks.each((i, el) => {
             const element = $(el);
             const dataEntity = element.attr("data-entity");
@@ -532,7 +531,7 @@ export class QuickEncounter {
                             multiplier = prevSibling.attributes["data-formula"].value;
                             if (!multiplier) {multiplier = 1;}
                         } catch {
-                            //Otherwise try to prase it out
+                            //Otherwise try to parse it out
                             multiplier = prevSibling.textContent.match(dieRollReg);
                             multiplier = multiplier? multiplier[0] : 1;
                         }
@@ -814,7 +813,7 @@ export class QuickEncounter {
         if (!nonFriendlyNPCTokens || !nonFriendlyNPCTokens.length || !pcTokens) {return;}
         const totalXP = await QuickEncounter.computeTotalXP(nonFriendlyNPCTokens);
         if (!totalXP) {return;}
-        const xpPerPlayer = pcTokens.length ? totalXP/pcTokens.length : null;
+        const xpPerPlayer = pcTokens.length ? Math.round(totalXP/pcTokens.length) : null;
         let content = game.i18n.localize("QE.XPtoAward.TOTAL") + totalXP;
         if (xpPerPlayer) {content += (game.i18n.localize("QE.XPtoAward.PERPLAYER") + xpPerPlayer);}
 

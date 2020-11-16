@@ -19,7 +19,7 @@ Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tra
 */
 
 
-import {QuickEncounter, MODULE_NAME, SCENE_ID_FLAG_KEY, TOKENS_FLAG_KEY} from './QuickEncounter.js';
+import {QuickEncounter} from './QuickEncounter.js';
 
 //Expand the available list of Note icons
 const moreNoteIcons = {

@@ -3,12 +3,13 @@
 ## BUGS
 v0.5.0 You still see and hear HP rolling with Token Mold, even though the saved tokens are not changed
 v0.5.3 NOT A BUG? In Foundry 0.7.3, doesn't create saved tokens correctly if they were made from a non-standard Actor
-v0.6.1: Can't change numeric field to die roll - try removing the actor and re-adding from the Journal Entry    
+v0.6.3 Saved tokens are removed when you switch to a die-roll to generate
 FIXED? v0.6.2: Warning about Map Note in the Journal Entry
         - move the creation of the Map Note before the render of the Journal Entry so you don't get a spurious warning
-
 v0.6.2: token.update and token.create could both fail if the data is missing - provide friendlier information for user    
->>>v0.6.2: Getting consistent token.create errors with Required field name on generated tokens
+        -   Getting  token.create errors with Required field name on generated tokens
+        - can't reproduce here
+FIXED in 0.6.3b? v0.6.2: XP award should be rounded in post-combat dialog
 
 ## FEATURES
 Add to Settings:
@@ -23,21 +24,20 @@ Add to Settings:
 - If you drag a Journal Entry to the Scene, then intercept to change the icon etc.
     - Partially done: could identify it's a Quick Encounter from the inclusion of Actor links
         but perhaps a better approach would be with a flag that was set
+- Allow tiles to be saved in the same way as tokens (from Issues)
 
-- XP to award dialog should have checkboxes for who awards XP and who gets it
 
+## VERSION 0.7
 More sophisticated monster entries:
     - Scan Journal Entries to turn into Actor links and Quick Encounters
     - Allow dynamic generation of which monsters (use a RollTable?)
-
-Show which Journal Entries have Quick Encounters in the Journal list
+- XP to award dialog should have checkboxes for who awards XP and who gets it
+- Show which Journal Entries have Quick Encounters in the Journal list
+- When the Companion dialog opens - show the token position as TEMPORARY tokens on the map - allow them to be moved or deleted    
 
 - Editing Companion dialog
     - Or JE-by-JE option to use new method; or global option   
         - Sync methods: Manual, JE-to-Companion, Companion-to-JE
-- When the Companion dialog opens - show the token position as TEMPORARY tokens on the map - allow them to be moved or deleted    
->>>Re-test with COmpendium links (they will break things)
-
 
 ## REFACTORING
 - Remove unused styles from .css
@@ -46,6 +46,8 @@ Show which Journal Entries have Quick Encounters in the Journal list
 - Improve the way the Journal Entry gets built to do more with the template and handlebars
 
 DOCS
+
+
 
 
 
@@ -88,6 +90,7 @@ FIXED in v0.6.1 Intro Je is no longer accurate with Companion Dialog method
 FIXED in 0.6.2: Scene not being saved or displayed
 FIXED in 0.6.2:  Note not being created - coords werent being saved
 FIXED in 0.6.3: 0.6.2: Flip the Old Embedded Setting to "Use Companion Dialog" ; add note about it becoming the default
+FIXED in 0.6.3 v0.6.1: Can't change numeric field to die roll - will need to validate 
 
 ## COMPLETED FEATURES
 (v0.4.0): If you're on a different scene, pops a dialog to check that you want to switch scenes
