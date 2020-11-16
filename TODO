@@ -4,8 +4,11 @@
 v0.5.0 You still see and hear HP rolling with Token Mold, even though the saved tokens are not changed
 v0.5.3 NOT A BUG? In Foundry 0.7.3, doesn't create saved tokens correctly if they were made from a non-standard Actor
 v0.6.1: Can't change numeric field to die roll - try removing the actor and re-adding from the Journal Entry    
-
-       
+>>>v0.6.2: Warning about Map Note in the Journal Entry
+        - move the creation of the Map Note before the render of the Journal Entry so you don't get a spurious warning
+>>>v0.6.2: Flip the Old Embedded Setting to "Use Companion Dialog" ; add note about it becoming the default
+v0.6.2: token.update and token.create could both fail if the data is missing - provide friendlier information for user    
+>>>v0.6.2: Getting consistent token.create errors with Required field name on generated tokens
 
 ## FEATURES
 Add to Settings:

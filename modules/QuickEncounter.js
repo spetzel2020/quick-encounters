@@ -95,6 +95,7 @@
                 v0.6.2a: addTokens(): Ignore undefined savedTokens from old method
                 Make useEmbeddedMethod=false the default going forward
                 v0.6.2b: Bug fix: Use game.scenes.viewed to populate the name of the created Journal Entry
+                Add a try/catch around tokens.update (because of problems with missing data)
 */
 
 
@@ -755,7 +756,10 @@ export class QuickEncounter {
         //v0.6.1d: If freezeCapturedTokens = true, then reset the savedTokens
         for (let i=0; i<expandedTokenData.length; i++) {
             if (freezeCapturedTokens && expandedTokenData[i].isSavedToken) {
-                createdTokens[i] = await createdTokens[i].update(expandedTokenData[i]);
+                //Ignore errors that happen during this update
+                try {
+                    createdTokens[i] = await createdTokens[i].update(expandedTokenData[i]);
+                } catch {}
             }
             //0.6.1: If you use Alt-Run then create all tokens hidden regardless of how they were saved; Ctrl-Run make them visible
             //(generated tokens are hidden by default; saved tokens retain their original visibility unless overridden)
