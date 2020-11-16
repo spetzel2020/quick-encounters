@@ -94,6 +94,7 @@
                 extractQuickEncounter(): Code old method with qeVersion=0.5
                 v0.6.2a: addTokens(): Ignore undefined savedTokens from old method
                 Make useEmbeddedMethod=false the default going forward
+                v0.6.2b: Bug fix: Use game.scenes.viewed to populate the name of the created Journal Entry
 */
 
 
@@ -293,11 +294,14 @@ export class QuickEncounter {
         for (const token of controlledTokens) {
             controlledTokensData.push(token.data);
         }
-        let newSavedTokensData = controlledTokensData;
+        let oldSavedTokensData = [];
         this.extractedActors.forEach(eActor => {
             //0.6.2: Bug: Old embedded method was concatenating undefined savedTokensData
-            if (eActor.savedTokensData) newSavedTokensData = newSavedTokensData.concat(eActor.savedTokensData)
+            if (eActor.savedTokensData) oldSavedTokensData = oldSavedTokensData.concat(eActor.savedTokensData)
         });
+        const newSavedTokensData = oldSavedTokensData.concat(controlledTokensData);
+        //0.6.2: If we don't already have coords, then use the tokens we just added
+        if (!this.coords) {this.coords = {x: newSavedTokensData[0].x, y: newSavedTokensData[0].y}}
 
         //Find set of distinct actors
         let tokenActorIDs = new Set();
@@ -370,7 +374,7 @@ export class QuickEncounter {
 
         const journalData = {
             folder: null,
-            name:  `Quick Encounter: ${quickEncounter.scene?.name}`,
+            name:  `Quick Encounter: ${game.scenes?.viewed?.name}`,
             content: content,
             type: "encounter",
             types: "base"
@@ -380,14 +384,13 @@ export class QuickEncounter {
         const ejSheet = new JournalSheet(journalEntry);
         ejSheet.render(true);   //0.6.1: This will also pop-open a companion sheet if you have that setting
 
-        //And create the Map Note (otherwise it will ask when you close the Journal Entry)
-        EncounterNote.place(journalEntry);
-
         //Update the Quick Encounter with the Journal Entry info
 //FIXME: Better process for setting this - maybe a setter        
         quickEncounter.journalEntryId = journalEntry.id;
         //v0.6.1k Update the created/changed QuickEncounter into the Journal Entry
         quickEncounter.serializeIntoJournalEntry();
+        //And create the Map Note (otherwise it will ask when you close the Journal Entry)
+        EncounterNote.place(quickEncounter);
     }
 
 
@@ -576,7 +579,7 @@ export class QuickEncounter {
         // Switch to the correct scene if confirmed
         const qeScene = QuickEncounter.getEncounterScene(qeJournalEntry);
         //If there isn't a Map Note anywhere, prompt to create one in the center of the view
-        if (!qeScene) {EncounterNote.noMapNoteDialog(qeJournalEntry);}
+        if (!qeScene) {EncounterNote.noMapNoteDialog(this);}
         const isPlaced = await EncounterNote.mapNoteIsPlaced(qeScene, qeJournalEntry);
         if (!isPlaced ) {return;}
 

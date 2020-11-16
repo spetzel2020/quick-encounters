@@ -41,6 +41,7 @@ Show which Journal Entries have Quick Encounters in the Journal list
 ## REFACTORING
 - Remove unused styles from .css
 - addTokens: Could just add the tokens one by one rather than filtering etc.
+    - Need to refactor so we use a constructor or factory rather than setting individual instance parameters
 - Improve the way the Journal Entry gets built to do more with the template and handlebars
 
 DOCS

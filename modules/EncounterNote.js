@@ -15,6 +15,7 @@ Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tra
 27-Sep-2020     v0.5.0: Bypass the Note Config sheet - just create it and allow for updating later
                 v0.5.0: NYI: Base code for Hook on renderNoteCOnfig to change it to look like a QE Note (but need a way of determining a QE Note)
 9-Nov-2020      v0.6.1: Refactor Map Note related functions here: switchToMapNoteScene(), noMapNoteDialog(), mapNoteIsPlaced()
+15-Nov-2020     v0.6.2: Refactor to use quickEncounter rather than journalEntry
 */
 
 
@@ -40,11 +41,11 @@ export class EncounterNoteConfig extends NoteConfig {
 }
 
 export class EncounterNote {
-    static async create(journalEntry, noteAnchor) {
-        if (!journalEntry) {return;}
+    static async create(quickEncounter, noteAnchor) {
+        if (!quickEncounter) {return;}
         // Create Note data
         const noteData = {
-              entryId: journalEntry.id,
+              entryId: quickEncounter.journalEntryId,
               x: noteAnchor.x,
               y: noteAnchor.y,
               icon: CONFIG.JournalEntry.noteIcons.Combat,
@@ -109,16 +110,15 @@ export class EncounterNote {
         });
     }
 
-    static async place(qeJournalEntry, options={}) {
-        if (!qeJournalEntry) {return;}
-        const savedTokens = qeJournalEntry.getFlag(MODULE_NAME, TOKENS_FLAG_KEY);
+    static async place(quickEncounter, options={}) {
+        if (!quickEncounter) {return;}
 
         //Create a Map Note for this encounter - the default is where the saved Tokens were
         let noteAnchor = {}
-        if (savedTokens && savedTokens.length) {
+        if (quickEncounter.coords) {
             noteAnchor = {
-                x: savedTokens[0].x,
-                y: savedTokens[0].y
+                x: quickEncounter.coords.x,
+                y: quickEncounter.coords.y
             }
         } else if (options.placeDefault) {
             //Otherwise, place it in the middle of the canvas stage (current view)
@@ -131,7 +131,7 @@ export class EncounterNote {
         if (canvas.grid.hitArea.contains(noteAnchor.x, noteAnchor.y) ) {
             // Create a Note; we don't pop-up the Note sheet because we really want this Note to be placed
             //(they can always edit it afterwards)
-            const newNote = await EncounterNote.create(qeJournalEntry, noteAnchor);
+            const newNote = await EncounterNote.create(quickEncounter, noteAnchor);
         }
     }
 
@@ -149,12 +149,12 @@ export class EncounterNote {
         return qeJournalEntry.sceneNote;
     }
 
-    static async noMapNoteDialog(qeJournalEntry) {
+    static async noMapNoteDialog(quickEncounter) {
         Dialog.confirm({
             title: game.i18n.localize("QE.NoMapNote.TITLE"),
             content : game.i18n.localize("QE.NoMapNote.CONTENT"),
             yes : async () => {
-                EncounterNote.place(qeJournalEntry, {placeDefault : true});
+                EncounterNote.place(quickEncounter, {placeDefault : true});
                 return true;
             }
         });
