@@ -1,5 +1,5 @@
 # Quick Encounters
-NEW in v0.6! Use Compendium Actors for infrequent Encounters, add tokens to existing Quick Encounters, use dice rolls for number of Actors, GM display of Combat XP and per player token - see [Release Notes](https://github.com/opus1217/quick-encounters/blob/v0.6.3/CHANGELOG.md#changelog)
+NEW in v0.6! Add tokens to existing Quick Encounters, use die rolls for number of Actors, GM display of Combat XP and per player token - see [Release Notes](https://github.com/opus1217/quick-encounters/blob/v0.6.3/CHANGELOG.md#changelog)
 * **Author**: Spetzel#0103
 * **Version**: 0.6.3
 * **Foundry VTT Compatibility**: 0.6.5-0.7.7
