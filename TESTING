@@ -45,6 +45,6 @@ CHECK VISIBILITY FOR A PLAYER
 BUG FIXES
 FIXED in 0.6.3: 0.6.2: Flip the Old Embedded Setting to "Use Companion Dialog" ; add note about it becoming the default
 FIXED in 0.6.3 v0.6.1: Can't change numeric field to die roll - will need to validate 
-TEST: FIXED in 0.6.3b v0.6.2: XP award should be rounded in post-combat dialog
-TEST: FIXED in v0.6.2: Warning about Map Note in the Journal Entry
+FIXED in 0.6.3b v0.6.2: XP award should be rounded in post-combat dialog
+FIXED in v0.6.2: Warning about Map Note in the Journal Entry
         - move the creation of the Map Note before the render of the Journal Entry so you don't get a spurious warning
