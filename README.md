@@ -39,6 +39,9 @@ Quick Encounters works well with [TokenMold](https://github.com/Moerill/token-mo
 4. To run your Quick Encounter, simply double-click the map pin to open the Quick Encounter Journal Entry.
 5. Click the Quick Encounter button: your saved tokens will be positioned around the map note, and added to the Combat Tracker.
 
+## The New Companion dialog
+![CompanionDialog](https://github.com/spetzel2020/quick-encounters/blob/master/img/CompanionDialog.png)
+
 ## Contributions
 *Coming Soon!*
 
