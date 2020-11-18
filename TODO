@@ -7,9 +7,7 @@ v0.5.3 NOT A BUG? In Foundry 0.7.3, doesn't create saved tokens correctly if the
 v0.6.2: token.update and token.create could both fail if the data is missing - provide friendlier information for user    
         -   Getting  token.create errors with Required field name on generated tokens
         - can't reproduce here
-v0.6.4: Can't zero out/clear Actors in JEs with only Companion Dialog?
-        - is working, but the check for not popping it up is faulty        
-
+     
 
 ## FEATURES
 Add to Settings:
@@ -27,8 +25,7 @@ Add to Settings:
 - Allow tiles to be saved in the same way as tokens (from Issues)
 
 
-
-## VERSION 0.7
+### Version 0.7
 More sophisticated monster entries:
     - Scan Journal Entries to turn into Actor links and Quick Encounters
     - Allow dynamic generation of which monsters (use a RollTable?)
@@ -43,10 +40,10 @@ More sophisticated monster entries:
 ## REFACTORING
 - Remove unused styles from .css
 - addTokens: Could just add the tokens one by one rather than filtering etc.
-    - Need to refactor so we use a constructor or factory rather than setting individual instance parameters
+    - Need to refactor so we use a constructor or factory rather than setting individual instance parameters outside the class
 - Improve the way the Journal Entry gets built to do more with the template and handlebars
 
-DOCS
+## DOCS
 
 
 
@@ -95,6 +92,7 @@ FIXED in 0.6.3 v0.6.1: Can't change numeric field to die roll - will need to val
 FIXED in 0.6.3b v0.6.2: XP award should be rounded in post-combat dialog
 FIXED in v0.6.2: Warning about Map Note in the Journal Entry
         - move the creation of the Map Note before the render of the Journal Entry so you don't get a spurious warning
+FIXED in v0.6.4: With no embedded Actors, the Companion dialog wasn't closing when all Actors were removed
 
 ## COMPLETED FEATURES
 (v0.4.0): If you're on a different scene, pops a dialog to check that you want to switch scenes
