@@ -97,7 +97,9 @@
                 v0.6.2b: Bug fix: Use game.scenes.viewed to populate the name of the created Journal Entry
                 Add a try/catch around tokens.update (because of problems with missing data)
                 v0.6.3: Switch Use Embedded OPtion to Use Companion Dialog option
-16-Nov-2020     v0.6.3b: onDeleteCombat(): Round computed XP per player                
+16-Nov-2020     v0.6.3b: onDeleteCombat(): Round computed XP per player    
+17-Nov-2020     v0.6.4: Method 3: Open a vanilla Journal Entry and ask if you want to add selected tokens to it   
+                QEDialog.buttons3: Remove the 3rd button if the 3rd callback isn't provided         
 */
 
 
@@ -105,7 +107,7 @@ import {EncounterNote} from './EncounterNote.js';
 import {EncounterCompanionSheet} from './EncounterCompanionSheet.js';
 
 export const MODULE_NAME = "quick-encounters";
-export const MODULE_VERSION = "0.6.3";
+export const MODULE_VERSION = "0.6.4";
 
 export const TOKENS_FLAG_KEY = "tokens";
 export const QE_JSON_FLAG_KEY = "quickEncounter";
@@ -115,11 +117,11 @@ export const QE_JSON_FLAG_KEY = "quickEncounter";
 export const dieRollReg = /^([0-9]+\s*d[4,6,8,10,12](?:\s*[+,-]\s*[0-9]+)*)/;
 
 export class QuickEncounter {
-    constructor(qeData) {
+    constructor(qeData={}) {
         if (!qeData) {return;}
         this.journalEntryId = qeData.journalEntryId;
         //In v0.6 this contains savedTokensData
-        this.extractedActors = qeData.extractedActors ?? [];
+        this.extractedActors = qeData.extractedActors;
         
         //VERSION 0.5 (or <= 0.6)
         if (!qeData.qeVersion || qeData.qeVersion < 0.6) {
@@ -136,7 +138,17 @@ export class QuickEncounter {
         //this.scene = qeData.savedTokensData ? qeData.savedTokensData[0]?.scene : null;
     }
     
-    async serializeIntoJournalEntry() {
+    async serializeIntoJournalEntry(journalEntryId) {
+        /*Handles three possibilities as a form of polymorphism:
+        1. journalEntryId is non-null and this.journalEntryId is non null; set the qe.journalEntryId and update
+        2. journalEntryId is null, but the qe.journalEntryId is non-null - update
+        3. journalEntryId is null, and qe.journalEntryId is null - do nothing
+        */
+        if (!this.journalEntryId) {
+            if (!journalEntryId) {return;}
+            this.journalEntryId = journalEntryId;
+        }
+
         const qeJournalEntry = game.journal.get(this.journalEntryId);
         //v0.6.1 - store created quickEncounter - but can't store object, so serialize data
         this.qeVersion = MODULE_VERSION;
@@ -247,17 +259,19 @@ export class QuickEncounter {
 
     static runAddOrCreate(event) {
         //Called when you press the Quick Encounters button (fist) from the sidebar
-        //If you are controlling tokens, it assumes that's the Encounter you want to create unless (0.6.1) you have an open Quick Encounter
+        //If you are controlling tokens it creates a new Quick Encounter Journal Entry
+        //0.6.4: If there's an open Journal Entry it asks if you want to add the tokens to it or run it
         //Method 1: Get the selected tokens and the scene
         //Exclude friendly tokens unless you say yes to the dialog
         const controlledTokens = Array.from(canvas.tokens.controlled);
         const controlledNonFriendlyTokens = controlledTokens?.filter(t => t.data?.disposition !== TOKEN_DISPOSITIONS.FRIENDLY );
         const controlledFriendlyTokens = controlledTokens?.filter(t => t.data?.disposition === TOKEN_DISPOSITIONS.FRIENDLY );
-        const quickEncounter = QuickEncounter.findCandidateJournalEntry();
+        const candidateJournalEntry = QuickEncounter.findCandidateJournalEntry();
+        const quickEncounter = (candidateJournalEntry instanceof QuickEncounter ) ? candidateJournalEntry : null;
 
         //v0.6.1 If you have both controlledNonFriendly tokens AND an open Quick Encounter, ask if you want to add to it
         if (controlledTokens && controlledTokens.length) {
-            if (quickEncounter && controlledNonFriendlyTokens && controlledNonFriendlyTokens.length) {
+            if (quickEncounter && controlledNonFriendlyTokens?.length) {
                 QEDialog.buttons3({
                     title: game.i18n.localize("QE.AddToQuickEncounter.TITLE"),
                     content: game.i18n.localize("QE.AddToQuickEncounter.CONTENT"),
@@ -266,13 +280,23 @@ export class QuickEncounter {
                     button3cb: () => { QuickEncounter.createFromTokens(controlledTokens)},
                     buttonLabels : ["QE.AddToQuickEncounter.RUN",  "QE.AddToQuickEncounter.ADD",  "QE.AddToQuickEncounter.CREATE"]
                 });
-            } else if (controlledFriendlyTokens && controlledFriendlyTokens.length) {
+            } else if (candidateJournalEntry &&  controlledNonFriendlyTokens?.length) {
+                //Ask if you want to add the tokens or create a new Journal Entry
+                QEDialog.buttons3({
+                    title: game.i18n.localize("QE.LinkToQuickEncounter.TITLE"),
+                    content: game.i18n.localize("QE.LinkToQuickEncounter.CONTENT"),
+                    button1cb: () => {QuickEncounter.link(candidateJournalEntry,controlledTokens)},
+                    button2cb: () => {QuickEncounter.createFromTokens(controlledTokens)},
+                    button3cb: null,
+                    buttonLabels : ["QE.LinkToQuickEncounter.LINK",  "QE.AddToQuickEncounter.CREATE"]
+                });
+            } else if (controlledFriendlyTokens?.length) {
                 Dialog.confirm({
                   title: game.i18n.localize("QE.IncludeFriendlies.TITLE"),
                   content: game.i18n.localize("QE.IncludeFriendlies.CONTENT"),
                   yes: () => {QuickEncounter.createFromTokens(controlledTokens)},
                   no: () => {
-                      if (controlledNonFriendlyTokens.length) {QuickEncounter.createFromTokens(controlledNonFriendlyTokens);}
+                      if (controlledNonFriendlyTokens?.length) {QuickEncounter.createFromTokens(controlledNonFriendlyTokens);}
                   }
                 });
             } else {
@@ -287,6 +311,20 @@ export class QuickEncounter {
         }
     }
 
+    static createQuickEncounterAndAddTokens(controlledTokens) {
+        let quickEncounter = new QuickEncounter();    //empty QuickEncounter   
+        quickEncounter.addTokens(controlledTokens);     //This will also update extractedActors etc.
+        return quickEncounter;
+    }
+
+    static link(openJournalSheet, controlledTokens) {
+        let quickEncounter = QuickEncounter.createQuickEncounterAndAddTokens(controlledTokens);
+        const journalEntry = openJournalSheet?.object;
+        quickEncounter.serializeIntoJournalEntry(journalEntry.id);
+        //Force a re-render which should pop up the COopanion dialog
+        openJournalSheet?.render(true);
+    }
+
 
     async addTokens(controlledTokens) {
         //Add the new tokens to the existing ones (or creates new ones)
@@ -296,7 +334,8 @@ export class QuickEncounter {
             controlledTokensData.push(token.data);
         }
         let oldSavedTokensData = [];
-        this.extractedActors.forEach(eActor => {
+        //0.6.4: Allow for no existing extractedActors (no longer setting this to [] in the constructor)
+        this.extractedActors?.forEach(eActor => {
             //0.6.2: Bug: Old embedded method was concatenating undefined savedTokensData
             if (eActor.savedTokensData) oldSavedTokensData = oldSavedTokensData.concat(eActor.savedTokensData)
         });
@@ -319,7 +358,7 @@ export class QuickEncounter {
             //findIndex() returns -1 if not found
             const extractedActorIndex = this.extractedActors?.findIndex(eActor => eActor.actorID === tokenActorID);
             //Option 1. We don't find this actor - then add a new Actor
-            if (extractedActorIndex < 0) {
+            if (!extractedActorIndex || (extractedActorIndex < 0)) {
                 const actor = game.actors.get(tokenActorID);
                 const newExtractedActor = {
                     numActors : numTokens,
@@ -328,6 +367,8 @@ export class QuickEncounter {
                     name : actor?.name,
                     savedTokensData : tokensData
                 }
+                //v0.6.4 No longer setting extractedActors=[] in constructor
+                if (!this.extractedActors) {this.extractedActors = [];}
                 this.extractedActors.push(newExtractedActor);
             } else if (typeof this.extractedActors[extractedActorIndex].numActors === "number") {
                 //Option 2: if we now have more tokens than actors, expand the number of actors
@@ -360,8 +401,7 @@ export class QuickEncounter {
         if (!controlledTokens) {return;}
 
 //Seems inelegant - especially since we'd like to update the journalEntry        
-        let quickEncounter = new QuickEncounter({});    //empty QuickEncounter   
-        quickEncounter.addTokens(controlledTokens);     //This will also update extractedActors etc.
+        let quickEncounter = QuickEncounter.createQuickEncounterAndAddTokens(controlledTokens);
 
         //Create a new JournalEntry - the corresponding map note gets automatically created too
 //FIXME: Replace all this with a renderTemplate section using handlebars
@@ -383,11 +423,8 @@ export class QuickEncounter {
         let journalEntry = await JournalEntry.create(journalData);
         const ejSheet = new JournalSheet(journalEntry);
 
-        //Update the Quick Encounter with the Journal Entry info
-//FIXME: Better process for setting this - maybe a setter        
-        quickEncounter.journalEntryId = journalEntry.id;
         //v0.6.1k Update the created/changed QuickEncounter into the Journal Entry
-        quickEncounter.serializeIntoJournalEntry();
+        quickEncounter.serializeIntoJournalEntry(journalEntry.id);
 
         //And create the Map Note (otherwise it will ask when you close the Journal Entry)
         await EncounterNote.place(quickEncounter);
@@ -438,17 +475,20 @@ export class QuickEncounter {
     *
     */
     static findCandidateJournalEntry() {
+        //Return either a Quick Encounter, a Journal Sheet, or null (in order of priority)
         if (Object.keys(ui.windows).length === 0) {return null;}
         else {
-            let quickEncounter = null;
+            let openJournalSheet = null;
             for (let w of Object.values(ui.windows)) {
                 //Check open windows for a Journal Sheet with a Map Note and embedded Actors
                 if (w instanceof JournalSheet) {
-                    quickEncounter = QuickEncounter.extractQuickEncounter(w);
-                    if (quickEncounter) {break;}
+                    openJournalSheet = w;
+                    const quickEncounter = QuickEncounter.extractQuickEncounter(w);
+                    if (quickEncounter) {return quickEncounter;}
                 }
+                if (openJournalSheet) {return openJournalSheet;}
             }
-            return quickEncounter;
+            return null;
         }
     }
 
@@ -858,39 +898,44 @@ export class QuickEncounter {
 
 export class QEDialog extends Dialog {
     static async buttons3({title, content, button1cb, button2cb, button3cb, buttonLabels, options={}}) {
+        //Also can function as a generic 2-button dialog by passing button3b=null
             return new Promise((resolve, reject) => {
         const dialog = new this({
             title: title,
             content: content,
             buttons: {
-            button1: {
-                icon: null,
-                label: game.i18n.localize(buttonLabels[0]),
-                callback: html => {
-                const result = button1cb ? button1cb(html) : true;
-                resolve(result);
+                button1: {
+                    icon: null,
+                    label: game.i18n.localize(buttonLabels[0]),
+                    callback: html => {
+                    const result = button1cb ? button1cb(html) : true;
+                    resolve(result);
+                    }
+                },
+                button2: {
+                    icon: null,
+                    label: game.i18n.localize(buttonLabels[1]),
+                    callback: html => {
+                    const result = button2cb ? button2cb(html) : false;
+                    resolve(result);
+                    }
+                },
+                button3: {
+                    icon: null,
+                    label: game.i18n.localize(buttonLabels[2]),
+                    callback: html => {
+                    const result = button3cb ? button3cb(html) : false;
+                    resolve(result);
+                    }
                 }
-            },
-            button2: {
-                icon: null,
-                label: game.i18n.localize(buttonLabels[1]),
-                callback: html => {
-                const result = button2cb ? button2cb(html) : false;
-                resolve(result);
-                }
-            },
-            button3: {
-                icon: null,
-                label: game.i18n.localize(buttonLabels[2]),
-                callback: html => {
-                const result = button3cb ? button3cb(html) : false;
-                resolve(result);
-                }
-            }
             },
             default: "button1",
             close: () => reject
         }, options);
+
+        if (!button3cb) {
+            delete dialog.data.buttons.button3;
+        }
         dialog.render(true);
         });
     }

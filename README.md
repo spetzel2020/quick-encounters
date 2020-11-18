@@ -1,7 +1,7 @@
 # Quick Encounters
-NEW in v0.6! Add tokens to existing Quick Encounters, use die rolls for number of Actors, GM display of Combat XP and per player token, new Companion dialog - see [Release Notes](https://github.com/opus1217/quick-encounters/blob/v0.6.3/CHANGELOG.md#changelog)
+NEW in v0.6! Add tokens to existing Quick Encounters, use die rolls for number of Actors, GM display of Combat XP and per player token, new Companion dialog - see [Release Notes](https://github.com/opus1217/quick-encounters/blob/v0.6.4/CHANGELOG.md#changelog)
 * **Author**: Spetzel#0103
-* **Version**: 0.6.3
+* **Version**: 0.6.4
 * **Foundry VTT Compatibility**: 0.6.5-0.7.7
 * **System Compatibility (If applicable)**: N/A
 * **Translation Support**: en, es
@@ -21,13 +21,13 @@ Quick Encounters works well with [TokenMold](https://github.com/Moerill/token-mo
 
 # Install
 1. Go to the "Add-on Modules" tab in Foundry Setup
-2. Click "Install Module" and search for **Quick Encounters** OR paste this link: `https://raw.githubusercontent.com/spetzel2020/quick-encounters/v0.6.3/module.json`
+2. Click "Install Module" and search for **Quick Encounters** OR paste this link: `https://raw.githubusercontent.com/spetzel2020/quick-encounters/v0.6.4/module.json`
 3. Open your world and go to Settings>Manage Modules and enable Quick Encounters
 
 # Using Quick Encounters
 ## Method 1 (like Fantasy Grounds "Encounters")
 1. Drag your Hostile tokens to the map and select them
-2. Then press the Quick Encounters button (in the Basic Controls palette on the left) and your tokens and their positions are saved into a Quick Encounter Journal Entry
+2. Then click the Quick Encounters button (in the Basic Controls palette on the left) and your tokens and their positions are saved into a Quick Encounter Journal Entry
 3. Close the Journal Entry and you will see a Quick Encounter Map Note
 4. Press "Save Map Note" to automatically place a single map pin on the Scene map.
 5. To run your Quick Encounter, simply double-click the map pin and click the "Add to Combat Tracker" button; all your saved tokens will be positioned on the map and added to the combat tracker, ready to fight!
@@ -38,6 +38,13 @@ Quick Encounters works well with [TokenMold](https://github.com/Moerill/token-mo
 3. Now drag the placed Journal Entry Note to the Scene map at the desired encounter position.
 4. To run your Quick Encounter, simply double-click the map pin to open the Quick Encounter Journal Entry.
 5. Click the Quick Encounter button: your saved tokens will be positioned around the map note, and added to the Combat Tracker.
+
+## Method 3 (save tokens into existing Journal Entries)
+If you have a licensed module with existing Journal Entries you probably don't want to edit all of them to insert Actors (Method 2). If you're using the new Companion Dialog instead:
+1. Drag Hostile tokens (representing the Encounter) to the Scene
+2. Open the Journal Entry you want to associate the Quick Encounter
+3. Click the Quick Encounter button and you will be asked if you want to create a new Encounter (Method 1) or add the tokens to this Journal Entry,
+4. To run the Encounter later, open the Journal Entry and use the Run Quick Encounter button in the Companion Dialog
 
 ## The New Companion dialog
 ![CompanionDialog](https://github.com/spetzel2020/quick-encounters/blob/master/img/CompanionDialog.png)

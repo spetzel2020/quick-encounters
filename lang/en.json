@@ -1,8 +1,8 @@
 {
   "QE.id": "quick-encounters",
-  "QE.Version" : "v0.6.3",
+  "QE.Version" : "v0.6.4",
   "QE.Name": "Quick Encounters",
-  "QE.Welcome" : "Welcome to Quick Encounters v0.6.3",
+  "QE.Welcome" : "Welcome to Quick Encounters v0.6",
   "QE.Description": "Pin your Encounters to the Scene or in the Journal and run them with one click!<h4>Method 1:</h4><p>Place and select your hostile tokens and click the <i class='fas fa-fist-raised'></i>Quick Encounter button to save them into an Encounter Journal Entry. To run the Encounter, double-click the Combat icon and click the Run Quick Encounter button</p><h4>Method 2:</h4><p>Create a Journal Entry with your descriptive text. Drag Actors into the Journal Entry. Drag the Journal Entry to the desired Encounter location on your map. To run the Encounter, select the Map Note, or open the Encounter Journal Entry and click the Quick Encounters button",
   "QE.Instructions.CONTENT" : "<strong>Your tokens and their positions have been saved in this Journal Entry and replaced with a single Quick Encounter Note.</strong><br><br>To run the Quick Encounter, double-click the Map Note icon and then click the Run Quick Encounter button.<br><br><h3>Quick Encounter</h3><p><i>Add a description of the Quick Encounter for you or your players:</i></p><br>",
   "QE.TotalXP.CONTENT" : "<br>Encounter total (not including random):",
@@ -27,6 +27,10 @@
   "QE.AddToQuickEncounter.ADD" : "Add",
   "QE.AddToQuickEncounter.RUN" : "Run",
   "QE.AddToQuickEncounter.CREATE" : "Create New",
+  "QE.LinkToQuickEncounter.TITLE": "Link a Quick Encounter?",
+  "QE.LinkToQuickEncounter.CONTENT": "You have an open Journal Entry and selected Hostile tokens; do you want to Link a Quick Encounter to this Journal Entry, or Create a New Quick Encounter?",
+  "QE.LinkToQuickEncounter.LINK": "Link",
+  "QE.LinkToQuickEncounter.CREATE": "Create New",
   "QE.MoreActorsThanTokens.TITLE" : "Ok to create more tokens?",
   "QE.MoreActorsThanTokens.CONTENT" : "You have {{numExcessActors}} more Actors than saved tokens. Create more tokens?",
   "QE.HowToUse.TITLE" : "How to use Quick Encounters",
@@ -46,6 +50,6 @@
   "QE.UseCompanionDialog.HINT" : "The new companion dialog (default in 0.6) pops up next to the Quick Encounter Journal Entry and lets you add or remove actors/tokens and quickly run the Encounter, without having to scroll through the Journal Entry for the actors or Quick Encounter button",
   "QE.CompanionDialog.INTRO" : "Checkmarks show which Actors have saved tokens; to save more, select them on the Scene and press the Quick Encounter (fist) button. You can also change the number of existing Actors below (clear field to remove an Actor).<br><strong>Warning: </strong>Changes you make here will not (yet) synchronize with the Journal Entry",
   "QE.CompanionDialog.Save.BUTTON" : "Save",
-   "QE.CompanionDialog.PS" : "<p><i>This is the new Quick Encounters companion dialog. Check </i><strong>Use old embedded method</strong><i> in Settings if you want to switch back.</i></p>",
+   "QE.CompanionDialog.PS" : "<p><i>This is the new Quick Encounters companion dialog. Uncheck </i><strong>Use new companion dialog</strong><i> in Settings if you want to switch back.</i></p>",
    "QE.CompanionDialog.InvalidNumActors.WARNING" : "Enter blank, a positive integer, or a die roll (for example, 2d6+5); you entered an invalid number: "
 }

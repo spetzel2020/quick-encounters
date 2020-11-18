@@ -3,10 +3,12 @@
 ## BUGS
 v0.5.0 You still see and hear HP rolling with Token Mold, even though the saved tokens are not changed
 v0.5.3 NOT A BUG? In Foundry 0.7.3, doesn't create saved tokens correctly if they were made from a non-standard Actor
-v0.6.3 Saved tokens are removed when you switch to a die-roll to generate
+>>>v0.6.3 Saved tokens are removed when you switch to a die-roll to generate
 v0.6.2: token.update and token.create could both fail if the data is missing - provide friendlier information for user    
         -   Getting  token.create errors with Required field name on generated tokens
         - can't reproduce here
+v0.6.4: Can't zero out/clear Actors in JEs with only Companion Dialog?
+        - is working, but the check for not popping it up is faulty        
 
 
 ## FEATURES
@@ -18,8 +20,6 @@ Add to Settings:
     - save with the Journal Entry as a flag; but then how do you turn it on again?
     - embed a QE Journal Entry
 >>> Add a link to open the Companion Sheet in Journal Entries    
-
->>>Open a vanilla Journal Entry, select tokens, and press the QE button to turn this into a QE              Should open an ADD vs. CREATE dialog
 
 - If you drag a Journal Entry to the Scene, then intercept to change the icon etc.
     - Partially done: could identify it's a Quick Encounter from the inclusion of Actor links
@@ -92,8 +92,8 @@ FIXED in 0.6.2: Scene not being saved or displayed
 FIXED in 0.6.2:  Note not being created - coords werent being saved
 FIXED in 0.6.3: 0.6.2: Flip the Old Embedded Setting to "Use Companion Dialog" ; add note about it becoming the default
 FIXED in 0.6.3 v0.6.1: Can't change numeric field to die roll - will need to validate 
-TEST: FIXED in 0.6.3b v0.6.2: XP award should be rounded in post-combat dialog
-TEST: FIXED in v0.6.2: Warning about Map Note in the Journal Entry
+FIXED in 0.6.3b v0.6.2: XP award should be rounded in post-combat dialog
+FIXED in v0.6.2: Warning about Map Note in the Journal Entry
         - move the creation of the Map Note before the render of the Journal Entry so you don't get a spurious warning
 
 ## COMPLETED FEATURES
@@ -125,3 +125,4 @@ v0.6.1 If you open a Quick Encounter Journal Entry and then select token(s) and 
 v0.6.1  - Alt-Run should add ALL tokens Invisible; Ctrl-Run makes them all visible
 v0.6.1 - Make QuickEncounter more oo; create around the quickEncounter that is stored in the Journal Entry
 v0.6.1 Store saved tokens with the Actors so they don't have to be reconstituted
+v0.6.4 Open a vanilla Journal Entry, select tokens, and press the QE button to turn this into a QE
