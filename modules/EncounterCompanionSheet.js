@@ -165,6 +165,8 @@ export class EncounterCompanionSheet extends FormApplication {
                 this.quickEncounter?.update({extractedActors : extractedActors});
             } else {
                 this.quickEncounter?.remove();
+                //And close this sheet
+                this.close();
             }
         }
 
