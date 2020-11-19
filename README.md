@@ -1,7 +1,7 @@
 # Quick Encounters
 NEW in v0.6! Add tokens to existing Quick Encounters, use die rolls for number of Actors, GM display of Combat XP and per player token, new Quick Encounter dialog - see [Release Notes](https://github.com/opus1217/quick-encounters/blob/v0.6.4/CHANGELOG.md#changelog)
 * **Author**: Spetzel#0103
-* **Version**: 0.6.4
+* **Version**: 0.6.5
 * **Foundry VTT Compatibility**: 0.6.5-0.7.7
 * **System Compatibility (If applicable)**: N/A
 * **Translation Support**: en, es
@@ -21,7 +21,7 @@ Quick Encounters works well with [TokenMold](https://github.com/Moerill/token-mo
 
 # Install
 1. Go to the "Add-on Modules" tab in Foundry Setup
-2. Click "Install Module" and search for **Quick Encounters** OR paste this link: `https://raw.githubusercontent.com/spetzel2020/quick-encounters/v0.6.4/module.json`
+2. Click "Install Module" and search for **Quick Encounters** OR paste this link: `https://raw.githubusercontent.com/spetzel2020/quick-encounters/v0.6.5/module.json`
 3. Open your world and go to Settings>Manage Modules and enable Quick Encounters
 
 # Using Quick Encounters

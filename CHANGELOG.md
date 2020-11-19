@@ -6,10 +6,10 @@
 - Use die rolls for number of Actors (e.g. 2d6)
 - GM display of Combat XP and per player token
 
-## 0.6.4
+## 0.6.5
 - Fixed bug: Previouly you would get repeats of the actor if you added tokens for the first Actor 
 - Changed CompanionDialog to QuickEncounterDialog throughout for consistency
-- 
+- Fixed bug: Changing number to a dice roll no longer deletes saved tokens
 ## 0.6.3
 - Switch Use Embedded to Use Companion Dialog
 ## 0.6.2

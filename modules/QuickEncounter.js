@@ -101,7 +101,7 @@
 17-Nov-2020     v0.6.4: Method 3: Open a vanilla Journal Entry and ask if you want to add selected tokens to it   
                 QEDialog.buttons3: Remove the 3rd button if the 3rd callback isn't provided    
 18-Nov-2020     v0.6.4c: Tweaked test for extractedActorIndex to not take this path on 0
-                getNumActors: Now takes rollType parameter "full" (which rolls randomly) or "template" which rolls max
+                getNumActors: Now takes rollType parameter "full" (which rolls randomly) or "template" which rolls
 */
 
 
@@ -109,7 +109,7 @@ import {EncounterNote} from './EncounterNote.js';
 import {EncounterCompanionSheet} from './EncounterCompanionSheet.js';
 
 export const MODULE_NAME = "quick-encounters";
-export const MODULE_VERSION = "0.6.4";
+export const MODULE_VERSION = "0.6.5";
 
 export const TOKENS_FLAG_KEY = "tokens";
 export const QE_JSON_FLAG_KEY = "quickEncounter";
