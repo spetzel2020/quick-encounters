@@ -137,7 +137,7 @@ export class EncounterCompanionSheet extends FormApplication {
                        
                     } else {
                         //otherwise leave unchanged - should pop up a dialog or highlight the field in red
-                        const warning = game.i18n.localize("QE.CompanionDialog.InvalidNumActors.WARNING") + " " + numActors;
+                        const warning = game.i18n.localize("QE.QuickEncounterDialog.InvalidNumActors.WARNING") + " " + numActors;
                         ui.notifications.warn(warning);
                     }
                 }

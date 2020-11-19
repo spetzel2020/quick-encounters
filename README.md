@@ -1,5 +1,5 @@
 # Quick Encounters
-NEW in v0.6! Add tokens to existing Quick Encounters, use die rolls for number of Actors, GM display of Combat XP and per player token, new Companion dialog - see [Release Notes](https://github.com/opus1217/quick-encounters/blob/v0.6.4/CHANGELOG.md#changelog)
+NEW in v0.6! Add tokens to existing Quick Encounters, use die rolls for number of Actors, GM display of Combat XP and per player token, new Quick Encounter dialog - see [Release Notes](https://github.com/opus1217/quick-encounters/blob/v0.6.4/CHANGELOG.md#changelog)
 * **Author**: Spetzel#0103
 * **Version**: 0.6.4
 * **Foundry VTT Compatibility**: 0.6.5-0.7.7
@@ -40,14 +40,14 @@ Quick Encounters works well with [TokenMold](https://github.com/Moerill/token-mo
 5. Click the Quick Encounter button: your saved tokens will be positioned around the map note, and added to the Combat Tracker.
 
 ## Method 3 (save tokens into existing Journal Entries)
-If you have a licensed module with existing Journal Entries you probably don't want to edit all of them to insert Actors (Method 2). If you're using the new Companion Dialog instead:
+If you have a licensed module with existing Journal Entries you probably don't want to edit all of them to insert Actors (Method 2). If you're using the new Quick Encounter Dialog instead:
 1. Drag Hostile tokens (representing the Encounter) to the Scene
 2. Open the Journal Entry you want to associate the Quick Encounter
 3. Click the Quick Encounter button and you will be asked if you want to create a new Encounter (Method 1) or add the tokens to this Journal Entry,
-4. To run the Encounter later, open the Journal Entry and use the Run Quick Encounter button in the Companion Dialog
+4. To run the Encounter later, open the Journal Entry and use the Run Quick Encounter button in the Quick Encounter Dialog
 
-## The New Companion dialog
-![CompanionDialog](https://github.com/spetzel2020/quick-encounters/blob/master/img/CompanionDialog.png)
+## The New Quick Encounter dialog
+![QuickEncounterDialog](https://github.com/spetzel2020/quick-encounters/blob/master/img/CompanionDialog.png)
 
 ## Contributions
 *Coming Soon!*

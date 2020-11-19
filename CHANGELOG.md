@@ -1,11 +1,15 @@
 # Release Notes
 ## NEW in 0.6
-- Companion dialog which shows which actors have saved tokens and which will be generated
+- Quick Encounter dialog which shows which actors have saved tokens and which will be generated
 - Add tokens to existing Quick Encounters (open the Journal Entry, select the token(s), and click the Quick Encounter button)
 - Keyboard modifiers when you Run the Quick Encounter: Alt adds all invisible; Ctrl adds all visible
 - Use die rolls for number of Actors (e.g. 2d6)
 - GM display of Combat XP and per player token
 
+## 0.6.4
+- Fixed bug: Previouly you would get repeats of the actor if you added tokens for the first Actor 
+- Changed CompanionDialog to QuickEncounterDialog throughout for consistency
+- 
 ## 0.6.3
 - Switch Use Embedded to Use Companion Dialog
 ## 0.6.2

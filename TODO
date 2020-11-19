@@ -3,10 +3,7 @@
 ## BUGS
 v0.5.0 You still see and hear HP rolling with Token Mold, even though the saved tokens are not changed
 v0.5.3 NOT A BUG? In Foundry 0.7.3, doesn't create saved tokens correctly if they were made from a non-standard Actor
->>>v0.6.3 Saved tokens are removed when you switch to a die-roll to generate
-v0.6.2: token.update and token.create could both fail if the data is missing - provide friendlier information for user    
-        -   Getting  token.create errors with Required field name on generated tokens
-        - can't reproduce here
+    
      
 
 ## FEATURES
@@ -26,6 +23,7 @@ Add to Settings:
 
 
 ### Version 0.7
+- Add the QE button to the window of the Companion Dialog
 More sophisticated monster entries:
     - Scan Journal Entries to turn into Actor links and Quick Encounters
     - Allow dynamic generation of which monsters (use a RollTable?)
@@ -38,6 +36,7 @@ More sophisticated monster entries:
         - Sync methods: Manual, JE-to-Companion, Companion-to-JE
 
 ## REFACTORING
+- Refactor EncounterCompanionDialog to QuickEncounterDialog
 - Remove unused styles from .css
 - addTokens: Could just add the tokens one by one rather than filtering etc.
     - Need to refactor so we use a constructor or factory rather than setting individual instance parameters outside the class
@@ -93,6 +92,12 @@ FIXED in 0.6.3b v0.6.2: XP award should be rounded in post-combat dialog
 FIXED in v0.6.2: Warning about Map Note in the Journal Entry
         - move the creation of the Map Note before the render of the Journal Entry so you don't get a spurious warning
 FIXED in v0.6.4: With no embedded Actors, the Companion dialog wasn't closing when all Actors were removed
+FIXED in v0.6.4: Previouly you would get repeats of the actor if you added tokens for the first Actor
+CAN'T REPRODUCE in 0.6.4: v0.6.2: token.update and token.create could both fail if the data is missing - provide friendlier information for user    
+                -   Getting  token.create errors with Required field name on generated tokens
+CAN'T REPRODUCE: v0.6.4: If you make multiple changes to Actors (more than one line) get an array of numActors back
+FIXED in v0.6.4:  Saved tokens were being removed when you switched to a die-roll to generate; now shows slots forup to the max of the die roll
+
 
 ## COMPLETED FEATURES
 (v0.4.0): If you're on a different scene, pops a dialog to check that you want to switch scenes

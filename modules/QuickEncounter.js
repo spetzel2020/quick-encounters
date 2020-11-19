@@ -99,7 +99,9 @@
                 v0.6.3: Switch Use Embedded OPtion to Use Companion Dialog option
 16-Nov-2020     v0.6.3b: onDeleteCombat(): Round computed XP per player    
 17-Nov-2020     v0.6.4: Method 3: Open a vanilla Journal Entry and ask if you want to add selected tokens to it   
-                QEDialog.buttons3: Remove the 3rd button if the 3rd callback isn't provided         
+                QEDialog.buttons3: Remove the 3rd button if the 3rd callback isn't provided    
+18-Nov-2020     v0.6.4c: Tweaked test for extractedActorIndex to not take this path on 0
+                getNumActors: Now takes rollType parameter "full" (which rolls randomly) or "template" which rolls max
 */
 
 
@@ -209,9 +211,9 @@ export class QuickEncounter {
             default: true,
             type: Boolean
         });
-        game.settings.register(MODULE_NAME, "useCompanionDialog", {
-            name: game.i18n.localize("QE.UseCompanionDialog.NAME"),
-            hint: game.i18n.localize("QE.UseCompanionDialog.HINT"),
+        game.settings.register(MODULE_NAME, "useQuickEncounterDialog", {
+            name: game.i18n.localize("QE.UseQuickEncounterDialog.NAME"),
+            hint: game.i18n.localize("QE.UseQuickEncounterDialog.HINT"),
             scope: "world",
             config: true,
             default: true,  
@@ -358,7 +360,8 @@ export class QuickEncounter {
             //findIndex() returns -1 if not found
             const extractedActorIndex = this.extractedActors?.findIndex(eActor => eActor.actorID === tokenActorID);
             //Option 1. We don't find this actor - then add a new Actor
-            if (!extractedActorIndex || (extractedActorIndex < 0)) {
+            //NOTE: This test specifically uses ==null in order to check undefined and not incorrectly take this path if extractorActorIndex==0
+            if ((extractedActorIndex === null) || (extractedActorIndex === undefined) || (extractedActorIndex < 0)) {
                 const actor = game.actors.get(tokenActorID);
                 const newExtractedActor = {
                     numActors : numTokens,
@@ -668,7 +671,7 @@ export class QuickEncounter {
                     combinedTokenData = combinedTokenData.concat(savedTokensForThisActorID);
                     combinedTokenData = combinedTokenData.concat(eaTokensData.slice(0, numExcessActors));
                 } else if (numExcessActors < 0) {
-                    //Take all possible saved tokens up to the number
+                    //Take all possible saved tokens up to the number - if it's a dice roll, we rely on it being the max possible
                     combinedTokenData = combinedTokenData.concat(savedTokensForThisActorID.slice(0, eaTokensData.length));
                 }
             } else {
@@ -705,10 +708,15 @@ export class QuickEncounter {
         if (multiplier) {
             if (typeof multiplier === "number") {
                 numActors = multiplier;
-            } else if ((typeof multiplier === "string") && Roll.validate(multiplier) && options?.rollRandom) {
+            } else if ((typeof multiplier === "string") && Roll.validate(multiplier)) {
+                //v0.6.4: if options.rollType="full", then roll randomly; if ="template" then compute max
                 //v0.6: Pass the multiplier to the roll formula, which allows for a digit or a formula
                 let r= new Roll(multiplier);
-                r.evaluate();
+                if (options?.rollType === "full") {
+                    r.evaluate();
+                } else {//template or other
+                    r.evaluate({minimize: false, maximize: true});
+                }
                 numActors = r.total ? r.total : 1;
             } 
         }
@@ -738,7 +746,9 @@ export class QuickEncounter {
         //(without actually extracting Actor/Compendium data every time)
         const extractedActorTokenData = [];          
         for (const eActor of this.extractedActors) {
-            const numActors = QuickEncounter.getNumActors(eActor, {rollRandom: false});
+            //v0.6.4: For random rolls, need the max number returned here
+            const numActors = QuickEncounter.getNumActors(eActor, {rollType: "template"});
+//FIXME: Probably a more efficient way to fill an array 0..numActors-1            
             for (let iToken=0; iToken < numActors; iToken++ ) {
                 extractedActorTokenData.push({actorId: eActor.actorID, isSavedToken : false});
             }
@@ -754,7 +764,7 @@ export class QuickEncounter {
             const actor = await QuickEncounter.getActor(eActor);
             if (!actor) {continue;}     //possibly will happen with Compendium
 //FIXME: May have to update extractedActor with the imported actorId and then hopefully it won't re-import
-            const numActors = QuickEncounter.getNumActors(eActor, {rollRandom : true});
+            const numActors = QuickEncounter.getNumActors(eActor, {rollType : "full"});
 
              for (let iActor=1; iActor <= numActors; iActor++) {
                  //Slightly vary the (x,y) coords so we don't pile all the tokens on top of each other and make them hard to find
@@ -986,7 +996,7 @@ Hooks.on(`renderJournalSheet`, async (journalSheet, html) => {
         
         let qeJournalEntryIntro = "";
         //v0.6.1: Also pop open a companion dialog with details about what tokens have been placed and XP
-        if (game.settings.get(MODULE_NAME, "useCompanionDialog")) {
+        if (game.settings.get(MODULE_NAME, "useQuickEncounterDialog")) {
             const companionSheet = new EncounterCompanionSheet(quickEncounter, totalXPLine);
             companionSheet.render(true);
             journalSheet.companionSheet = companionSheet;
