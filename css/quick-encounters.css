@@ -1,0 +1,91 @@
+#QEContainers {
+    height: auto;
+    width: 100%;
+    min-height: 200px;
+}
+#QEContainers .group-container {
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -ms-box-sizing: border-box;
+    box-sizing: border-box;
+    width: 30%;
+}
+#QEContainers .group-legend {
+    width: auto;
+    margin-left: auto;
+    margin-right: auto;
+}
+#QEContainers .center-container {
+    width: 50%;
+}
+#QEContainers .group-field {
+    display: flex;
+    flex-wrap: wrap;
+    position: relative;
+}
+#QEContainers .actor-container {
+    opacity: 1;
+    position: relative;
+    margin: 0 auto;
+}
+#QEContainers .actor-portrait {
+    flex: 0 0 auto;
+    max-width: 50px;
+    height: 50px
+}
+#QEContainers .actor-subtract {
+    opacity: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+}
+#QEContainers .num-actors {
+    max-width: 45px;
+    margin-left: 5px
+}
+
+
+#QEContainers .actor-container:hover .actor-portrait {
+    opacity: 0.3;
+}
+#QEContainers .actor-container:hover .actor-subtract {
+    opacity: 0.8;
+}
+#QEContainers .difficulty-rating {
+    width: 70%;
+    margin: 0 auto;
+    text-align: center;
+}
+#QEContainers .difficulty-threshold {
+    width: 50%;
+    margin: 0 auto;
+    text-align: center;
+}
+#QEContainers .daily-budget {
+    width: 80%;
+    margin: 0 auto;
+    text-align: center;
+    padding-top: 10%;
+}
+
+#QEXP {
+    position: relative;
+    display: flex;
+    height: auto;
+    width: 100%;
+}
+#QEXP .scores {
+    width: 50%;
+    margin: 0 auto;
+    text-align: center;
+}
+#QEXP .clear{
+    position: absolute;
+    margin-top: 5%;
+    width: 15%;
+    height: 45%;
+    text-align: center;
+    transform: translate(550%, 0%);
+}

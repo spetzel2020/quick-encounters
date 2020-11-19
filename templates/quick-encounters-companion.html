@@ -1,0 +1,34 @@
+<form>
+    <div id="QEContainers">
+        <header>{{{localize 'QE.QuickEncounterDialog.INTRO'}}}</header>
+        <hr>
+        <div class="flexcol">
+            {{#each combatants}}
+                <div class="flexrow">
+                    <img class='actor-portrait' src="{{this.img}}" title="{{this.actorName}}" id="{{this.actorId}}" />
+                    <div class="flexcol">
+                        <div class="flexrow">
+                            <input type="String" name="{{this.actorId}}" class="num-actors" id="{{this.actorId}}" value={{this.numActors}}>
+                            x {{this.actorName}} {{this.xp}}
+                        </div>
+                        <div class="flexrow">
+                            {{#each this.tokens}}
+                                <input type="checkbox" {{#if this.isSavedToken}}{{checked}}{{/if}} disabled>
+                            {{/each}}
+                        </div>
+                    </div>
+                </div>
+            {{/each}}
+        </div>
+        {{{totalXPLine}}}<br>
+        <div class="flexrow">
+            <button type="button" name="addToCombatTracker"><i class="fas fa-fist-raised"></i>
+                {{localize 'QE.AddToCombatTracker.BUTTON'}}
+            </button>
+            <button type="submit" name="save">
+                {{localize 'QE.QuickEncounterDialog.Save.BUTTON'}}
+            </button>
+        </div>
+        <footer>{{{localize 'QE.QuickEncounterDialog.PS'}}}</footer>
+    </div>
+</form>

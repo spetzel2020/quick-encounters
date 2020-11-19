@@ -1,25 +1,50 @@
+TESTING WITH FOUNDRY 0.7.7
+
 TUTORIAL
-1. Press Quick Encounter button with nothing selected -> should pop up Tutorial     - OK in Foundry 0.7.3
-2. With Tutorial open, repeat #1 -> should keep existing Tutorial                  - OK in Foundry 0.7.3
-3. Close Tutorial -> should delete the Journal Entry                                 - OK in Foundry 0.7.3
-4. Open some Journal Entries with no embedded Actors, press QE button -> should open Tutorial    - OK in Foundry 0.7.3
-5. Open multiple Journal Entries with embedded Actors, press QE button -> should run the Encounter    - OK in Foundry 0.7.3
-6. Leave Tutorial Window open; create another Journal Entry, Save, and then close - should be kept  - OK in Foundry 0.7.3
+1. Press Quick Encounter button with nothing selected -> should pop up Tutorial 			             	OK
+2. With Tutorial open, repeat #1 -> should keep existing Tutorial                 	                        OK
+3. Close Tutorial -> should delete the Journal Entry                                					    OK
+4. Open some Journal Entries with no embedded Actors, press QE button -> should open Tutorial   		    OK
+5. Open multiple Journal Entries with embedded Actors, press QE button -> should run the Encounter		    OK	
+6. Leave Tutorial Window open; create another Journal Entry, Save, and then close - should be kept		    OK
     - was being deleted in 0.5.2 because it was finding the Tutorial Window
 
 
 METHOD 1
-1. Select one friendly token and press QE button -> should ask if you want to add to JE       - OK in Foundry 0.7.3
-2. Select multiple friendly and neutral tokens -> should ask...                               - OK in Foundry 0.7.3
-3. Select one hostile token and press QE button -> adds to JE                                 - OK in Foundry 0.7.3
-4. Select multiple hostile and neutral tokens and press QE button -> adds to JE                  - OK in Foundry 0.7.3
-
+1. Select one friendly token and press QE button -> should ask if you want to add to JE			            OK
+2. Select multiple friendly and neutral tokens -> should ask...						                        OK
+3. Select one hostile token and press QE button -> adds to JE						                        OK
+4. Select multiple hostile and neutral tokens and press QE button -> adds to JE 				            OK
 
 METHOD 2
-1. Add Actors to a Journal Entry ; should re-render with embedded QE button                   - OK in Foundry 0.7.3
-
+1. Add Actors to a Journal Entry ; should re-render with embedded QE button 				                OK
 
 USE, MOVING, DELETION
-1. Delete Note; should get recreated next time you close the Journal Entry            - OK in Foundry 0.7.3
-2. Move Note - Actor tokens should be created at the position of the Note                 - OK in Foundry 0.7.3
-3. Start on another Scene and run an Encounter - should switch scenes                         - OK in Foundry 0.7.3
+1. Delete Note; should warn there is no Note when you open the Journal Entry 				                MISSING from Journal Entry
+2. Move Note - Actor tokens should be created at the position of the Note			                        OK
+3. Start on another Scene and run an Encounter - should switch scenes     					                OK	
+
+-------------
+
+NEW FEATURES IN 0.6
+0. OPen QE with Companion Dialog and Run
+1. Open a vanilla Journal Entry, select tokens, and press the QE button to turn this into a QE              Should open an ADD vs. CREATE dialog
+2. Random encounters (1d4+2)                                                                                OK
+3. Alt- or Ctrl- Run to force invisible or visible                                                          OK
+4. Show total XP and XP per player token to GM                                                              OK
+5. Add a Compendium Entry "Dire Wolf" - get "Query returned multiple entries"		                        BUG in 0.7.4 (QE 0.6)
+
+USE OLD EMBEDDED METHOD
+Verify above tests with Use Companion Dialog = TRUE and Use Companion Dialog = FALSE
+1. Check that previously created encounters work with new Setting = TRUE
+2. Check that previously created encounters work with new Setting = FALSE
+3. Create a new Encounter with the "Use new Companion Dialog" = FALSE
+
+CHECK VISIBILITY FOR A PLAYER
+
+BUG FIXES
+FIXED in 0.6.3: 0.6.2: Flip the Old Embedded Setting to "Use Companion Dialog" ; add note about it becoming the default
+FIXED in 0.6.3 v0.6.1: Can't change numeric field to die roll - will need to validate 
+FIXED in 0.6.3b v0.6.2: XP award should be rounded in post-combat dialog
+FIXED in v0.6.2: Warning about Map Note in the Journal Entry
+        - move the creation of the Map Note before the render of the Journal Entry so you don't get a spurious warning

@@ -1,8 +1,8 @@
 # Quick Encounters
-NEW in v0.5! Save your player tokens at the entrance to new Scenes, works better with Token Mold, Quick Encounter button always available, Surprise encounters! - see [Release Notes](https://github.com/opus1217/quick-encounters/blob/master/CHANGELOG.md#changelog)
+NEW in v0.6! Add tokens to existing Quick Encounters, use die rolls for number of Actors, GM display of Combat XP and per player token, new Quick Encounter dialog - see [Release Notes](https://github.com/opus1217/quick-encounters/blob/v0.6.4/CHANGELOG.md#changelog)
 * **Author**: Spetzel#0103
-* **Version**: 0.5.4
-* **Foundry VTT Compatibility**: 0.6.5-0.7.2
+* **Version**: 0.6.5
+* **Foundry VTT Compatibility**: 0.6.5-0.7.7
 * **System Compatibility (If applicable)**: N/A
 * **Translation Support**: en, es
 
@@ -17,17 +17,17 @@ Keeps your Scene map clean and your encounters simple by saving tokens/Actors in
 * For Roving Encounters move a single Map Note, not many tokens
 * Save your player tokens at the entrance to a new Scene too!
 
-Quick Encounters works well with [TokenMold](https://github.com/Moerill/token-mold#token-mold) to vary your tokens names, HP, etc (although TokenMold is not required for Quick Encounters). Quick Encounters also previews the XP for each group of hostiles If using dnd5e)
+Quick Encounters works well with [TokenMold](https://github.com/Moerill/token-mold#token-mold) to vary your tokens names, HP, etc (although TokenMold is not required for Quick Encounters). Quick Encounters also previews the XP for each group of hostiles if using dnd5e)
 
 # Install
 1. Go to the "Add-on Modules" tab in Foundry Setup
-2. Click "Install Module" and search for **Quick Encounters** OR paste this link: `https://raw.githubusercontent.com/opus1217/quick-encounters/v0.5.4/module.json`
+2. Click "Install Module" and search for **Quick Encounters** OR paste this link: `https://raw.githubusercontent.com/spetzel2020/quick-encounters/v0.6.5/module.json`
 3. Open your world and go to Settings>Manage Modules and enable Quick Encounters
 
 # Using Quick Encounters
 ## Method 1 (like Fantasy Grounds "Encounters")
 1. Drag your Hostile tokens to the map and select them
-2. Then press the Quick Encounters button and your tokens and their positions are saved into a Quick Encounter Journal Entry
+2. Then click the Quick Encounters button (in the Basic Controls palette on the left) and your tokens and their positions are saved into a Quick Encounter Journal Entry
 3. Close the Journal Entry and you will see a Quick Encounter Map Note
 4. Press "Save Map Note" to automatically place a single map pin on the Scene map.
 5. To run your Quick Encounter, simply double-click the map pin and click the "Add to Combat Tracker" button; all your saved tokens will be positioned on the map and added to the combat tracker, ready to fight!
@@ -38,3 +38,21 @@ Quick Encounters works well with [TokenMold](https://github.com/Moerill/token-mo
 3. Now drag the placed Journal Entry Note to the Scene map at the desired encounter position.
 4. To run your Quick Encounter, simply double-click the map pin to open the Quick Encounter Journal Entry.
 5. Click the Quick Encounter button: your saved tokens will be positioned around the map note, and added to the Combat Tracker.
+
+## Method 3 (save tokens into existing Journal Entries)
+If you have a licensed module with existing Journal Entries you probably don't want to edit all of them to insert Actors (Method 2). If you're using the new Quick Encounter Dialog instead:
+1. Drag Hostile tokens (representing the Encounter) to the Scene
+2. Open the Journal Entry you want to associate the Quick Encounter
+3. Click the Quick Encounter button and you will be asked if you want to create a new Encounter (Method 1) or add the tokens to this Journal Entry,
+4. To run the Encounter later, open the Journal Entry and use the Run Quick Encounter button in the Quick Encounter Dialog
+
+## The New Quick Encounter dialog
+![QuickEncounterDialog](https://github.com/spetzel2020/quick-encounters/blob/master/img/CompanionDialog.png)
+
+## Contributions
+*Coming Soon!*
+
+## License
+**Quick Encounters for Foundry VTT** by Jeffrey Pugh is licensed under the [GNU General Public License v3.0](https://github.com/spetzel2020/quick-encounters/blob/master/LICENSE)
+
+This work is licensed under Foundry Virtual Tabletop [EULA - Limited License Agreement for module development v 0.1.6](http://foundryvtt.com/pages/license.html).

@@ -1,4 +1,37 @@
 # Release Notes
+## NEW in 0.6
+- Quick Encounter dialog which shows which actors have saved tokens and which will be generated
+- Add tokens to existing Quick Encounters (open the Journal Entry, select the token(s), and click the Quick Encounter button)
+- Keyboard modifiers when you Run the Quick Encounter: Alt adds all invisible; Ctrl adds all visible
+- Use die rolls for number of Actors (e.g. 2d6)
+- GM display of Combat XP and per player token
+
+## 0.6.5
+- Fixed bug: Previouly you would get repeats of the actor if you added tokens for the first Actor 
+- Changed CompanionDialog to QuickEncounterDialog throughout for consistency
+- Fixed bug: Changing number to a dice roll no longer deletes saved tokens
+## 0.6.3
+- Switch Use Embedded to Use Companion Dialog
+## 0.6.2
+- Bug fix: An existing Quick Encounter with no saved tokens was adding null tokens
+- Edit Tutorial to reflect new abilities
+
+## 0.6.1
+- Companion dialog which shows which actors have saved tokens and which will be generated
+- Add tokens to existing Quick Encounters (open the Journal Entry, select the token(s), and click the Quick Encounter button)
+- Keyboard modifiers when you Run the Quick Encounter: Alt adds all invisible; Ctrl adds all visible
+- Use dice rolls for number of Actors
+- Bug fix: Combat XP and per player token now only shown to GM
+
+## 0.6.0abc
+- Allow Compendium entries as well as Actors
+- Combat tracker now pops up more reliably when run a Quick Encounter
+- No longer pops up an extra copy of the tutorial every time you press the Quick Encounter button
+- Handle multipliers that are dice rolls, e.g. 1d4+2 Vampire Spawn (Note they must be in Foundry [[/r 1d4+2]] form  to be recognized)
+
+## v0.5.5
+- Add Display XP after Combat setting to display Encounter XP and XP per player token when you End Combat
+- Confirm compatible with Foundry 0.7.6
 
 ## v0.5.4
 - Spanish translation of dialogs and messages (thanks https://github.com/lozalojo)
