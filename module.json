@@ -13,7 +13,7 @@
   },
   {
     "lang": "es",
-    "name": "Spanish",
+    "name": "Español",
     "path": "lang/es.json"
   }],
   "esmodules" : ["modules/QuickEncounter.js","modules/EncounterNote.js","modules/EncounterCompanionSheet.js"
