@@ -56,4 +56,3 @@
   "QE.QuickEncounterDialog.PS" : "<p><i>Este es el nuevo diálogo de Encuentros Rápidos. Desmarque </i><strong>Usar el nuevo diálogo de Encuentros Rápidos</strong><i> en los Ajustes si quiere deshabilitar esta opción.</i></p>",
   "QE.QuickEncounterDialog.InvalidNumActors.WARNING" : "Déjelo vacío o introduzca un valor entero positivo, o bien una fórmula de dados (por ejemplo, 2d6+5); ha introducido un valor inválido: "
 }
-
