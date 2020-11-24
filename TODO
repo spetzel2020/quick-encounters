@@ -2,8 +2,7 @@
 
 ## BUGS
 v0.5.0 You still see and hear HP rolling with Token Mold, even though the saved tokens are not changed
-v0.5.3 NOT A BUG? In Foundry 0.7.3, doesn't create saved tokens correctly if they were made from a non-standard Actor
-    
+
      
 
 ## FEATURES
@@ -23,11 +22,15 @@ Add to Settings:
 
 
 ### Version 0.7
+- Option to leave the tokens on the Scene (invisible or visible) but:
+    - turn them visible when you press the Quick Encounters button
+    - add them to the Combat Tracker
 - Add the QE button to the window of the Companion Dialog
 More sophisticated monster entries:
     - Scan Journal Entries to turn into Actor links and Quick Encounters
     - Allow dynamic generation of which monsters (use a RollTable?)
 - XP to award dialog should have checkboxes for who awards XP and who gets it
+    - create a separate module from this 
 - Show which Journal Entries have Quick Encounters in the Journal list
 - When the Companion dialog opens - show the token position as TEMPORARY tokens on the map - allow them to be moved or deleted    
 
@@ -97,6 +100,8 @@ CAN'T REPRODUCE in 0.6.4: v0.6.2: token.update and token.create could both fail 
                 -   Getting  token.create errors with Required field name on generated tokens
 CAN'T REPRODUCE: v0.6.4: If you make multiple changes to Actors (more than one line) get an array of numActors back
 FIXED in v0.6.4:  Saved tokens were being removed when you switched to a die-roll to generate; now shows slots forup to the max of the die roll
+CAN'T REPROODUCE: v0.5.3 In Foundry 0.7.3, doesn't create saved tokens correctly if they were made from a non-standard Actor
+CAN'T REPRODUCE v0.6.5: Test generating a Quick Encounter by dragging Actors into the Journal Entry; seems to store them but also reset
 
 
 ## COMPLETED FEATURES
