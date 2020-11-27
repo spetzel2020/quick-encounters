@@ -12,6 +12,7 @@ Reused as EncounterCompanionSheet
                 v0.6.1n: If we removed all the Actors, then remove the whole Quick Encounter
 16-Nov-2020     v0.6.3b: Make "number" field a String so we can handle die rolls, a number, and nothing (which means remove the actor)                
                          Add validation and warning if you make a mistake
+27-Nov-2020     v0.6.7b: Display compendium info in Companion dialog                         
 */
 
 
@@ -33,22 +34,34 @@ export class EncounterCompanionSheet extends FormApplication {
 
             combatants.push({
                 numActors : eActor.numActors,
+                actorName: eActor.name,             //default
                 actorId: eActor.actorID,
-                tokens: tokens
+                dataPackName : eActor.dataPackName, //non-null if a Compendium entry
+                tokens: tokens,
+                numType : typeof eActor.numActors
             });
         }
 
         //Regardless of how we built combatants, fill in derived data for display
-        combatants?.forEach((c, i) => {
-            const actor = game.actors.get(c.actorId);
-            //0.4.1: 5e specific: find XP for this number of this actor
-            const xp = QuickEncounter.getActorXP(actor);
-            const xpString = xp ? `(${xp}XP each)`: "";
-            combatants[i].img = actor?.img;
-            combatants[i].actorName = actor?.name;
-            combatants[i].xp = xpString;
-            combatants[i].numType = typeof c.numActors;
-        });
+        //FIXME: Unclear we can't combine these two loops
+        for (const [i,c] of combatants.entries()) {
+            if (c.dataPackName) {   //Compendium
+                const pack = game.packs.get(c.dataPackName);
+                pack.getIndex().then(index => {
+                    const entry = index.find(e => e._id === c.actorId)
+                    combatants[i].img = entry?.img || CONST.DEFAULT_TOKEN;
+                    combatants[i].actorName = entry?.name;
+                });
+            } else {      //regular actor
+                const actor = game.actors.get(c.actorId);
+                //0.4.1: 5e specific: find XP for this number of this actor
+                const xp = QuickEncounter.getActorXP(actor);
+                const xpString = xp ? `(${xp}XP each)`: "";
+                combatants[i].img = actor?.img;
+                combatants[i].actorName = actor?.name;
+                combatants[i].xp = xpString;
+            }
+        }
 
         this.quickEncounter = quickEncounter;
         this.combatants = combatants;
@@ -154,7 +167,7 @@ export class EncounterCompanionSheet extends FormApplication {
                     numActors : c.numActors,
                     dataPackName : c.dataPackName, //if non-null then this is a Compendium reference
                     actorID : c.actorId,           //If Compendium sometimes this is the reference
-                    name : c.name,
+                    name : c.actorName,
                     savedTokensData : c.tokens.filter(td => td.isSavedToken)
                 }
             });

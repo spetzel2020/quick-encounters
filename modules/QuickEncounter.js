@@ -476,7 +476,7 @@ export class QuickEncounter {
     }
 
 
-    /** Method 2: Look through open Windows to find a Journal Entry with Actors and a Map Note
+    /* Method 2: Look through open Windows to find a Journal Entry with Actors and a Map Note
     *
     */
     static findCandidateJournalEntry() {
@@ -663,7 +663,8 @@ export class QuickEncounter {
         //v0.6.1: savedTokensData is stored with each actor
 
         for (const ea of this.extractedActors) {
-            const eaTokensData = extractedActorTokenData.filter(eatd => eatd.actorId === ea.actorID);
+            ///0.6.7 If the actor is from the Compendium, match on that
+            const eaTokensData = extractedActorTokenData.filter(eatd => ea.actorID === (eatd.compendiumActorId ?? eatd.actorId));
             const savedTokensForThisActorID = ea.savedTokensData;
 
             if (savedTokensForThisActorID) {
@@ -782,7 +783,7 @@ export class QuickEncounter {
                  const tempToken = await Token.fromActor(actor, tokenData);
                  tokenData = tempToken.data;
                  //If from a Compendium, we remember that and the original Compendium actorID
-                 if (eActor.dataPackName) {tokenData.compendiumActorID = eActor.actorID;}
+                 if (eActor.dataPackName) {tokenData.compendiumActorId = eActor.actorID;}
                  expandedTokenData.push(tokenData);
              }
         }

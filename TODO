@@ -2,7 +2,7 @@
 
 ## BUGS
 v0.5.0 You still see and hear HP rolling with Token Mold, even though the saved tokens are not changed
->>>0.6.6: Compendium links don't work
+
 
      
 ## FEATURES
@@ -110,7 +110,8 @@ CAN'T REPRODUCE: v0.6.4: If you make multiple changes to Actors (more than one l
 FIXED in v0.6.4:  Saved tokens were being removed when you switched to a die-roll to generate; now shows slots forup to the max of the die roll
 CAN'T REPROODUCE: v0.5.3 In Foundry 0.7.3, doesn't create saved tokens correctly if they were made from a non-standard Actor
 CAN'T REPRODUCE v0.6.5: Test generating a Quick Encounter by dragging Actors into the Journal Entry; seems to store them but also reset
-FIXED? in 0.6.7: 0.6.6: Wildcard Randomization doesn't work when placing tokens using Method 2
+FIXED in 0.6.7: 0.6.6: Wildcard Randomization doesn't work when placing tokens using Method 2
+FIXED in 0.6.7: 0.6: Compendium links don't work
 
 
 ## COMPLETED FEATURES
