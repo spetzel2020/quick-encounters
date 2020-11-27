@@ -2,33 +2,35 @@
 
 ## BUGS
 v0.5.0 You still see and hear HP rolling with Token Mold, even though the saved tokens are not changed
+>>>0.6.6: Compendium links don't work
 
      
-
 ## FEATURES
 Add to Settings:
     - Create the Quick Encounter section in a QE Journal Entry (otherwise you have to use the sidebar button)
     - Option to have to specifically designate a Journal Entry as a Quick Encounter (or you can use the side button)
 
 - Allow a way to NOT have Quick Encounters turn Actor links into a Quick Encounter Journal Entry
-    - save with the Journal Entry as a flag; but then how do you turn it on again?
-    - embed a QE Journal Entry
->>> Add a link to open the Companion Sheet in Journal Entries    
-
-- If you drag a Journal Entry to the Scene, then intercept to change the icon etc.
-    - Partially done: could identify it's a Quick Encounter from the inclusion of Actor links
-        but perhaps a better approach would be with a flag that was set
-- Allow tiles to be saved in the same way as tokens (from Issues)
+    - maybe use the border QE button to do this
+>>> Add the QE button to the JE border to reopen the dialog
+    - add to the window border of the QE dialog    
 
 
 ### Version 0.7
 - Option to leave the tokens on the Scene (invisible or visible) but:
     - turn them visible when you press the Quick Encounters button
     - add them to the Combat Tracker
-- Include placed tiles
+- Allow tiles to be saved in the same way as tokens (from Issues)
 - Include a Playlists or track to play when combat starts    
+- Synchronize with the Journal Entry if there are Actor links
 - Add the QE button to the window border of the Companion Dialog
 - Create multiple QEs (Waves/Adds) per Journal Entry
+- Use QE. constants to keep the namespace clean
+
+- If you drag a Journal Entry to the Scene, then intercept to change the icon etc.
+    - Partially done: could identify it's a Quick Encounter from the inclusion of Actor links
+        but perhaps a better approach would be with a flag that was set
+
 - XP to award dialog should have checkboxes for who awards XP and who gets it
     - create a separate module from this 
 
@@ -108,6 +110,7 @@ CAN'T REPRODUCE: v0.6.4: If you make multiple changes to Actors (more than one l
 FIXED in v0.6.4:  Saved tokens were being removed when you switched to a die-roll to generate; now shows slots forup to the max of the die roll
 CAN'T REPROODUCE: v0.5.3 In Foundry 0.7.3, doesn't create saved tokens correctly if they were made from a non-standard Actor
 CAN'T REPRODUCE v0.6.5: Test generating a Quick Encounter by dragging Actors into the Journal Entry; seems to store them but also reset
+FIXED? in 0.6.7: 0.6.6: Wildcard Randomization doesn't work when placing tokens using Method 2
 
 
 ## COMPLETED FEATURES

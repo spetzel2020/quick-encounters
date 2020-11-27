@@ -6,6 +6,9 @@
 - Use die rolls for number of Actors (e.g. 2d6)
 - GM display of Combat XP and per player token
 
+## 0.6.7
+ -Fixed a bug where wildcard token images didn't work in Method 2
+
 ## 0.6.6
 - Spanish translation updated (thanks https://github.com/lozalojo!)
 - Japanese translation added (thanks "touge"!)

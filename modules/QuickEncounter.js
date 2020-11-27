@@ -102,6 +102,8 @@
                 QEDialog.buttons3: Remove the 3rd button if the 3rd callback isn't provided    
 18-Nov-2020     v0.6.4c: Tweaked test for extractedActorIndex to not take this path on 0
                 getNumActors: Now takes rollType parameter "full" (which rolls randomly) or "template" which rolls
+27-Nov-2020     v0.6.7: BUG: 0.6.5: Wildcard Randomization doesn't work when placing tokens using Method 2   
+                generateFullExtractedActorTokenData(): Call Token.fromActor() which does the merge but also handles wildcard token images             
 */
 
 
@@ -776,7 +778,9 @@ export class QuickEncounter {
                      isSavedToken : false
                  }
                  //Use the prototype token from the Actors
-                 tokenData = mergeObject(actor.data.token, tokenData, {inplace: false});
+                 //v0.6.7: Call Token.fromActor() which does the merge but also handles wildcard token images
+                 const tempToken = await Token.fromActor(actor, tokenData);
+                 tokenData = tempToken.data;
                  //If from a Compendium, we remember that and the original Compendium actorID
                  if (eActor.dataPackName) {tokenData.compendiumActorID = eActor.actorID;}
                  expandedTokenData.push(tokenData);
