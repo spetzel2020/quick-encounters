@@ -5,9 +5,11 @@
 - Keyboard modifiers when you Run the Quick Encounter: Alt adds all invisible; Ctrl adds all visible
 - Use die rolls for number of Actors (e.g. 2d6)
 - GM display of Combat XP and per player token
+- (v0.6.7) Defer loading of Actors by using Compendium links in Method 2
 
 ## 0.6.7
- -Fixed a bug where wildcard token images didn't work in Method 2
+ - Fixed a bug where wildcard token images didn't work in Method 2
+ - Fixed a bug where Compendium links in Journal entries weren't working
 
 ## 0.6.6
 - Spanish translation updated (thanks https://github.com/lozalojo!)
