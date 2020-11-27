@@ -25,12 +25,18 @@ Add to Settings:
 - Option to leave the tokens on the Scene (invisible or visible) but:
     - turn them visible when you press the Quick Encounters button
     - add them to the Combat Tracker
-- Add the QE button to the window of the Companion Dialog
+- Include placed tiles
+- Include a Playlists or track to play when combat starts    
+- Add the QE button to the window border of the Companion Dialog
+- Create multiple QEs (Waves/Adds) per Journal Entry
+- XP to award dialog should have checkboxes for who awards XP and who gets it
+    - create a separate module from this 
+
+### Later
 More sophisticated monster entries:
     - Scan Journal Entries to turn into Actor links and Quick Encounters
     - Allow dynamic generation of which monsters (use a RollTable?)
-- XP to award dialog should have checkboxes for who awards XP and who gets it
-    - create a separate module from this 
+
 - Show which Journal Entries have Quick Encounters in the Journal list
 - When the Companion dialog opens - show the token position as TEMPORARY tokens on the map - allow them to be moved or deleted    
 

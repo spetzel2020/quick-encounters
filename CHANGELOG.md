@@ -7,7 +7,8 @@
 - GM display of Combat XP and per player token
 
 ## 0.6.6
-- Spanish translation added (thanks https://github.com/lozalojo!)
+- Spanish translation updated (thanks https://github.com/lozalojo!)
+- Japanese translation added (thanks "touge"!)
 
 ## 0.6.5
 - Fixed bug: Previouly you would get repeats of the actor if you added tokens for the first Actor 
