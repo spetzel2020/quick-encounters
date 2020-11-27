@@ -38,6 +38,10 @@ Quick Encounters works well with [TokenMold](https://github.com/Moerill/token-mo
 4. To run your Quick Encounter, simply double-click the map Note to open the Quick Encounter Journal Entry.
 5. Click the Quick Encounter button: your saved tokens will be positioned around the map Note, and added to the Combat Tracker.
 
+### Using Compendium links in Method 2
+* In Step 1, you can select Actors from a Compendium and drag them directly into the Journal Entry. This lets you defer importing Actors until you actually need them (for example for rare Encounters). Currently you need to manually remove the imported Actors when and if you run the Quick Encounter.
+* Note that you cannot drag the Compendium Actor to the Scene to place tokens, because that will automatically import the Actor and the link will then be to the imported Actor, not to the Compendium.
+
 ## Method 3 (save tokens into existing Journal Entries)
 If you have a licensed module with existing Journal Entries you probably don't want to edit all of them to insert Actors (Method 2). If you're using the new Quick Encounter Dialog instead:
 1. Create Hostile tokens (representing the Encounter) and drag them to the Scene

@@ -15,6 +15,9 @@ Add to Settings:
 >>> Add the QE button to the JE border to reopen the dialog
     - add to the window border of the QE dialog    
 
+### Version 0.6.8
+- Save token positions for Compendium actors and allow deleting the Actors  
+    - remember that you dragged the Compendium link to the Scene before capturing it in Method 1
 
 ### Version 0.7
 - Option to leave the tokens on the Scene (invisible or visible) but:
