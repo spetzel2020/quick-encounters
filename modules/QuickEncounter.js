@@ -145,7 +145,7 @@ export class QuickEncounter {
                 //Create a map of actors to tokens
                 let actorToTokensMap = {}
 //FIXME: If you have multiple actors, this will reset the map multiple times  - must be a better way to do this                
-                for (const eActor of this.extractedtActors) {
+                for (const eActor of this.extractedActors) {
                     actorToTokensMap[eActor.actorID] = qeData.savedTokensData.filter(td => (td.actorId === eActor.actorID));
                 }
                 //Now repeat the loop and assign the savedTokens
@@ -665,7 +665,7 @@ export class QuickEncounter {
         canvas.tokens.activate();
 
         //0.6.1: createTokenDataFromActors() sets isSavedToken=false
-        //0.6.8: Don't return extractedActorTokenData; add it to the extractedActors
+        //0.6.8: Don't return extractedActorTokenData; add it (as generatedTokensData) to the extractedActors
         await this.generateFullExtractedActorTokenData(coords);
         //0.6.8: combineTokenData now puts the combined generated and saved tokens in combinedTokensData on each eActor
         this.combineTokenData();

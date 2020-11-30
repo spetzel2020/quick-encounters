@@ -3,7 +3,7 @@
 ## BUGS
 v0.6.6 If you have two QEs open with QE dialogs, closing one Journal Entry will close both QE dialogs
     - it looks like you can't have two QE dialogs open simulataneously; one replaces the other
-
+v0.6: Can't copy a QE Journal Entry - it references the old QE
            
 ## FEATURES
 - Add a link back to the README
@@ -13,10 +13,14 @@ v0.6.6 If you have two QEs open with QE dialogs, closing one Journal Entry will 
 
 ### Version 0.7
 - Refactor how we're handling token allocation: creation or addition
+    - should always maintain an accurate generated tokens, incorporating saved tokens
+    - combine "combineTokens" and "generate" (they are always used together)
+    - other refactoring (see below)
 - Save token positions for Compendium actors and allow deleting the Actors  
     - remember that you dragged the Compendium link to the Scene before capturing it in Method 1
 - Option to leave the tokens on the Scene (invisible or visible) but:
     - turn them visible when you press the Quick Encounters button
+    - When the Companion dialog opens - show the token position as TEMPORARY tokens on the map - allow them to be moved or deleted    
     - add them to the Combat Tracker
     - when you're on the entry in the QE dialog it should show the positions of those tokens
     - maybe an option to place all the tokens and move them around, then they get automatically captured and removed
@@ -26,7 +30,7 @@ v0.6.6 If you have two QEs open with QE dialogs, closing one Journal Entry will 
 - Add the QE button to the window border of the Companion Dialog
 - Create multiple QEs (Waves/Adds) per Journal Entry
 - Use QE. constants to keep the namespace clean
-- What should happen when you copy an Encounter - should move any placed tokens to the new Map Note
+- Ability to copy an Encounter (if you copy the Journal Entry) - should move any placed tokens to the new Map Note
 
 - If you drag a Journal Entry to the Scene, then intercept to change the icon etc.
     - Partially done: could identify it's a Quick Encounter from the inclusion of Actor links
@@ -41,7 +45,6 @@ More sophisticated monster entries:
     - Allow dynamic generation of which monsters (use a RollTable?)
 
 - Show which Journal Entries have Quick Encounters in the Journal list
-- When the Companion dialog opens - show the token position as TEMPORARY tokens on the map - allow them to be moved or deleted    
 
 - Editing Companion dialog
     - Or JE-by-JE option to use new method; or global option   
