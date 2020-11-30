@@ -4,21 +4,17 @@
 v0.6.6 If you have two QEs open with QE dialogs, closing one Journal Entry will close both QE dialogs
     - it looks like you can't have two QE dialogs open simulataneously; one replaces the other
 
-      
-
-
-     
+           
 ## FEATURES
 - Add a link back to the README
 - Add to the README FAQs about handling multiple instances
 >>> Add the QE button to the JE border to reopen the dialog
     - add to the window border of the QE dialog    
 
-### Version 0.6.8
+### Version 0.7
+- Refactor how we're handling token allocation: creation or addition
 - Save token positions for Compendium actors and allow deleting the Actors  
     - remember that you dragged the Compendium link to the Scene before capturing it in Method 1
-
-### Version 0.7
 - Option to leave the tokens on the Scene (invisible or visible) but:
     - turn them visible when you press the Quick Encounters button
     - add them to the Combat Tracker
@@ -120,9 +116,9 @@ FIXED in 0.6.7: 0.6: Compendium links don't work
 FIXED in 0.6.8: v0.6.6: If you have two identical Actors in the QE dialog, the formdata combines them into one row    
 WON'T FIX: v0.5.0 You still see and hear HP rolling with Token Mold, even though the saved tokens are not changed
                     - there are now features in TokenMold and other mods to prevent this
-FIXED? v0.6.6 If you have a Journal Entry with multiple DIFFERENT mentions of the same creature, you get combinatorial multiplication of tokens etc.
+FIXED v0.6.6 If you have a Journal Entry with multiple DIFFERENT mentions of the same creature, you get combinatorial multiplication of tokens etc.
         - when you place tokens, add them to the first instance, then subsequent instances, then back to the first
-FIXED? v0.6.6: If you have two identical Actors in the QE dialog, the formdata combines them into one row 
+FIXED v0.6.6: If you have two identical Actors in the QE dialog, the formdata combines them into one row 
         - so instead we need to add a row# to distinguish  
 
 ## COMPLETED FEATURES
