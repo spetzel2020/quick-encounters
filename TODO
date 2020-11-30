@@ -1,15 +1,10 @@
 # TO DO
 
 ## BUGS
-v0.5.0 You still see and hear HP rolling with Token Mold, even though the saved tokens are not changed
 v0.6.6 If you have two QEs open with QE dialogs, closing one Journal Entry will close both QE dialogs
-v0.6.6 If you have a Journal Entry with multiple DIFFERENT mentions of the same creature, you get combinatorial multiplication of tokens etc.
-        - we're going to need this for Waves and for different groups
-        - for now total up? Or somehow track multiple instances
-            - and blanking out one instance should leave the other
-        - when you place tokens, add them to the first instance, then subsequent instances, then back to the first
-v0.6.6: If you have two identical Actors in the QE dialog, the formdata combines them into one row 
-        - so instead we need to add a row# to distinguish        
+    - it looks like you can't have two QE dialogs open simulataneously; one replaces the other
+
+      
 
 
      
@@ -123,7 +118,12 @@ CAN'T REPRODUCE v0.6.5: Test generating a Quick Encounter by dragging Actors int
 FIXED in 0.6.7: 0.6.6: Wildcard Randomization doesn't work when placing tokens using Method 2
 FIXED in 0.6.7: 0.6: Compendium links don't work
 FIXED in 0.6.8: v0.6.6: If you have two identical Actors in the QE dialog, the formdata combines them into one row    
-
+WON'T FIX: v0.5.0 You still see and hear HP rolling with Token Mold, even though the saved tokens are not changed
+                    - there are now features in TokenMold and other mods to prevent this
+FIXED? v0.6.6 If you have a Journal Entry with multiple DIFFERENT mentions of the same creature, you get combinatorial multiplication of tokens etc.
+        - when you place tokens, add them to the first instance, then subsequent instances, then back to the first
+FIXED? v0.6.6: If you have two identical Actors in the QE dialog, the formdata combines them into one row 
+        - so instead we need to add a row# to distinguish  
 
 ## COMPLETED FEATURES
 (v0.4.0): If you're on a different scene, pops a dialog to check that you want to switch scenes
