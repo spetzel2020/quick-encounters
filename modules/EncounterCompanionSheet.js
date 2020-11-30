@@ -12,7 +12,10 @@ Reused as EncounterCompanionSheet
                 v0.6.1n: If we removed all the Actors, then remove the whole Quick Encounter
 16-Nov-2020     v0.6.3b: Make "number" field a String so we can handle die rolls, a number, and nothing (which means remove the actor)                
                          Add validation and warning if you make a mistake
-27-Nov-2020     v0.6.7b: Display compendium info in Companion dialog                         
+27-Nov-2020     v0.6.7b: Display compendium info in Companion dialog           
+28-Nov-2020     v0.6.8: Use combinedTokensData on each extractedActor; that way we don't have to separate it
+                        (but still have to support the pre-0.6 method where it isn't associated with the actor)       
+                        combatants, updateObject(): Add rowNum to distinguish between same actorId instances
 */
 
 
@@ -22,44 +25,42 @@ export class EncounterCompanionSheet extends FormApplication {
         if (!game.user.isGM || !quickEncounter) {return;}
 
 //FIXME: Should be able to get this more directly from the quickEncounter
-        //Thie version of the Quick Encounter is what is extracted from in the Journal Entry
-        const extractedActors = quickEncounter.extractedActors;
-        const extractedActorTokenData = quickEncounter.generateTemplateExtractedActorTokenData();     //this is just sparse array with the correct numbers
-        const combinedTokenData = quickEncounter.combineTokenData(extractedActorTokenData);
+        //This version of the Quick Encounter is what is extracted from in the Journal Entry
+        quickEncounter.generateTemplateExtractedActorTokenData();     //this is just sparse array with the correct numbers
+        quickEncounter.combineTokenData();
 
-  
         let combatants = [];
-        for (const eActor of extractedActors) {
-            const tokens = combinedTokenData.filter(t => t.actorId === eActor.actorID);
+        if (quickEncounter.extractedActors) {
+            for (const [i,eActor] of quickEncounter.extractedActors.entries()) {
+                const combatant = {
+                    rowNum : i,
+                    numActors : eActor.numActors,
+                    actorName: eActor.name,             //default
+                    actorId: eActor.actorID,
+                    dataPackName : eActor.dataPackName, //non-null if a Compendium entry
+                    tokens: eActor.combinedTokensData,
+                    numType : typeof eActor.numActors
+                }
 
-            combatants.push({
-                numActors : eActor.numActors,
-                actorName: eActor.name,             //default
-                actorId: eActor.actorID,
-                dataPackName : eActor.dataPackName, //non-null if a Compendium entry
-                tokens: tokens,
-                numType : typeof eActor.numActors
-            });
-        }
+                if (eActor.dataPackName) {   
+                    //Compendium: for display just use the index (can only get name, id, index)
+                    const pack = game.packs.get(eActor.dataPackName);
+                    pack.getIndex().then(index => {
+                        const entry = index.find(e => e._id === combatant.actorId)
+                        combatant.img = entry?.img || CONST.DEFAULT_TOKEN;
+                        combatant.actorName = entry?.name;
+                    });
+                } else {      //regular actor
+                    const actor = game.actors.get(eActor.actorID);
+                    //0.4.1: 5e specific: find XP for this number of this actor
+                    const xp = QuickEncounter.getActorXP(actor);
+                    const xpString = xp ? `(${xp}XP each)`: "";
+                    combatant.img = actor?.img;
+                    combatant.actorName = actor?.name;
+                    combatant.xp = xpString;
+                }
 
-        //Regardless of how we built combatants, fill in derived data for display
-        //FIXME: Unclear we can't combine these two loops
-        for (const [i,c] of combatants.entries()) {
-            if (c.dataPackName) {   //Compendium
-                const pack = game.packs.get(c.dataPackName);
-                pack.getIndex().then(index => {
-                    const entry = index.find(e => e._id === c.actorId)
-                    combatants[i].img = entry?.img || CONST.DEFAULT_TOKEN;
-                    combatants[i].actorName = entry?.name;
-                });
-            } else {      //regular actor
-                const actor = game.actors.get(c.actorId);
-                //0.4.1: 5e specific: find XP for this number of this actor
-                const xp = QuickEncounter.getActorXP(actor);
-                const xpString = xp ? `(${xp}XP each)`: "";
-                combatants[i].img = actor?.img;
-                combatants[i].actorName = actor?.name;
-                combatants[i].xp = xpString;
+                combatants.push(combatant);
             }
         }
 
@@ -124,10 +125,10 @@ export class EncounterCompanionSheet extends FormApplication {
         const checkIntReg = /^[0-9]*$/;   
         //Capture changes in the number of Actors or new Actors added (currently not possible through this dialog)
         let wasChanged = false;
-        for (let [actorId, numActors] of Object.entries(formData)) {
+        for (let [rowNum, numActors] of Object.entries(formData)) {
             let combatantWasChanged = false;
-            const iCombatant = this.combatants.findIndex(c => c.actorId === actorId);   //returns -1 if nothing found
-            if (iCombatant === -1) {
+            const iCombatant = rowNum;
+            if (iCombatant >= this.combatants.length) {
                 //New combatant
                 combatantWasChanged = true;
                 

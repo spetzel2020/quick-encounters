@@ -7,6 +7,10 @@
 - GM display of Combat XP and per player token
 - (v0.6.7) Defer loading of Actors by using Compendium links in Method 2
 
+## 0.6.8
+- Fixed a bug where two instances of the same actor produced too many token slots
+- 
+- 
 ## 0.6.7
  - Fixed a bug where wildcard token images didn't work in Method 2
  - Fixed a bug where Compendium links in Journal entries weren't working

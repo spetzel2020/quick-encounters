@@ -40,7 +40,12 @@ Verify above tests with Use Companion Dialog = TRUE and Use Companion Dialog = F
 2. Check that previously created encounters work with new Setting = FALSE
 3. Create a new Encounter with the "Use new Companion Dialog" = FALSE
 
+BACKWARD COMPATIBILITY
+- Create a QE in v0.5 and make sure it mostly works in 0.6.8
+
 CHECK VISIBILITY FOR A PLAYER
+
+
 
 BUG FIXES
 FIXED in 0.6.3: 0.6.2: Flip the Old Embedded Setting to "Use Companion Dialog" ; add note about it becoming the default
@@ -48,3 +53,5 @@ FIXED in 0.6.3 v0.6.1: Can't change numeric field to die roll - will need to val
 FIXED in 0.6.3b v0.6.2: XP award should be rounded in post-combat dialog
 FIXED in v0.6.2: Warning about Map Note in the Journal Entry
         - move the creation of the Map Note before the render of the Journal Entry so you don't get a spurious warning
+- If you have two QEs open with QE dialogs, closing one Journal Entry will close both QE dialogs
+- v0.6.6 If you have a Journal Entry with multiple DIFFERENT mentions of the same creature, you get combinatorial multiplication of tokens etc.        
