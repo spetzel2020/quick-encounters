@@ -108,6 +108,8 @@
                 Change expandedTokensData to generatedTokensData and make it per extractedActor (in the same wau the savedTokenData is)
                 addTokens(): Search the actor list to see if there's another Actor to add tokens to
                 constructor(): Always provide a (possibly empty) savedTokensData array
+30-Nov-2020     v0.6.9: Bug: When you add tokens to an existing QE with that Actor, it should fill in all generatedTokens and then increase numActors  
+                addTokens(): Add remaining tokens to the 0th element for this actorId              
 */
 
 
@@ -115,7 +117,7 @@ import {EncounterNote} from './EncounterNote.js';
 import {EncounterCompanionSheet} from './EncounterCompanionSheet.js';
 
 export const MODULE_NAME = "quick-encounters";
-export const MODULE_VERSION = "0.6.8";
+export const MODULE_VERSION = "0.6.9";
 
 export const TOKENS_FLAG_KEY = "tokens";
 export const QE_JSON_FLAG_KEY = "quickEncounter";
@@ -378,7 +380,6 @@ export class QuickEncounter {
         //v0.6.8 Allow for more than one instance of the Actor in the list (must have been originally created from a Journal Entry)
         for (const tokenActorId of tokenActorIds) {
             const tokensData = newSavedTokensData.filter(t => t.actorId === tokenActorId);
-            const numTokens = tokensData.length;
 
             //v0.6.8: Could be more than one instance of an actorId
             const extractedActorsOfThisActorId = this.extractedActors?.filter(eActor => eActor.actorID === tokenActorId);
@@ -400,11 +401,17 @@ export class QuickEncounter {
                         extractedActorsOfThisActorId[i].savedTokensData = eActor.savedTokensData.concat(tokensData);
                     }
                 }//end for 
+                //v0.6.9: If there are addedTokensData left over, add them to the 0th element and increase the numActors
+                if (tokensData.length) {
+                    //Should have savedTokensData already 
+                    extractedActorsOfThisActorId[0].savedTokensData = extractedActorsOfThisActorId[0].savedTokensData.concat(tokensData);
+                    extractedActorsOfThisActorId[0].numActors = extractedActorsOfThisActorId[0].savedTokensData.length;
+                }
             } else {
                 //Option 1. We don't find this actor - then add a new Actor with ALL of the relevant tokens
                 const actor = game.actors.get(tokenActorId);
                 const newExtractedActor = {
-                    numActors : numTokens,
+                    numActors : tokensData.length,
                     dataPackName : null,              //if non-null then this is a Compendium reference
                     actorID : tokenActorId,           //If Compendium sometimes this is the reference
                     name : actor?.name,
@@ -417,6 +424,7 @@ export class QuickEncounter {
         }//end for tokenActorIds
 
         //Delete the existing tokens (because they will be replaced)
+//FIXME: Refactor to create array of tokens to delete before calling deleteMany()        
         for (const token of controlledTokens) {
             canvas.tokens.deleteMany([token.id]);
         }
