@@ -1,4 +1,4 @@
-import {QuickEncounter, dieRollReg} from './QuickEncounter.js';
+import {QuickEncounter, dieRollReg, MODULE_NAME} from './QuickEncounter.js';
 
 /*
 Reused as EncounterCompanionSheet
@@ -16,6 +16,7 @@ Reused as EncounterCompanionSheet
 28-Nov-2020     v0.6.8: Use combinedTokensData on each extractedActor; that way we don't have to separate it
                         (but still have to support the pre-0.6 method where it isn't associated with the actor)       
                         combatants, updateObject(): Add rowNum to distinguish between same actorId instances
+30-Nov-2020     v0.6.9c: Add get id() so that we get unique identifer for the companion sheet                        
 */
 
 
@@ -70,6 +71,10 @@ export class EncounterCompanionSheet extends FormApplication {
         game.users.apps.push(this)
     }
 
+    /** @override */
+	get id() {
+	    return `${MODULE_NAME}-${this.appId}`;
+    }
 
     /** @override  */
     //WARNING: Do not add submitOnClose=true because that will create a submit loop

@@ -948,6 +948,63 @@ export class QuickEncounter {
         */
     }
 
+    static async onRenderJournalSheet(journalSheet, html) {
+        if (!game.user.isGM) {return;}
+
+        //v0.5.0 If this could be a Quick Encounter, add the button at the top and the total XP
+        //v0.5.3 Remove any existing versions of this first before recomputing it - limit to 5 checks just in case
+        for (let iCheck=0; iCheck < 5; iCheck++) {
+            const qeDiv = journalSheet.element.find("#QuickEncounterIntro");
+            if (!qeDiv || !qeDiv[0] || !qeDiv[0].parentNode) {break;}
+            qeDiv[0].parentNode.removeChild(qeDiv[0]);
+        }
+
+        const quickEncounter = QuickEncounter.extractQuickEncounter(journalSheet);
+        if (quickEncounter) {
+            const extractedActors = quickEncounter.extractedActors;
+            let totalXP = null;
+            for (const eActor of extractedActors) {
+                const actor = game.actors.get(eActor.actorID);
+                const actorXP = QuickEncounter.getActorXP(actor);
+                //Only include non-character tokens in XP
+                if (actorXP && (actor.data.type === "npc")) {
+                    if (!totalXP) {totalXP = 0;}
+                    //Allow for numActors being a roll (e.g. [[/r 1d4]]) in which case we ignore the XP
+                    //although we probably should provide a range or average
+                    if (typeof eActor.numActors === "number") {
+                        totalXP += eActor.numActors * actorXP;
+                    }
+                }
+            }
+            let totalXPLine = null;
+            if (totalXP) {
+                totalXPLine = `${game.i18n.localize("QE.TotalXP.CONTENT")} ${totalXP}XP<br>`;
+            }
+            //If there's no Map Note, include a warning
+            let noMapNoteWarning = null;
+            const qeScene = QuickEncounter.getEncounterScene(journalSheet.object);
+            if (!qeScene) {
+                noMapNoteWarning = `${game.i18n.localize("QE.AddToCombatTracker.NoMapNote")}`;
+            }
+            
+            let qeJournalEntryIntro = "";
+            //v0.6.1: Also pop open a companion dialog with details about what tokens have been placed and XP
+            if (game.settings.get(MODULE_NAME, "useQuickEncounterDialog")) {
+                const companionSheet = new EncounterCompanionSheet(quickEncounter, totalXPLine);
+                companionSheet.render(true);
+                journalSheet.companionSheet = companionSheet;
+                qeJournalEntryIntro = noMapNoteWarning;
+            } else {
+                qeJournalEntryIntro = await renderTemplate('modules/quick-encounters/templates/qeJournalEntryIntro.html', {totalXPLine, noMapNoteWarning});
+            }
+            html.find('.editor-content').prepend(qeJournalEntryIntro);
+            //If there's an embedded button, then add a listener
+            html.find('button[name="addToCombatTracker"]').click(event => {
+                quickEncounter.run(event);
+            });
+        }
+    }
+
 }
 
 export class QEDialog extends Dialog {
@@ -999,62 +1056,7 @@ export class QEDialog extends Dialog {
 
 /** HOOKS */
 //Add a listener for the embedded Encounter button and record the scene if we can
-Hooks.on(`renderJournalSheet`, async (journalSheet, html) => {
-    if (!game.user.isGM) {return;}
-
-    //v0.5.0 If this could be a Quick Encounter, add the button at the top and the total XP
-    //v0.5.3 Remove any existing versions of this first before recomputing it - limit to 5 checks just in case
-    for (let iCheck=0; iCheck < 5; iCheck++) {
-        const qeDiv = journalSheet.element.find("#QuickEncounterIntro");
-        if (!qeDiv || !qeDiv[0] || !qeDiv[0].parentNode) {break;}
-        qeDiv[0].parentNode.removeChild(qeDiv[0]);
-    }
-
-    const quickEncounter = QuickEncounter.extractQuickEncounter(journalSheet);
-    if (quickEncounter) {
-        const extractedActors = quickEncounter.extractedActors;
-        let totalXP = null;
-        for (const eActor of extractedActors) {
-            const actor = game.actors.get(eActor.actorID);
-            const actorXP = QuickEncounter.getActorXP(actor);
-            //Only include non-character tokens in XP
-            if (actorXP && (actor.data.type === "npc")) {
-                if (!totalXP) {totalXP = 0;}
-                //Allow for numActors being a roll (e.g. [[/r 1d4]]) in which case we ignore the XP
-                //although we probably should provide a range or average
-                if (typeof eActor.numActors === "number") {
-                    totalXP += eActor.numActors * actorXP;
-                }
-            }
-        }
-        let totalXPLine = null;
-        if (totalXP) {
-            totalXPLine = `${game.i18n.localize("QE.TotalXP.CONTENT")} ${totalXP}XP<br>`;
-        }
-        //If there's no Map Note, include a warning
-        let noMapNoteWarning = null;
-        const qeScene = QuickEncounter.getEncounterScene(journalSheet.object);
-        if (!qeScene) {
-            noMapNoteWarning = `${game.i18n.localize("QE.AddToCombatTracker.NoMapNote")}`;
-        }
-        
-        let qeJournalEntryIntro = "";
-        //v0.6.1: Also pop open a companion dialog with details about what tokens have been placed and XP
-        if (game.settings.get(MODULE_NAME, "useQuickEncounterDialog")) {
-            const companionSheet = new EncounterCompanionSheet(quickEncounter, totalXPLine);
-            companionSheet.render(true);
-            journalSheet.companionSheet = companionSheet;
-            qeJournalEntryIntro = noMapNoteWarning;
-        } else {
-            qeJournalEntryIntro = await renderTemplate('modules/quick-encounters/templates/qeJournalEntryIntro.html', {totalXPLine, noMapNoteWarning});
-        }
-        html.find('.editor-content').prepend(qeJournalEntryIntro);
-        //If there's an embedded button, then add a listener
-        html.find('button[name="addToCombatTracker"]').click(event => {
-            quickEncounter.run(event);
-        });
-    }
-});//end Hooks.on("renderJournalSheet")
+Hooks.on(`renderJournalSheet`,  QuickEncounter.onRenderJournalSheet);//end Hooks.on("renderJournalSheet")
 
 
 //The Journal Sheet  looks to see if this is the Tutorial and deletes the Journal Entry if so

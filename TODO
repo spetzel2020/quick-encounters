@@ -1,8 +1,6 @@
 # TO DO
 
 ## BUGS
->>>v0.6.6 If you have two QEs open with QE dialogs, closing one Journal Entry will close both QE dialogs
-    - it looks like you can't have two QE dialogs open simulataneously; one replaces the other
 v0.6: Can't copy a QE Journal Entry - it references the old QE
 v0.6.8: You can use a Compendium link - but the Image doesn't always appear in the QE dialog
         - use the lazy loading method from Compendiums?
@@ -127,6 +125,8 @@ FIXED v0.6.6 If you have a Journal Entry with multiple DIFFERENT mentions of the
         - when you place tokens, add them to the first instance, then subsequent instances, then back to the first
 FIXED v0.6.6: If you have two identical Actors in the QE dialog, the formdata combines them into one row 
         - so instead we need to add a row# to distinguish  
+FIXED in 0.6.8: v0.6.6 If you have two QEs open with QE dialogs, closing one Journal Entry will close both QE dialogs
+        - it looks like you can't have two QE dialogs open simulataneously; one replaces the other        
 
 ## COMPLETED FEATURES
 (v0.4.0): If you're on a different scene, pops a dialog to check that you want to switch scenes
