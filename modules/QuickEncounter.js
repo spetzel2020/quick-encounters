@@ -111,6 +111,7 @@
 30-Nov-2020     v0.6.9: Bug: When you add tokens to an existing QE with that Actor, it should fill in all generatedTokens and then increase numActors  
                 addTokens(): Add remaining tokens to the 0th element for this actorId; 
                 Analyze the added tokens only (was previously adding existing tokens en masse which doesn't work for multiple instances of the same Actor)          
+1-Dec-2020      v0.6.10: First attempt to reuse the existing QE dialog (not using app.id)                
 */
 
 
@@ -118,7 +119,7 @@ import {EncounterNote} from './EncounterNote.js';
 import {EncounterCompanionSheet} from './EncounterCompanionSheet.js';
 
 export const MODULE_NAME = "quick-encounters";
-export const MODULE_VERSION = "0.6.9";
+export const MODULE_VERSION = "0.6.10";
 
 export const TOKENS_FLAG_KEY = "tokens";
 export const QE_JSON_FLAG_KEY = "quickEncounter";
@@ -471,14 +472,6 @@ export class QuickEncounter {
 
 
 
-    static getActorXP(actor) {
-        if ((game.system.id !== "dnd5e") || !actor) {return null;}
-        try {
-            return actor.data?.data?.details?.xp?.value;
-        } catch (err) {
-            return null;
-        }
-    }
 
     static async showTutorialJournalEntry() {
         //0.5.0: Check if there's an existing open Tutorial
@@ -905,7 +898,7 @@ export class QuickEncounter {
 
         //Now compute total XP and XP per player
         if (!nonFriendlyNPCTokens || !nonFriendlyNPCTokens.length || !pcTokens) {return;}
-        const totalXP = await QuickEncounter.computeTotalXP(nonFriendlyNPCTokens);
+        const totalXP = QuickEncounter.computeTotalXPFromTokens(nonFriendlyNPCTokens);
         if (!totalXP) {return;}
         const xpPerPlayer = pcTokens.length ? Math.round(totalXP/pcTokens.length) : null;
         let content = game.i18n.localize("QE.XPtoAward.TOTAL") + totalXP;
@@ -926,27 +919,52 @@ export class QuickEncounter {
     }
 
 
+    static getActorXP(actor) {
+        if ((game.system.id !== "dnd5e") || !actor) {return null;}
+        try {
+            return actor.data?.data?.details?.xp?.value;
+        } catch (err) {
+            return null;
+        }
+    }
 
-    static async computeTotalXP(tokens) {
+    static computeTotalXPFromTokens(tokens) {
         if ((game.system.id !== "dnd5e") || !tokens) { return; }
         let totalXP = null;
         for (const token of tokens) {
             totalXP += QuickEncounter.getActorXP(token.actor);
         }
         return totalXP;
-        /*        
-                if (totalXP) {
-                    const chatMessageData = {
-                        user: game.user,
-                        whisperTo: game.user,
-                        visible : true,
-                        content : `Total XP: ${totalXP}`
-                    }
-                    const chatMessage = await ChatMessage.create(chatMessageData);
-                    //Post is unnecessary because create calls onCreate which calls postOne
-                }
-        */
     }
+
+    computeTotalXP() {
+        //Compute total XP from non-character, fixed-number (non-die-roll) extracted actors
+        //The final XP depends on who was non-friendly, computed from what tokens you pass to computeTotalXPFromTokens
+        const extractedActors = this.extractedActors;
+        let totalXP = null;
+        for (const eActor of extractedActors) {
+            const actor = game.actors.get(eActor.actorID);
+            const actorXP = QuickEncounter.getActorXP(actor);
+            //Only include non-character tokens in XP
+            if (actorXP && (actor.data.type === "npc")) {
+                if (!totalXP) {totalXP = 0;}
+                //Allow for numActors being a roll (e.g. [[/r 1d4]]) in which case we ignore the XP
+                //although we probably should provide a range or average
+                if (typeof eActor.numActors === "number") {
+                    totalXP += eActor.numActors * actorXP;
+                }
+            }
+        }
+        return totalXP;
+    }
+
+    renderTotalXPLine() {
+        const totalXP = this.computeTotalXP();
+        if (!totalXP) {return null;}
+        return `${game.i18n.localize("QE.TotalXP.CONTENT")} ${totalXP}XP<br>`;
+    }
+
+
 
     static async onRenderJournalSheet(journalSheet, html) {
         if (!game.user.isGM) {return;}
@@ -961,25 +979,8 @@ export class QuickEncounter {
 
         const quickEncounter = QuickEncounter.extractQuickEncounter(journalSheet);
         if (quickEncounter) {
-            const extractedActors = quickEncounter.extractedActors;
-            let totalXP = null;
-            for (const eActor of extractedActors) {
-                const actor = game.actors.get(eActor.actorID);
-                const actorXP = QuickEncounter.getActorXP(actor);
-                //Only include non-character tokens in XP
-                if (actorXP && (actor.data.type === "npc")) {
-                    if (!totalXP) {totalXP = 0;}
-                    //Allow for numActors being a roll (e.g. [[/r 1d4]]) in which case we ignore the XP
-                    //although we probably should provide a range or average
-                    if (typeof eActor.numActors === "number") {
-                        totalXP += eActor.numActors * actorXP;
-                    }
-                }
-            }
-            let totalXPLine = null;
-            if (totalXP) {
-                totalXPLine = `${game.i18n.localize("QE.TotalXP.CONTENT")} ${totalXP}XP<br>`;
-            }
+            const totalXPLine = quickEncounter.renderTotalXPLine();
+
             //If there's no Map Note, include a warning
             let noMapNoteWarning = null;
             const qeScene = QuickEncounter.getEncounterScene(journalSheet.object);
@@ -990,9 +991,11 @@ export class QuickEncounter {
             let qeJournalEntryIntro = "";
             //v0.6.1: Also pop open a companion dialog with details about what tokens have been placed and XP
             if (game.settings.get(MODULE_NAME, "useQuickEncounterDialog")) {
-                const companionSheet = new EncounterCompanionSheet(quickEncounter, totalXPLine);
-                companionSheet.render(true);
-                journalSheet.companionSheet = companionSheet;
+                //v0.6.10: First attempt to reuse the existing QE dialog (not using app.id)
+                let qeDialog = journalSheet.qeDialog;
+                if (!qeDialog) {qeDialog = new EncounterCompanionSheet(quickEncounter);}
+                qeDialog.render(true);
+                journalSheet.qeDialog = qeDialog;
                 qeJournalEntryIntro = noMapNoteWarning;
             } else {
                 qeJournalEntryIntro = await renderTemplate('modules/quick-encounters/templates/qeJournalEntryIntro.html', {totalXPLine, noMapNoteWarning});
@@ -1056,7 +1059,7 @@ export class QEDialog extends Dialog {
 
 /** HOOKS */
 //Add a listener for the embedded Encounter button and record the scene if we can
-Hooks.on(`renderJournalSheet`,  QuickEncounter.onRenderJournalSheet);//end Hooks.on("renderJournalSheet")
+Hooks.on(`renderJournalSheet`,  QuickEncounter.onRenderJournalSheet);
 
 
 //The Journal Sheet  looks to see if this is the Tutorial and deletes the Journal Entry if so
@@ -1074,10 +1077,9 @@ Hooks.on('closeJournalSheet', async (journalSheet, html) => {
     }
 
     //v0.6.1: If there's a QE dialog open, close that too
-//FIXME: If there are more than one QE dialogs open, it closes both of them
-    if (journalSheet.companionSheet) {
-        journalSheet.companionSheet.close();
-        delete journalSheet.companionSheet;
+    if (journalSheet.qeDialog) {
+        journalSheet.qeDialog.close();
+        delete journalSheet.qeDialog;
     }
 });
 

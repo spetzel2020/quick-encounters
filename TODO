@@ -4,9 +4,9 @@
 v0.6: Can't copy a QE Journal Entry - it references the old QE
 v0.6.8: You can use a Compendium link - but the Image doesn't always appear in the QE dialog
         - use the lazy loading method from Compendiums?
+             
            
 ## FEATURES
-- Add a link back to the README
 - Add to the README FAQs about handling multiple instances
 >>> Add the QE button to the JE border to reopen the dialog
     - add to the window border of the QE dialog    
@@ -126,7 +126,10 @@ FIXED v0.6.6 If you have a Journal Entry with multiple DIFFERENT mentions of the
 FIXED v0.6.6: If you have two identical Actors in the QE dialog, the formdata combines them into one row 
         - so instead we need to add a row# to distinguish  
 FIXED in 0.6.9: v0.6.6 If you have two QEs open with QE dialogs, closing one Journal Entry will close both QE dialogs
-        - it looks like you can't have two QE dialogs open simulataneously; one replaces the other        
+        - it looks like you can't have two QE dialogs open simulataneously; one replaces the other   
+FIXED in 0.6.10: v0.6.9: You can have individual QE dialogs, but a change will pop up a new one  
+        - need to reference the older one and just re-render  
+FIXED in 0.6.10: v0.6.9: EncounterCompanionDialog: Not recomputing total XP line when you change numbers of actors              
 
 ## COMPLETED FEATURES
 (v0.4.0): If you're on a different scene, pops a dialog to check that you want to switch scenes
@@ -158,3 +161,4 @@ v0.6.1  - Alt-Run should add ALL tokens Invisible; Ctrl-Run makes them all visib
 v0.6.1 - Make QuickEncounter more oo; create around the quickEncounter that is stored in the Journal Entry
 v0.6.1 Store saved tokens with the Actors so they don't have to be reconstituted
 v0.6.4 Open a vanilla Journal Entry, select tokens, and press the QE button to turn this into a QE
+v0.6.8 Tutorial: Add a link back to the README
