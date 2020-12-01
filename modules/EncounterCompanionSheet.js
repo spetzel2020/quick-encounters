@@ -18,7 +18,8 @@ Reused as EncounterCompanionSheet
                         combatants, updateObject(): Add rowNum to distinguish between same actorId instances
 30-Nov-2020     v0.6.9c: Add get id() so that we get unique identifer for the companion sheet   
 1-Dec-2020      v0.6.10: Move calculation/updating of combatants for display to getData() so it is re-rendered after update  
-                         Remove passing totalXPLine because it has to be updated as you add/remove combatants                  
+                         Remove passing totalXPLine because it has to be updated as you add/remove combatants     
+                v0.6.11: update(): Update to new quickEncounter             
 */
 
 
@@ -35,6 +36,10 @@ export class EncounterCompanionSheet extends FormApplication {
 //FIXME: Probably would be better to reference the Journal Entry this is for    
 	get id() {
 	    return `${MODULE_NAME}-${this.appId}`;
+    }
+
+    update(quickEncounter) {
+        if (quickEncounter) this.quickEncounter = quickEncounter;
     }
 
     /** @override  */

@@ -111,7 +111,8 @@
 30-Nov-2020     v0.6.9: Bug: When you add tokens to an existing QE with that Actor, it should fill in all generatedTokens and then increase numActors  
                 addTokens(): Add remaining tokens to the 0th element for this actorId; 
                 Analyze the added tokens only (was previously adding existing tokens en masse which doesn't work for multiple instances of the same Actor)          
-1-Dec-2020      v0.6.10: First attempt to reuse the existing QE dialog (not using app.id)                
+1-Dec-2020      v0.6.10: First attempt to reuse the existing QE dialog (not using app.id)  
+                v0.6.11:   Fixed bug: If you were using a die roll, added tokens were added twice            
 */
 
 
@@ -119,7 +120,7 @@ import {EncounterNote} from './EncounterNote.js';
 import {EncounterCompanionSheet} from './EncounterCompanionSheet.js';
 
 export const MODULE_NAME = "quick-encounters";
-export const MODULE_VERSION = "0.6.10";
+export const MODULE_VERSION = "0.6.11";
 
 export const TOKENS_FLAG_KEY = "tokens";
 export const QE_JSON_FLAG_KEY = "quickEncounter";
@@ -350,7 +351,7 @@ export class QuickEncounter {
         let quickEncounter = QuickEncounter.createQuickEncounterAndAddTokens(controlledTokens);
         const journalEntry = openJournalSheet?.object;
         quickEncounter.serializeIntoJournalEntry(journalEntry.id);
-        //Force a re-render which should pop up the COopanion dialog
+        //Force a re-render which should pop up the QE dialog
         openJournalSheet?.render(true);
     }
 
@@ -394,6 +395,8 @@ export class QuickEncounter {
                         //In this case the numActors is a diceroll, so we don't change numActors but assign all the tokens
                         //FIXME: Should just fill out to the maxRoll
                         extractedActorsOfThisActorId[i].savedTokensData = eActor.savedTokensData.concat(tokensData);
+                        //v0.6.11 - was allocating here and then doing it again below
+                        tokensData.length = 0;
                     }
                 }//end for 
                 //v0.6.9: If there are addedTokensData left over, add them to the 0th element and increase the numActors
@@ -993,7 +996,12 @@ export class QuickEncounter {
             if (game.settings.get(MODULE_NAME, "useQuickEncounterDialog")) {
                 //v0.6.10: First attempt to reuse the existing QE dialog (not using app.id)
                 let qeDialog = journalSheet.qeDialog;
-                if (!qeDialog) {qeDialog = new EncounterCompanionSheet(quickEncounter);}
+                if (qeDialog) {
+                    qeDialog.update(quickEncounter);    //have to update since we extract a new one each time
+                } else {
+                    qeDialog = new EncounterCompanionSheet(quickEncounter);
+                }
+
                 qeDialog.render(true);
                 journalSheet.qeDialog = qeDialog;
                 qeJournalEntryIntro = noMapNoteWarning;

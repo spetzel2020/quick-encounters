@@ -7,6 +7,9 @@
 - GM display of Combat XP and per player token
 - (v0.6.8) Use Compendium links in Method 2 (so you can defer loading of Actors)
 
+## 0.6.11
+- Not re-rendering when you add new tokens or increase numbers?
+
 ## 0.6.10
 Fixed: Every change to the contents of the QE dialog popped up a new dialog
 Fixed: Changes to QE dialog contents were not triggering a re-render
