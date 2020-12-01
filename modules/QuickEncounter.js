@@ -109,7 +109,8 @@
                 addTokens(): Search the actor list to see if there's another Actor to add tokens to
                 constructor(): Always provide a (possibly empty) savedTokensData array
 30-Nov-2020     v0.6.9: Bug: When you add tokens to an existing QE with that Actor, it should fill in all generatedTokens and then increase numActors  
-                addTokens(): Add remaining tokens to the 0th element for this actorId              
+                addTokens(): Add remaining tokens to the 0th element for this actorId; 
+                Analyze the added tokens only (was previously adding existing tokens en masse which doesn't work for multiple instances of the same Actor)          
 */
 
 
@@ -356,21 +357,13 @@ export class QuickEncounter {
     async addTokens(controlledTokens) {
         //Add the new tokens to the existing ones (or creates new ones)
         //Use tokenData because tokens is too deep to store in flags
-        let controlledTokensData = [];
-        for (const token of controlledTokens) {
-            controlledTokensData.push(token.data);
-        }
-        let oldSavedTokensData = [];
-        //0.6.4: Allow for no existing extractedActors (no longer setting this to [] in the constructor)
-        this.extractedActors?.forEach(eActor => {
-            //0.6.2: Bug: Old embedded method was concatenating undefined savedTokensData
-            if (eActor.savedTokensData) oldSavedTokensData = oldSavedTokensData.concat(eActor.savedTokensData)
-        });
-        const newSavedTokensData = oldSavedTokensData.concat(controlledTokensData);
+        let controlledTokensData = controlledTokens.map(ct => {return ct.data});
+      
+        const newSavedTokensData = duplicate(controlledTokensData);
         //0.6.2: If we don't already have coords, then use the tokens we just added
         if (!this.coords) {this.coords = {x: newSavedTokensData[0].x, y: newSavedTokensData[0].y}}
 
-        //Find set of distinct actors
+        //Find set of distinct actors - some/all of these may be new if the addTokens is being called from create
         let tokenActorIds = new Set();
         for (const tokenData of newSavedTokensData) {
             tokenActorIds.add(tokenData.actorId);
@@ -392,8 +385,9 @@ export class QuickEncounter {
                         //Option 2: Add as many tokens as we need
                         const numNeededTokens = eActor.numActors - eActor.savedTokensData.length;
                         if (numNeededTokens > 0) {
-                            extractedActorsOfThisActorId[i].savedTokensData = eActor.savedTokensData.concat(tokensData.slice(0, numNeededTokens));
-                            tokensData.splice(0,numNeededTokens);
+                            //Note that we have to check min() because the weird behavior is that splice doesn't delete if numNeededTokens>length
+                            const tokensDataToTransfer = tokensData.splice(0, Math.min(numNeededTokens,tokensData.length));
+                            extractedActorsOfThisActorId[i].savedTokensData = eActor.savedTokensData.concat(tokensDataToTransfer);                            
                         }
                     } else {
                         //In this case the numActors is a diceroll, so we don't change numActors but assign all the tokens
@@ -405,7 +399,9 @@ export class QuickEncounter {
                 if (tokensData.length) {
                     //Should have savedTokensData already 
                     extractedActorsOfThisActorId[0].savedTokensData = extractedActorsOfThisActorId[0].savedTokensData.concat(tokensData);
-                    extractedActorsOfThisActorId[0].numActors = extractedActorsOfThisActorId[0].savedTokensData.length;
+                    if (typeof extractedActorsOfThisActorId[0].numActors === "number") {
+                        extractedActorsOfThisActorId[0].numActors = extractedActorsOfThisActorId[0].savedTokensData.length;
+                    }
                 }
             } else {
                 //Option 1. We don't find this actor - then add a new Actor with ALL of the relevant tokens
@@ -424,10 +420,9 @@ export class QuickEncounter {
         }//end for tokenActorIds
 
         //Delete the existing tokens (because they will be replaced)
-//FIXME: Refactor to create array of tokens to delete before calling deleteMany()        
-        for (const token of controlledTokens) {
-            canvas.tokens.deleteMany([token.id]);
-        }
+    
+        const controlledTokensIds = controlledTokens.map(ct => {return ct.id});
+        canvas.tokens.deleteMany(controlledTokensIds);
 
         //v0.6.1k Update the created/changed QuickEncounter into the Journal Entry
         this.serializeIntoJournalEntry();
