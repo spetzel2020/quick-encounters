@@ -1,5 +1,8 @@
 # Quick Encounters
-NEW in v0.6! Add tokens to existing Quick Encounters, use die rolls for number of Actors, GM display of Combat XP and per player token, new Quick Encounter dialog - see [Release Notes](https://github.com/spetzel2020/quick-encounters/blob/master/CHANGELOG.md)
+NEW in v0.6! Add tokens to existing Quick Encounters, use die rolls for number of Actors, GM display of Combat XP and per player token, new Quick Encounter dialog
+
+New in this release: Bug fixes and layout tweaks; see [Release Notes](https://github.com/spetzel2020/quick-encounters/blob/master/CHANGELOG.md
+
 * **Author**: Spetzel#0103
 * **Version**: 0.6.11
 * **Foundry VTT Compatibility**: 0.6.5-0.7.7
