@@ -8,7 +8,7 @@
 - (v0.6.8) Use Compendium links in Method 2 (so you can defer loading of Actors)
 
 ## 0.6.11
-- Not re-rendering when you add new tokens or increase numbers?
+Fixed: Wasn't re-rendering when you add new tokens or increase numbers?
 
 ## 0.6.10
 Fixed: Every change to the contents of the QE dialog popped up a new dialog
@@ -16,7 +16,7 @@ Fixed: Changes to QE dialog contents were not triggering a re-render
 Fixed: Total XP in QE dialog wasn't updating
 
 ## 0.6.9
-- Fixed a bug where two QE Journal Entries would references only one QE dialog
+Fixed: two QE Journal Entries would references only one QE dialog
 
 ## 0.6.8
 - Fixed a bug where two instances of the same actor produced too many token slots
