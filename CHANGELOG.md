@@ -7,6 +7,8 @@
 - GM display of Combat XP and per player token
 - (v0.6.8) Use Compendium links in Method 2 (so you can defer loading of Actors)
 
+## 0.6.12
+- German translation added (thanks @Fallayn#6414!)
 ## 0.6.11
 Fixed: Wasn't re-rendering when you add new tokens or increase numbers?
 
