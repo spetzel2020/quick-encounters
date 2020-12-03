@@ -7,7 +7,7 @@ New in this release: Bug fixes and layout tweaks; see [Release Notes](https://gi
 * **Version**: 0.6.11
 * **Foundry VTT Compatibility**: 0.6.5-0.7.7
 * **System Compatibility (If applicable)**: All; additional features for dnd5e
-* **Translation Support**: en, es (thanks [lozalojo!](https://github.com/lozalojo), ja (thanks "touge"!)
+* **Translation Support**: en, es (thanks [lozalojo!](https://github.com/lozalojo)), ja (thanks "touge"!)
 
 
 # Description
