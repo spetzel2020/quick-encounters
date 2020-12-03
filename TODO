@@ -7,11 +7,17 @@ v0.6.8: You can use a Compendium link - but the Image doesn't always appear in t
              
            
 ## FEATURES
+### 0.6.12
 - Add to the README FAQs about handling multiple instances
->>> Add the QE button to the JE border to reopen the dialog
-    - add to the window border of the QE dialog    
+- Add German translation??
+- Modify en.json to allow variable substitution (hopefully without breaking es and ja)
+    
 
 ### Version 0.7
+- Add more icons to the Scene Notes
+- Incorporate Easy XP if not already loaded
+- Add the QE button to the JE border to reopen the dialog and to show that this is Quick Encounter
+    - add to the window border of the QE dialog to allow other actions
 - Remove the option to not use the QE dialog (including Setting and direction at the bottom of the QE dialog)
 - Refactor how we're handling token allocation: creation or addition
     - should always maintain an accurate generated tokens, incorporating saved tokens
@@ -20,7 +26,7 @@ v0.6.8: You can use a Compendium link - but the Image doesn't always appear in t
 - Save token positions for Compendium actors and allow deleting the Actors  
     - remember that you dragged the Compendium link to the Scene before capturing it in Method 1
 - Option to leave the tokens on the Scene (invisible or visible) but:
-    - turn them visible when you press the Quick Encounters button
+    - turn them visible when you press the Quick Encounters button and add them to the Combat Tracker
     - When the Companion dialog opens - show the token position as TEMPORARY tokens on the map - allow them to be moved or deleted    
     - add them to the Combat Tracker
     - when you're on the entry in the QE dialog it should show the positions of those tokens
@@ -48,15 +54,13 @@ More sophisticated monster entries:
 
 - Show which Journal Entries have Quick Encounters in the Journal list
 
-- Editing Companion dialog
-    - Or JE-by-JE option to use new method; or global option   
-        - Sync methods: Manual, JE-to-Companion, Companion-to-JE
 
 ## REFACTORING
 - Refactor EncounterCompanionDialog to QuickEncounterDialog
 - Remove unused styles from .css
 - addTokens: Could just add the tokens one by one rather than filtering etc.
     - Need to refactor so we use a constructor or factory rather than setting individual instance parameters outside the class
+        - may not be happening any more
 - Improve the way the Journal Entry gets built to do more with the template and handlebars
 
 ## DOCS
