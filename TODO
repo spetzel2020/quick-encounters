@@ -8,12 +8,12 @@ v0.6.8: You can use a Compendium link - but the Image doesn't always appear in t
            
 ## FEATURES
 ### 0.6.12
-- Add to the README FAQs about handling multiple instances
-- Add German translation??
+- Add German translation
 - Modify en.json to allow variable substitution (hopefully without breaking es and ja)
     
 
 ### Version 0.7
+- Add to the README FAQs about handling multiple instances
 - Add more icons to the Scene Notes
 - Incorporate Easy XP if not already loaded
 - Add the QE button to the JE border to reopen the dialog and to show that this is Quick Encounter

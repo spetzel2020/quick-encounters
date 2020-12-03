@@ -6,6 +6,7 @@
 - Use die rolls for number of Actors (e.g. 2d6)
 - GM display of Combat XP and per player token
 - (v0.6.8) Use Compendium links in Method 2 (so you can defer loading of Actors)
+- Translations: en, es, ja, de
 
 ## 0.6.12
 - German translation added (thanks @Fallayn#6414!)
