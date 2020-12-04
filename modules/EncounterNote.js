@@ -16,6 +16,7 @@ Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tra
                 v0.5.0: NYI: Base code for Hook on renderNoteCOnfig to change it to look like a QE Note (but need a way of determining a QE Note)
 9-Nov-2020      v0.6.1: Refactor Map Note related functions here: switchToMapNoteScene(), noMapNoteDialog(), mapNoteIsPlaced()
 15-Nov-2020     v0.6.2: Refactor to use quickEncounter rather than journalEntry
+2-Dec-2020      v0.6.12: Test parameterization of i18n strings, using Localization.format() (but be backward compatible)
 */
 
 
@@ -169,9 +170,17 @@ export class EncounterNote {
 
         //Otherwise ask if you want to switch to the scene - default is No/false
         let shouldSwitch = false;
+        //v0.6.12: Testing parameterization of i18n strings, using Localization.format()
+        // If there is an 0612 version use that with a parameter, otherwise there isn't a parameter yet and we do it the pre-0.6.12 way
+        let content; 
+        if (game.i18n.has("QE.SwitchScene.CONTENT.0612", false)) {
+            content = game.i18n.format("QE.SwitchScene.CONTENT.0612", {sceneName : qeScene.name});
+        } else {
+            content = game.i18n.localize("QE.SwitchScene.CONTENT") + qeScene.name + "?";
+        }
         await Dialog.confirm({
             title: game.i18n.localize("QE.SwitchScene.TITLE"),
-            content : `${game.i18n.localize("QE.SwitchScene.CONTENT")} ${qeScene.name}?`,
+            content : content,
             //0.5.0 Need the Yes response to wait until we are in the correct scene (so don't make it async)
             //and in particular, the Journal Note has been drawn
             yes : () => {shouldSwitch = true},

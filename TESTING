@@ -19,7 +19,7 @@ USE, MOVING, DELETION
 3. Start on another Scene and run an Encounter - should switch scenes     					                OK	
 
 NEW FEATURES IN 0.6
-0. Open QE with Companion Dialog and Run
+0. Open QE with QE Dialog and Run
 1. Open a vanilla Journal Entry, select tokens, and press the QE button to turn this into a QE -> ADD vs. CREATE dialog	OK
 2. Random encounters (1d4+2)                                                                                					OK
 3. Alt- or Ctrl- Run to force invisible or visible                                                          					OK
