@@ -1,28 +1,45 @@
 {
   "name": "quick-encounters",
   "title": "Quick Encounters",
-  "description" : "<p>Keeps your Scene map clean and your encounters simple by saving tokens/Actors into Quick Encounter Journal Entries:</p><ul><li>Design your encounters by positioning and configuring Hostile tokens, then save the tokens into a Quick Encounter Journal Entry, marked with a single Map Note on the Scene which only you the DM see</li><li>Run your Quick Encounter by clicking the Add to Combat Tracker button; all your saved tokens will be positioned back on the map and added to the Combat Tracker, ready to fight!</li><li>Run encounters from converted or packaged modules with embedded Actors</li><li>Easily scale-up encounters by changing 3 Zombies to 10 Zombies</li><li>Similar to the Encounter ability in Fantasy Grounds</li><li>For Roving Encounters move a single Map Note, not many tokens</li><li>Save your player tokens at the entrance to a new Scene too!</li></ul>",
-  "author" : "Spetzel",
-  "version": "0.6.5",
+  "description": "<p>Keeps your Scene map clean and your encounters simple by saving tokens/Actors into Quick Encounter Journal Entries:</p><ul><li>Design your encounters by positioning and configuring Hostile tokens, then save the tokens into a Quick Encounter Journal Entry, marked with a single Map Note on the Scene which only you the DM see</li><li>Run your Quick Encounter by clicking the Add to Combat Tracker button; all your saved tokens will be positioned back on the map and added to the Combat Tracker, ready to fight!</li><li>Run encounters from converted or packaged modules with embedded Actors</li><li>Easily scale-up encounters by changing 3 Zombies to 10 Zombies</li><li>Similar to the Encounter ability in Fantasy Grounds</li><li>For Roving Encounters move a single Map Note, not many tokens</li><li>Save your player tokens at the entrance to a new Scene too!</li></ul>",
+  "author": "Spetzel",
+  "version": "0.6.12",
   "minimumCoreVersion": "0.6.5",
   "compatibleCoreVersion": "0.7.7",
-  "languages": [{
-    "lang": "en",
-    "name": "English",
-    "path": "lang/en.json"
-  },
-  {
-    "lang": "es",
-    "name": "Spanish",
-    "path": "lang/es.json"
-  }],
-  "esmodules" : ["modules/QuickEncounter.js","modules/EncounterNote.js","modules/EncounterCompanionSheet.js"
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    },
+    {
+      "lang": "es",
+      "name": "Español",
+      "path": "lang/es.json"
+    },
+    {
+      "lang": "ja",
+      "name": "日本語",
+      "path": "lang/ja.json"
+    },
+    {
+      "lang": "de",
+      "name": "Deutsch",
+      "path": "lang/de.json"
+    }
   ],
-  "styles": ["css/quick-encounters.css"],
-  "readme": "https://github.com/spetzel2020/quick-encounters/blob/v0.6.5/README.md",
+  "esmodules": [
+    "modules/QuickEncounter.js",
+    "modules/EncounterNote.js",
+    "modules/EncounterCompanionSheet.js"
+  ],
+  "styles": [
+    "css/quick-encounters.css"
+  ],
+  "readme": "https://github.com/spetzel2020/quick-encounters/blob/master/README.md",
   "bugs": "https://github.com/spetzel2020/quick-encounters/issues",
-  "changelog": "https://github.com/spetzel2020/quick-encounters/blob/v0.6.5/CHANGELOG.md",
-  "manifest": "https://raw.githubusercontent.com/spetzel2020/quick-encounters/v0.6.5/module.json",
-  "download": "https://github.com/spetzel2020/quick-encounters/archive/v0.6.5.zip",
+  "changelog": "https://github.com/spetzel2020/quick-encounters/blob/master/CHANGELOG.md",
+  "manifest": "https://github.com/spetzel2020/quick-encounters/releases/download/latest/module.json",
+  "download": "https://github.com/spetzel2020/quick-encounters/releases/download/latest/quick-encounters.zip",
   "url": "https://github.com/spetzel2020/quick-encounters"
 }
