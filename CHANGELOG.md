@@ -8,6 +8,9 @@
 - (v0.6.8) Use Compendium links in Method 2 (so you can defer loading of Actors)
 - Translations: en, es, ja, de
 
+## 0.6.13
+Fixing: Drag QE Journal Entry to Scene and then open it from Scene Note - should remember the position
+
 ## 0.6.12
 - German translation added (thanks @Fallayn#6414!)
 ## 0.6.11

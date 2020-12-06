@@ -1,15 +1,18 @@
 # TO DO
 
 ## BUGS
-v0.6: Can't copy a QE Journal Entry - it references the old QE
+>>>v0.6: Can't copy a QE Journal Entry - it references the old QE
+0.6.12- Delete all associated Scene Notes when you delete a JE
+>>>0.6.12   - remember which Scene Note opened the JE
+
 v0.6.8: You can use a Compendium link - but the Image doesn't always appear in the QE dialog
         - use the lazy loading method from Compendiums?
              
            
 ## FEATURES
-### 0.6.12
-- Add German translation
-- Modify en.json to allow variable substitution (hopefully without breaking es and ja)
+### 0.6.13
+
+
     
 
 ### Version 0.7
@@ -166,3 +169,5 @@ v0.6.1 - Make QuickEncounter more oo; create around the quickEncounter that is s
 v0.6.1 Store saved tokens with the Actors so they don't have to be reconstituted
 v0.6.4 Open a vanilla Journal Entry, select tokens, and press the QE button to turn this into a QE
 v0.6.8 Tutorial: Add a link back to the README
+v0.6.12 Add German translation
+v0.6.12 Modify en.json to allow variable substitution (hopefully without breaking es and ja)

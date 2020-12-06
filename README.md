@@ -4,7 +4,7 @@ NEW in v0.6! Add tokens to existing Quick Encounters, use die rolls for number o
 New in this release: Bug fixes and layout tweaks; see [Release Notes](https://github.com/spetzel2020/quick-encounters/blob/master/CHANGELOG.md
 
 * **Author**: Spetzel#0103
-* **Version**: 0.6.12
+* **Version**: 0.6.13
 * **Foundry VTT Compatibility**: 0.6.5-0.7.7
 * **System Compatibility (If applicable)**: All; additional features for dnd5e
 * **Translation Support**: en, es (thanks [lozalojo!](https://github.com/lozalojo), ja (thanks "touge"!), de (thanks @Fallayn#6414)

@@ -112,7 +112,8 @@
                 addTokens(): Add remaining tokens to the 0th element for this actorId; 
                 Analyze the added tokens only (was previously adding existing tokens en masse which doesn't work for multiple instances of the same Actor)          
 1-Dec-2020      v0.6.10: First attempt to reuse the existing QE dialog (not using app.id)  
-                v0.6.11:   Fixed bug: If you were using a die roll, added tokens were added twice            
+                v0.6.11:   Fixed bug: If you were using a die roll, added tokens were added twice    
+5-Dec-2020      v0.6.13: Add this.clickedNote. Set QuickEncounter.hoveredNote in Hook.hoverNote and then transfer to this.clickedNote if the Journal Entry matches
 */
 
 
@@ -166,6 +167,7 @@ export class QuickEncounter {
               
             }
         }
+        this.clickedNote = null;
     }
     
     async serializeIntoJournalEntry(journalEntryId) {
@@ -247,6 +249,9 @@ export class QuickEncounter {
             default: true,  
             type: Boolean
         });
+
+        //0.6.13 Initialize which Note you are hovering over
+        QuickEncounter.hoveredNote = null;
     }
 
 
@@ -645,21 +650,27 @@ export class QuickEncounter {
         //- Find the encounter location based on the Note position
         //- Create tokens (or use existing ones if they exist)
         const qeJournalEntry = game.journal.get(this.journalEntryId);
+
         const extractedActors = this.extractedActors;
         const savedTokensData = this.savedTokensData; 
 
         //Create tokens from embedded Actors - use saved tokens in their place if you have them
         if (!(qeJournalEntry && ((extractedActors && extractedActors.length) || (savedTokensData && savedTokensData.length)))) {return;}
 
-        // Switch to the correct scene if confirmed
-        const qeScene = QuickEncounter.getEncounterScene(qeJournalEntry);
-        //If there isn't a Map Note anywhere, prompt to create one in the center of the view
-        if (!qeScene) {EncounterNote.noMapNoteDialog(this);}
-        const isPlaced = await EncounterNote.mapNoteIsPlaced(qeScene, qeJournalEntry);
-        if (!isPlaced ) {return;}
+        //0.6.13 If we have clickedNote specified we know we're in the right scene, otherwise see where there is one
+        let mapNote = qeJournalEntry.clickedNote;
+        if (!mapNote) {
+            // Switch to the correct scene if confirmed
+            const qeScene = QuickEncounter.getEncounterScene(qeJournalEntry);
+            //If there isn't a Map Note anywhere, prompt to create one in the center of the view
+            if (!qeScene) {EncounterNote.noMapNoteDialog(this);}
+            const isPlaced = await EncounterNote.mapNoteIsPlaced(qeScene, qeJournalEntry);
+            if (!isPlaced ) {return;}
+            //Something is desperately wrong if this is null
+            mapNote = qeJournalEntry.sceneNote;
+        }
 
-        //Something is desperately wrong if this is null
-        const mapNote = qeJournalEntry.sceneNote;
+
         const coords = {x: mapNote.data.x, y: mapNote.data.y}
         canvas.tokens.activate();
 
@@ -982,11 +993,14 @@ export class QuickEncounter {
 
         const quickEncounter = QuickEncounter.extractQuickEncounter(journalSheet);
         if (quickEncounter) {
+            const qeJournalEntry = journalSheet.object;
+            //0.6.13: If we opened this from a Scene Note, then remember that (because you could move off to another Note)
+            qeJournalEntry.clickedNote =  (QuickEncounter.hoveredNote?.entry.id === journalSheet.object.id) ? QuickEncounter.hoveredNote : null;
             const totalXPLine = quickEncounter.renderTotalXPLine();
 
             //If there's no Map Note, include a warning
             let noMapNoteWarning = null;
-            const qeScene = QuickEncounter.getEncounterScene(journalSheet.object);
+            const qeScene = QuickEncounter.getEncounterScene(qeJournalEntry);
             if (!qeScene) {
                 noMapNoteWarning = `${game.i18n.localize("QE.AddToCombatTracker.NoMapNote")}`;
             }
@@ -1066,6 +1080,16 @@ export class QEDialog extends Dialog {
 
 
 /** HOOKS */
+//0.6.13: Can't hook on actually clicking on the Note, so on hoverIn/hoverOut we record which Note we're on
+Hooks.on("hoverNote", (note, startedHover) => {
+    if (!note || !game.user.isGM) {return;}
+    if (startedHover) {
+        QuickEncounter.hoveredNote = note;
+    } else {
+        QuickEncounter.hoveredNote = null;
+    }
+});
+
 //Add a listener for the embedded Encounter button and record the scene if we can
 Hooks.on(`renderJournalSheet`,  QuickEncounter.onRenderJournalSheet);
 
@@ -1089,6 +1113,7 @@ Hooks.on('closeJournalSheet', async (journalSheet, html) => {
         journalSheet.qeDialog.close();
         delete journalSheet.qeDialog;
     }
+    delete journalEntry.clickedNote;
 });
 
 
