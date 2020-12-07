@@ -114,6 +114,7 @@
 1-Dec-2020      v0.6.10: First attempt to reuse the existing QE dialog (not using app.id)  
                 v0.6.11:   Fixed bug: If you were using a die roll, added tokens were added twice    
 5-Dec-2020      v0.6.13: Add this.clickedNote. Set QuickEncounter.hoveredNote in Hook.hoverNote and then transfer to this.clickedNote if the Journal Entry matches
+6-Dec-2020      v0.6.13c: Keep the same clickedNote as long as the JE is open (even if you hover somewhere else)
 */
 
 
@@ -995,7 +996,10 @@ export class QuickEncounter {
         if (quickEncounter) {
             const qeJournalEntry = journalSheet.object;
             //0.6.13: If we opened this from a Scene Note, then remember that (because you could move off to another Note)
-            qeJournalEntry.clickedNote =  (QuickEncounter.hoveredNote?.entry.id === journalSheet.object.id) ? QuickEncounter.hoveredNote : null;
+            //But once the Journal Entry is open we don't reset it, even if subsequently we re-render (e.g. adding another Actor)
+            if (!qeJournalEntry.clickedNote && (QuickEncounter.hoveredNote?.entry.id === journalSheet.object.id)) {
+                qeJournalEntry.clickedNote = QuickEncounter.hoveredNote;
+            }
             const totalXPLine = quickEncounter.renderTotalXPLine();
 
             //If there's no Map Note, include a warning
