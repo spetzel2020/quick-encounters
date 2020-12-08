@@ -19,7 +19,7 @@ Here's a more complete statement of the problem:
         - As an upgrade method, store Map Note when creating new QEs; for others check when you open a Map Note and  savedTokens[0] has the Map Note coords.
         - Will need a dialog/notification to explain what happened
   
->>>0.6.12- Delete all associated Scene Notes when you delete a JE
+
 v0.6.8: You can use a Compendium link - but the Image doesn't always appear in the QE dialog
         - use the lazy loading method from Compendiums?
              
@@ -158,7 +158,8 @@ FIXED in 0.6.9: v0.6.6 If you have two QEs open with QE dialogs, closing one Jou
 FIXED in 0.6.10: v0.6.9: You can have individual QE dialogs, but a change will pop up a new one  
         - need to reference the older one and just re-render  
 FIXED in 0.6.10: v0.6.9: EncounterCompanionDialog: Not recomputing total XP line when you change numbers of actors      
-FIXED in 0.6.13: The remembered Scene NOte seems to be forgotten when you add a new Actor            
+FIXED in 0.6.13: The remembered Scene NOte seems to be forgotten when you add a new Actor   
+FIXED in 0.6.13:  Delete all associated Scene Notes when you delete a JE    (on this Scene or others)    
 
 ## COMPLETED FEATURES
 (v0.4.0): If you're on a different scene, pops a dialog to check that you want to switch scenes
@@ -193,4 +194,5 @@ v0.6.4 Open a vanilla Journal Entry, select tokens, and press the QE button to t
 v0.6.8 Tutorial: Add a link back to the README
 v0.6.12 Add German translation
 v0.6.12 Modify en.json to allow variable substitution (hopefully without breaking es and ja)
-0.6.13 Remember which Scene Note opened the JE and place generated tokens around it
+v0.6.13 Remember which Scene Note opened the JE and place generated tokens around it
+v0.6.13 Expand list of Note icons

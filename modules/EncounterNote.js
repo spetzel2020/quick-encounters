@@ -18,6 +18,8 @@ Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tra
 15-Nov-2020     v0.6.2: Refactor to use quickEncounter rather than journalEntry
 2-Dec-2020      v0.6.12: Test parameterization of i18n strings, using Localization.format() (but be backward compatible)
 7-Dec-2020      v0.6.13: delete(): Delete ALL of the Notes (in this or other Scenes) associated with the delete journal Entry
+                        EncounterNote.create() and .place() return newNote so that we can store that in the quickEncounter before serialization
+                        Expand the available list of Note icons (perhaps would be good to have a Setting to allow/disallow this)
 */
 
 
@@ -25,7 +27,42 @@ import {QuickEncounter} from './QuickEncounter.js';
 
 //Expand the available list of Note icons
 const moreNoteIcons = {
-    "Combat" : "icons/svg/combat.svg"
+    "Acid" : "icons/svg/acid.svg",
+    "Angel" : "icons/svg/angel.svg",
+    "Aura" : "icons/svg/aura.svg",
+    "Blind" : "icons/svg/blind.svg",
+    "Blood" : "icons/svg/blood.svg",
+    "Bones" : "icons/svg/bones.svg",
+    "Circle" : "icons/svg/circle.svg",
+    "Clockwork" : "icons/svg/clockwork.svg",
+    "Combat" : "icons/svg/combat.svg",
+    "Cowled" : "icons/svg/cowled.svg",
+    "Daze" : "icons/svg/daze.svg",
+    "Deaf" : "icons/svg/deaf.svg",
+    "Direction" : "icons/svg/direction.svg",
+    "Door-Closed" : "icons/svg/door-closed.svg",   
+    "Door-Exit" : "icons/svg/door-exit.svg",    
+    "Down" : "icons/svg/down.svg",
+    "Explosion" : "icons/svg/explosion.svg",
+    "Eye" : "icons/svg/eye.svg",
+    "Falling" : "icons/svg/falling.svg",    
+    "Frozen" : "icons/svg/frozen.svg",
+    "Hazard" : "icons/svg/hazard.svg",
+    "Heal" : "icons/svg/heal.svg",
+    "Holy Shield" : "icons/svg/holy-shield.svg",
+    "Ice Aura" : "icons/svg/ice-aura.svg",
+    "Lightning" : "icons/svg/lightning.svg",
+    "Net" : "icons/svg/net.svg",
+    "Padlock" : "icons/svg/padlock.svg",   
+    "Paralysis" : "icons/svg/paralysis.svg",
+    "Poison" : "icons/svg/posion.svg",
+    "Radiation" : "icons/svg/radiation.svg",
+    "Sleep" : "icons/svg/sleep.svg",
+    "Sound" : "icons/svg/sound.svg",  
+    "Sun" : "icons/svg/sun.svg",
+    "Terror" : "icons/svg/terror.svg",   
+    "Up" : "icons/svg/up.svg",
+    "Wing" : "icons/svg/wing.svg"      
 }
 Object.assign(CONFIG.JournalEntry.noteIcons, moreNoteIcons);
 
@@ -62,6 +99,7 @@ export class EncounterNote {
         //This is different from the JournalEntry._onDropData approach
         let newNote = await Note.create(noteData);
         newNote._sheet = new EncounterNoteConfig(newNote);
+        return newNote;
     }
 
     static async delete(journalEntry) {
@@ -116,7 +154,7 @@ export class EncounterNote {
 
     static async place(quickEncounter, options={}) {
         if (!quickEncounter) {return;}
-
+        let qeNote = null;
         //Create a Map Note for this encounter - the default is where the saved Tokens were
         let noteAnchor = {}
         if (quickEncounter.coords) {
@@ -135,8 +173,9 @@ export class EncounterNote {
         if (canvas.grid.hitArea.contains(noteAnchor.x, noteAnchor.y) ) {
             // Create a Note; we don't pop-up the Note sheet because we really want this Note to be placed
             //(they can always edit it afterwards)
-            await EncounterNote.create(quickEncounter, noteAnchor);
+            qeNote = await EncounterNote.create(quickEncounter, noteAnchor);
         }
+        return qeNote;
     }
 
 
