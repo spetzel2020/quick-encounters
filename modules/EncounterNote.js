@@ -212,8 +212,8 @@ export class EncounterNote {
         //v0.6.12: Testing parameterization of i18n strings, using Localization.format()
         // If there is an 0612 version use that with a parameter, otherwise there isn't a parameter yet and we do it the pre-0.6.12 way
         let content; 
-        if (game.i18n.has("QE.SwitchScene.CONTENT.0612", false)) {
-            content = game.i18n.format("QE.SwitchScene.CONTENT.0612", {sceneName : qeScene.name});
+        if (game.i18n.has("QE.SwitchScene.CONTENT_v0612", false)) {
+            content = game.i18n.format("QE.SwitchScene.CONTENT_v0612", {sceneName : qeScene.name});
         } else {
             content = game.i18n.localize("QE.SwitchScene.CONTENT") + qeScene.name + "?";
         }

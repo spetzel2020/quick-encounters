@@ -1,6 +1,7 @@
 # TO DO
 
 ## BUGS
+>>>v0.6.12: The .0612 addition to QE.SwitchScene.CONTENT doesn't work, probably because it's a number
 Here's a more complete statement of the problem:
         1. If you create a Quick Encounter by selecting tokens and pressing the Quick Encounter button, you get a Journal Entry with captured tokens and a Scene (Map) Note at the (x,y) position of the 0th token
         2. If you move the existing Map Note to a new location (for example, the border of the room rather than the center of it), the tokens should not move
