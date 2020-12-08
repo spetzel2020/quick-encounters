@@ -17,6 +17,7 @@ Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tra
 9-Nov-2020      v0.6.1: Refactor Map Note related functions here: switchToMapNoteScene(), noMapNoteDialog(), mapNoteIsPlaced()
 15-Nov-2020     v0.6.2: Refactor to use quickEncounter rather than journalEntry
 2-Dec-2020      v0.6.12: Test parameterization of i18n strings, using Localization.format() (but be backward compatible)
+7-Dec-2020      v0.6.13: delete(): Delete ALL of the Notes (in this or other Scenes) associated with the delete journal Entry
 */
 
 
@@ -65,31 +66,33 @@ export class EncounterNote {
 
     static async delete(journalEntry) {
         if (!game.user.isGM) {return;}
-        const scene = QuickEncounter.getEncounterScene(journalEntry);
-        if (scene) {
-            //Find the corresponding Map note - have to switch to the correct scene first
-            if (!await EncounterNote.switchToMapNoteScene(scene, journalEntry)) {return;}
-            const note = journalEntry.sceneNote;
-            const noteName = note.name;
-
-            //Delete the note from the viewed scene
-            if (note) {
-                //0.4.2: Replaces Dialog.prompt from Foundry 0.7.2
-                EncounterNote.dialogPrompt({
-                  title: game.i18n.localize("QE.DeletedJournalNote.TITLE"),
-                  content: game.i18n.localize("QE.DeletedJournalNote.CONTENT"),
-                  label : "",
-                  callback : () => {console.log(`Deleted Map Note ${noteName}`);},
-                  options: {
-                    top:  window.innerHeight - 350,
-                    left: window.innerWidth - 720,
-                    width: 400,
-                    jQuery: false
-                  }
-                });
-                canvas.notes.deleteMany([note.id]);
-            }
+        //Create filtered array of matching Notes for each scene
+        let matchingNoteIds;
+        let numNotesDeleted = 0;
+        for (const scene of game.scenes) {
+            matchingNoteIds = scene.data.notes.filter(note => note.entryId === journalEntry.id).map(note => note._id);
+            if (!matchingNoteIds?.length) {continue;}
+            //Deletion is triggered by Scene (because that's where the notes are stored)
+            scene.deleteEmbeddedEntity("Note", matchingNoteIds);
+            numNotesDeleted += matchingNoteIds.length;
         }
+
+        if (numNotesDeleted) {
+            //0.4.2: Replaces Dialog.prompt from Foundry 0.7.2
+            EncounterNote.dialogPrompt({
+                title: game.i18n.localize("QE.DeletedJournalNote.TITLE"),
+                content: game.i18n.format("QE.DeletedJournalNote.Multiple.CONTENT",{numNotesDeleted}),
+                label : "",
+                callback : () => {console.log(`Deleted ${numNotesDeleted} Map Note(s)`);},
+                options: {
+                top:  window.innerHeight - 350,
+                left: window.innerWidth - 720,
+                width: 400,
+                jQuery: false
+                }
+            });
+        }
+
     }
 
     static dialogPrompt({title, content, label, callback}={}, options={}) {
@@ -193,7 +196,7 @@ export class EncounterNote {
 
 }
 
-//Delete a corresponding Map Note if you delete the Journal Entry
+//Delete any corresponding Map Notes if you delete the Journal Entry
 Hooks.on("deleteJournalEntry", EncounterNote.delete);
 
 //Pretty up the first Map Note (hopefully we can do the same for others)
