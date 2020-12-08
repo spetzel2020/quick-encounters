@@ -3,7 +3,7 @@ NEW in v0.6! Add tokens to existing Quick Encounters, use die rolls for number o
 
 New in this release: Foundry 0.7.8 compatibility, Copy Quick Encounters for Traps or Roving/Random Encounters, Bug fixes and layout tweaks
 
-See [Release Notes](https://github.com/spetzel2020/quick-encounters/blob/master/CHANGELOG.md
+See [Release Notes](https://github.com/spetzel2020/quick-encounters/blob/master/CHANGELOG.md)
 
 * **Author**: Spetzel#0103
 * **Version**: 0.6.13
