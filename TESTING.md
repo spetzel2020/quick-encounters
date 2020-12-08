@@ -34,6 +34,7 @@
 
 ### BACKWARD COMPATIBILITY
 - Create a QE in v0.5 and make sure it mostly works in 0.6.8
+- Pre 0.6.13 (for originalNote): Copy a pre-0.6.13 Note and confirm token placement (with/without saved)
 
 ### BUG FIXES
 -  If you have two QEs open with QE dialogs, closing one Journal Entry will close both QE dialogs			

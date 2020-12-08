@@ -117,6 +117,8 @@
 6-Dec-2020      v0.6.13c: Keep the same clickedNote as long as the JE is open (even if you hover somewhere else)
 7-Dec-2020      v0.6.13f: Apply shift between sourceNote and originalNote (if present) to shift tokens
                 (Note that we cannot compare savedTokens[0] coords because we might have moved the original note)
+8-Dec-2020      v0.6.13h: checkAndFixOriginalData(): For backward compatibility, if we can recover the originalNote (because it's coordinates
+                match one of the tokens) - then do so                
 */
 
 
@@ -170,7 +172,6 @@ export class QuickEncounter {
               
             }
         }
-        this.clickedNote = null;
     }
     
     async serializeIntoJournalEntry(journalEntryId) {
@@ -217,6 +218,21 @@ export class QuickEncounter {
         const qeJournalEntry = game.journal.get(this.journalEntryId);
         await qeJournalEntry?.setFlag(MODULE_NAME, QE_JSON_FLAG_KEY, null);
     }
+
+    checkAndFixOriginalNoteData(clickedNote) {
+        //0.6.13: If originalNoteData is not set, we try to recover it from savedTokens
+        if (!clickedNote || this.originalNoteData) {return false;}
+        for (const eActor of this.extractedActors) {
+            for (const std of eActor.savedTokensData) {
+                if ((std.x === clickedNote.data.x) && (std.y === clickedNote.data.y)) {
+                    this.originalNoteData = clickedNote.data;
+                    return true;    //yes we were able to fix - serialize
+                }
+            }
+        }
+        return false;
+    }
+
 
     static init() {
         game.settings.register(MODULE_NAME, "quickEncountersVersion", {
@@ -564,9 +580,10 @@ export class QuickEncounter {
 
         //0.6.1k: If quickEncounter is stored, extract that - but you can't store the actual object
         let quickEncounter = QuickEncounter.deserializeFromJournalEntry(journalEntry);
+
         //If there's no quickEncounter stored, then it's in pieces - also if you are looking at a Journal Entry with Actor links
         if (!quickEncounter) {
-            //Extract it the old (v0.5) way
+            //Extract it the old (v0.5) way - this also still applies if you create a Journal Entry with Actor or Compendium links
             //0.6 this now potentially includes Compendium links
             const extractedActors = QuickEncounter.extractActors(journalSheet.element);
             const savedTokensData =  journalEntry.getFlag(MODULE_NAME, TOKENS_FLAG_KEY);
@@ -1024,6 +1041,10 @@ export class QuickEncounter {
             if (!qeJournalEntry.clickedNote && (QuickEncounter.hoveredNote?.entry?.id === journalSheet.object.id)) {
                 qeJournalEntry.clickedNote = QuickEncounter.hoveredNote;
             }
+            //0.6.13: If originalNoteData is not set (pre-0.6.13) then we may be able to recover it from a saved Token
+            if (quickEncounter.checkAndFixOriginalNoteData(qeJournalEntry.clickedNote)) {
+                quickEncounter.serializeIntoJournalEntry();
+            }
             const totalXPLine = quickEncounter.renderTotalXPLine();
 
             //If there's no Map Note, include a warning
@@ -1109,6 +1130,7 @@ export class QEDialog extends Dialog {
 
 /** HOOKS */
 //0.6.13: Can't hook on actually clicking on the Note, so on hoverIn/hoverOut we record which Note we're on
+//and then set qeJournalEntry.clickedNote in the renderJournalEntry Hook
 Hooks.on("hoverNote", (note, startedHover) => {
     if (!note || !game.user.isGM) {return;}
     if (startedHover) {

@@ -58,9 +58,12 @@ More sophisticated monster entries:
 
 
 ## REFACTORING
+- Include JSDocs
 - Refactor EncounterCompanionDialog to QuickEncounterDialog
 - Refactor post-combat-XP to just use an included version of EasyXP
 - Remove unused styles from .css
+- Remove unused variables and properties
+        - this.coords
 - addTokens: Could just add the tokens one by one rather than filtering etc.
     - Need to refactor so we use a constructor or factory rather than setting individual instance parameters outside the class
         - may not be happening any more
