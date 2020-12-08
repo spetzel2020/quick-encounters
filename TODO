@@ -1,18 +1,20 @@
 # TO DO
 
 ## BUGS
-v0.6: Can't copy a QE Journal Entry - it references the old QE
+>>>v0.6.13: Backward compatibility (because we don't have originalNote): What happens when you copy-paste older Map Notes?
+        = perhaps check when you open a Map Note and savedTokens[0] has the Map Note coords.
+v0.6.14: Intercept dragging a Journal Entry (creating a new Note) or copying a Note
 v0.6.8: You can use a Compendium link - but the Image doesn't always appear in the QE dialog
         - use the lazy loading method from Compendiums?
              
            
 ## FEATURES
-### 0.6.12
-- Add German translation
-- Modify en.json to allow variable substitution (hopefully without breaking es and ja)
-    
-
 ### Version 0.7
+- Ability to add tokens to the QE as relative to the Map Note rather than absolute
+        - for positioning in a room you would want this to be absolute and stlll be able to reposition the Scene Note
+        - so this needs to be a setting per QE or even per Actor
+        - store the saved Tokens with the Map NOte rather than with the Journal Entry
+- Ability to drag Actors OR Tokens into the QE (in the former case there is no positioning)
 - Add to the README FAQs about handling multiple instances
 - Add more icons to the Scene Notes
 - Incorporate Easy XP if not already loaded
@@ -56,11 +58,16 @@ More sophisticated monster entries:
 
 
 ## REFACTORING
+- Include JSDocs
 - Refactor EncounterCompanionDialog to QuickEncounterDialog
+- Refactor post-combat-XP to just use an included version of EasyXP
 - Remove unused styles from .css
+- Remove unused variables and properties
+        - this.coords
 - addTokens: Could just add the tokens one by one rather than filtering etc.
     - Need to refactor so we use a constructor or factory rather than setting individual instance parameters outside the class
         - may not be happening any more
+>>>- Serializing should happen when we update quickEncounter        
 - Improve the way the Journal Entry gets built to do more with the template and handlebars
 
 ## DOCS
@@ -133,7 +140,25 @@ FIXED in 0.6.9: v0.6.6 If you have two QEs open with QE dialogs, closing one Jou
         - it looks like you can't have two QE dialogs open simulataneously; one replaces the other   
 FIXED in 0.6.10: v0.6.9: You can have individual QE dialogs, but a change will pop up a new one  
         - need to reference the older one and just re-render  
-FIXED in 0.6.10: v0.6.9: EncounterCompanionDialog: Not recomputing total XP line when you change numbers of actors              
+FIXED in 0.6.10: v0.6.9: EncounterCompanionDialog: Not recomputing total XP line when you change numbers of actors      
+FIXED in 0.6.13: The remembered Scene Note seems to be forgotten when you add a new Actor   
+FIXED in 0.6.13:  Delete all associated Scene Notes when you delete a JE    (on this Scene or others) 
+FIXED in 0.6.13: 0.6.12: When you copy-paste a QE Map Note, a Quick Encounter run from it will add tokens either at the original Note or at a random Note   
+        Here's a more complete statement of the problem:
+                1. If you create a Quick Encounter by selecting tokens and pressing the Quick Encounter button, you get a Journal Entry with captured tokens and a Scene (Map) Note at the (x,y) position of the 0th token
+                2. If you move the existing Map Note to a new location (for example, the border of the room rather than the center of it), the tokens should not move
+                3. However, if you copy-paste the Map Note to a new location, the captured tokens will no longer be relevant. Either:
+                (a) The saved tokens shouldbe cleared for the Journal Entry (which applies to all Map Notes)
+                OR (b) The saved tokens should be kept for the first (original) Map Note, but cleared for subsequent ones
+                OR (c) The saved tokens should be positioned relative to the Map Note for the 2nd and subsequent Map Notes
+
+                The greatest flexibility would come by storing token positions IN the Map Note, but that's a big code change. So maybe relevant for 0.7, but not 0.6-Maint.
+
+                **For 0.6-Maint, propose:**
+                - Store the original Map Note ID in the Journal Entry
+                - If you start the QE from the original Map Note, use saved/captured token positions
+                - If you start the QE from any other Map Note, calculate offsets of token positions from the original Map Note and apply those to the other Map Note
+                This would only require one code change to the QuickEncounter (Stored in the Journal Entry)
 
 ## COMPLETED FEATURES
 (v0.4.0): If you're on a different scene, pops a dialog to check that you want to switch scenes
@@ -166,3 +191,7 @@ v0.6.1 - Make QuickEncounter more oo; create around the quickEncounter that is s
 v0.6.1 Store saved tokens with the Actors so they don't have to be reconstituted
 v0.6.4 Open a vanilla Journal Entry, select tokens, and press the QE button to turn this into a QE
 v0.6.8 Tutorial: Add a link back to the README
+v0.6.12 Add German translation
+v0.6.12 Modify en.json to allow variable substitution (hopefully without breaking es and ja)
+v0.6.13 Remember which Scene Note opened the JE and place generated tokens around it
+v0.6.13 Expand list of Note icons

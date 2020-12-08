@@ -1,4 +1,4 @@
-# Release Notes
+# RELEASE NOTES
 ## NEW in 0.6
 - Quick Encounter dialog which shows which actors have saved tokens and which will be generated
 - Add tokens to existing Quick Encounters (open the Journal Entry, select the token(s), and click the Quick Encounter button)
@@ -6,12 +6,20 @@
 - Use die rolls for number of Actors (e.g. 2d6)
 - GM display of Combat XP and per player token
 - (v0.6.8) Use Compendium links in Method 2 (so you can defer loading of Actors)
+- (v0.6.13) Additional Note icons
+- (v0.6.13) Support multiple copies of a QE Note for Traps/Roving/Random Encounters
 - Translations: en, es, ja, de
+
+## 0.6.13
+Fixed: Delete all associated Scene Notes when you delete a JE    (on this Scene or others) 
+Fixed: When you copy-paste a QE Map Note, a Quick Encounter run from it would add tokens either at the original Note or at a random Note   
+        - Generated tokens will be generated around the latest clicked Note; saved tokens will be shifted appropriately
+Bonus: Added Note icons to distinguish your Quick Encounters
 
 ## 0.6.12
 - German translation added (thanks @Fallayn#6414!)
 ## 0.6.11
-Fixed: Wasn't re-rendering when you add new tokens or increase numbers?
+Fixed: Wasn't re-rendering when you add new tokens or increase numbers
 
 ## 0.6.10
 Fixed: Every change to the contents of the QE dialog popped up a new dialog
