@@ -1,36 +1,14 @@
 # TO DO
 
 ## BUGS
->>>v0.6.12: The .0612 addition to QE.SwitchScene.CONTENT doesn't work, probably because it's a number
-Here's a more complete statement of the problem:
-        1. If you create a Quick Encounter by selecting tokens and pressing the Quick Encounter button, you get a Journal Entry with captured tokens and a Scene (Map) Note at the (x,y) position of the 0th token
-        2. If you move the existing Map Note to a new location (for example, the border of the room rather than the center of it), the tokens should not move
-        3. However, if you copy-paste the Map Note to a new location, the captured tokens will no longer be relevant. Either:
-        (a) The saved tokens shouldbe cleared for the Journal Entry (which applies to all Map Notes)
-        OR (b) The saved tokens should be kept for the first (original) Map Note, but cleared for subsequent ones
-        OR (c) The saved tokens should be positioned relative to the Map Note for the 2nd and subsequent Map Notes
-
-        The greatest flexibility would come by storing token positions IN the Map Note, but that's a big code change. So maybe relevant for 0.7, but not 0.6-Maint.
-
-        **For 0.6-Maint, propose:**
-        - Store the original Map Note ID in the Journal Entry
-        - If you start the QE from the original Map Note, use saved/captured token positions
-        - If you start the QE from any other Map Note, calculate offsets of token positions from the original Map Note and apply those to the other Map Note
-        This would only require one code change to the QuickEncounter (Stored in the Journal Entry)
-        - Will need a dialog/notification to explain what happened??
-
->>>v0.6.13:  As an upgrade method, store Map Note when creating new QEs; for others check when you open a Map Note and savedTokens[0] has the Map Note coords.
+>>>v0.6.13: Backward compatibility (because we don't have originalNote): What happens when you copy-paste older Map Notes?
+        = perhaps check when you open a Map Note and savedTokens[0] has the Map Note coords.
 v0.6.14: Intercept dragging a Journal Entry (creating a new Note) or copying a Note
 v0.6.8: You can use a Compendium link - but the Image doesn't always appear in the QE dialog
         - use the lazy loading method from Compendiums?
              
            
 ## FEATURES
-### 0.6.13
-
-
-    
-
 ### Version 0.7
 - Ability to add tokens to the QE as relative to the Map Note rather than absolute
         - for positioning in a room you would want this to be absolute and stlll be able to reposition the Scene Note
@@ -160,8 +138,24 @@ FIXED in 0.6.9: v0.6.6 If you have two QEs open with QE dialogs, closing one Jou
 FIXED in 0.6.10: v0.6.9: You can have individual QE dialogs, but a change will pop up a new one  
         - need to reference the older one and just re-render  
 FIXED in 0.6.10: v0.6.9: EncounterCompanionDialog: Not recomputing total XP line when you change numbers of actors      
-FIXED in 0.6.13: The remembered Scene NOte seems to be forgotten when you add a new Actor   
-FIXED in 0.6.13:  Delete all associated Scene Notes when you delete a JE    (on this Scene or others)    
+FIXED in 0.6.13: The remembered Scene Note seems to be forgotten when you add a new Actor   
+FIXED in 0.6.13:  Delete all associated Scene Notes when you delete a JE    (on this Scene or others) 
+FIXED in 0.6.13: 0.6.12: When you copy-paste a QE Map Note, a Quick Encounter run from it will add tokens either at the original Note or at a random Note   
+        Here's a more complete statement of the problem:
+                1. If you create a Quick Encounter by selecting tokens and pressing the Quick Encounter button, you get a Journal Entry with captured tokens and a Scene (Map) Note at the (x,y) position of the 0th token
+                2. If you move the existing Map Note to a new location (for example, the border of the room rather than the center of it), the tokens should not move
+                3. However, if you copy-paste the Map Note to a new location, the captured tokens will no longer be relevant. Either:
+                (a) The saved tokens shouldbe cleared for the Journal Entry (which applies to all Map Notes)
+                OR (b) The saved tokens should be kept for the first (original) Map Note, but cleared for subsequent ones
+                OR (c) The saved tokens should be positioned relative to the Map Note for the 2nd and subsequent Map Notes
+
+                The greatest flexibility would come by storing token positions IN the Map Note, but that's a big code change. So maybe relevant for 0.7, but not 0.6-Maint.
+
+                **For 0.6-Maint, propose:**
+                - Store the original Map Note ID in the Journal Entry
+                - If you start the QE from the original Map Note, use saved/captured token positions
+                - If you start the QE from any other Map Note, calculate offsets of token positions from the original Map Note and apply those to the other Map Note
+                This would only require one code change to the QuickEncounter (Stored in the Journal Entry)
 
 ## COMPLETED FEATURES
 (v0.4.0): If you're on a different scene, pops a dialog to check that you want to switch scenes
