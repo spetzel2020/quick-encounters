@@ -16,10 +16,10 @@ Here's a more complete statement of the problem:
         - If you start the QE from the original Map Note, use saved/captured token positions
         - If you start the QE from any other Map Note, calculate offsets of token positions from the original Map Note and apply those to the other Map Note
         This would only require one code change to the QuickEncounter (Stored in the Journal Entry)
-        - As an upgrade method, store Map Note when creating new QEs; for others check when you open a Map Note and  savedTokens[0] has the Map Note coords.
-        - Will need a dialog/notification to explain what happened
-  
+        - Will need a dialog/notification to explain what happened??
 
+>>>v0.6.13:  As an upgrade method, store Map Note when creating new QEs; for others check when you open a Map Note and savedTokens[0] has the Map Note coords.
+v0.6.14: Intercept dragging a Journal Entry (creating a new Note) or copying a Note
 v0.6.8: You can use a Compendium link - but the Image doesn't always appear in the QE dialog
         - use the lazy loading method from Compendiums?
              
@@ -85,6 +85,7 @@ More sophisticated monster entries:
 - addTokens: Could just add the tokens one by one rather than filtering etc.
     - Need to refactor so we use a constructor or factory rather than setting individual instance parameters outside the class
         - may not be happening any more
+>>>- Serializing should happen when we update quickEncounter        
 - Improve the way the Journal Entry gets built to do more with the template and handlebars
 
 ## DOCS

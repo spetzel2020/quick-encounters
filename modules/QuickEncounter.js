@@ -115,6 +115,8 @@
                 v0.6.11:   Fixed bug: If you were using a die roll, added tokens were added twice    
 5-Dec-2020      v0.6.13: Add this.clickedNote. Set QuickEncounter.hoveredNote in Hook.hoverNote and then transfer to this.clickedNote if the Journal Entry matches
 6-Dec-2020      v0.6.13c: Keep the same clickedNote as long as the JE is open (even if you hover somewhere else)
+7-Dec-2020      v0.6.13f: Apply shift between sourceNote and originalNote (if present) to shift tokens
+                (Note that we cannot compare savedTokens[0] coords because we might have moved the original note)
 */
 
 
@@ -122,7 +124,7 @@ import {EncounterNote} from './EncounterNote.js';
 import {EncounterCompanionSheet} from './EncounterCompanionSheet.js';
 
 export const MODULE_NAME = "quick-encounters";
-export const MODULE_VERSION = "0.6.12";
+export const MODULE_VERSION = "0.6.13";
 
 export const TOKENS_FLAG_KEY = "tokens";
 export const QE_JSON_FLAG_KEY = "quickEncounter";
@@ -202,7 +204,7 @@ export class QuickEncounter {
         } catch {
             console.log(`Invalid JSON: ${qeJSON}`);
         }
-        //quickEncounter will ALWAYS be non-null, but we want to make sure it has data
+        //quickEncounter will ALWAYS be non-null, but we want to make sure it has real data
         if (!quickEncounter.extractedActors) {quickEncounter = null;}
         return quickEncounter;
     }
@@ -470,13 +472,18 @@ export class QuickEncounter {
         let journalEntry = await JournalEntry.create(journalData);
         const ejSheet = new JournalSheet(journalEntry);
 
+//REFACTOR: Individual property setting and order is fragile        
+        quickEncounter.serializeIntoJournalEntry(journalEntry.id);
+        //And create the Map Note - needs journalEntry.id to be set already
+        const newNote = await EncounterNote.place(quickEncounter);
+        //0.6.13: Record the Map Note data because we will use it to distinguish between the original and copied Scene Notes
+        quickEncounter.originalNoteData = newNote?.data;
+        
         //v0.6.1k Update the created/changed QuickEncounter into the Journal Entry
         quickEncounter.serializeIntoJournalEntry(journalEntry.id);
 
-        //And create the Map Note (otherwise it will ask when you close the Journal Entry)
-        await EncounterNote.place(quickEncounter);
         //v0.6.3: Show the Journal Sheet last so it can see the Map Note
-        ejSheet.render(true);   //0.6.1: This will also pop-open a companion sheet if you have that setting
+        ejSheet.render(true);   //0.6.1: This will also pop-open a QE dialog if you have that setting
     }
 
 
@@ -670,15 +677,16 @@ export class QuickEncounter {
             //Something is desperately wrong if this is null
             mapNote = qeJournalEntry.sceneNote;
         }
+        this.sourceNote = mapNote;
 
-
-        const coords = {x: mapNote.data.x, y: mapNote.data.y}
         canvas.tokens.activate();
 
         //0.6.1: createTokenDataFromActors() sets isSavedToken=false
         //0.6.8: Don't return extractedActorTokenData; add it (as generatedTokensData) to the extractedActors
-        await this.generateFullExtractedActorTokenData(coords);
+        //v0.6.13 Use this.sourceNote instead of coords
+        await this.generateFullExtractedActorTokenData();
         //0.6.8: combineTokenData now puts the combined generated and saved tokens in combinedTokensData on each eActor
+        //0.6.13 Compare this.sourceNote with this.originalNote to see if we should translate savedTokens
         this.combineTokenData();
 
         //Now create the Tokens
@@ -705,19 +713,31 @@ export class QuickEncounter {
         //If we have no savedTokens, do none of this checking
         //v0.6.1: savedTokensData is stored with each actor
         //v0.6.8: generatedTokensData and the resulting combinedTokensData is now also stored with each actor
+        //v0.6.13 If sourceNote != originalNote, then translate the savedTokens
+        let shift = {x:0, y:0};
+        if ((this.sourceNote && this.originalNoteData) && (this.sourceNote.data._id !== this.originalNoteData._id)) {
+            shift = {
+                x: (this.sourceNote.data.x - this.originalNoteData.x),
+                y: (this.sourceNote.data.y - this.originalNoteData.y)
+            }
+        }
 
         for (const [indexExtractedActor, ea] of this.extractedActors.entries()) {
-//FIXME: 0.6.7 If the actor is from the Compendium, match on that; should no longer be necessary
             let combinedTokensData = [];
             //generatedTokensData is as many generated tokens as there are numActors; override them with real savedTokens
             if (ea.savedTokensData) {
-                const numExcessActors = ea.generatedTokensData.length -  ea.savedTokensData.length;
+                let shiftedTokensData = ea.savedTokensData.map(std => {
+                    std.x += shift.x;
+                    std.y += shift.y;
+                    return std;
+                });
+                const numExcessActors = ea.generatedTokensData.length -  shiftedTokensData.length;
                 if (numExcessActors >= 0) {
                     //if excessActors > 0 take all of the saved tokens and then as many as necessary from the extracted Actor tokens
-                    combinedTokensData =  ea.savedTokensData.concat(ea.generatedTokensData.slice(0, numExcessActors));
+                    combinedTokensData =  shiftedTokensData.concat(ea.generatedTokensData.slice(0, numExcessActors));
                 } else if (numExcessActors < 0) {
                     //Take all possible saved tokens up to the number - if it's a dice roll, we rely on it being the max possible
-                    combinedTokensData = ea.savedTokensData.slice(0, ea.generatedTokensData.length);
+                    combinedTokensData = shiftedTokensData.slice(0, ea.generatedTokensData.length);
                 }
             } else {
                 //No saved tokens - just use the Actor data
@@ -802,7 +822,10 @@ export class QuickEncounter {
         }
     }
 
-    async generateFullExtractedActorTokenData(coords) {
+    async generateFullExtractedActorTokenData() {
+        //v0.6.13: sourceNote is either the Scene Note we double-clicked, or the first one we find (if started from the Journal Entry)
+        const coords = {x: this.sourceNote?.data?.x, y: this.sourceNote?.data?.y}
+
         if (!this.extractedActors || !this.extractedActors.length || !coords) {return;}
         const gridSize = canvas.dimensions.size;
         for (let [iExtractedActor, eActor] of this.extractedActors.entries()) {
@@ -997,7 +1020,8 @@ export class QuickEncounter {
             const qeJournalEntry = journalSheet.object;
             //0.6.13: If we opened this from a Scene Note, then remember that (because you could move off to another Note)
             //But once the Journal Entry is open we don't reset it, even if subsequently we re-render (e.g. adding another Actor)
-            if (!qeJournalEntry.clickedNote && (QuickEncounter.hoveredNote?.entry.id === journalSheet.object.id)) {
+            //Allows for .entry to be null (if you deleted the Note by itself)
+            if (!qeJournalEntry.clickedNote && (QuickEncounter.hoveredNote?.entry?.id === journalSheet.object.id)) {
                 qeJournalEntry.clickedNote = QuickEncounter.hoveredNote;
             }
             const totalXPLine = quickEncounter.renderTotalXPLine();

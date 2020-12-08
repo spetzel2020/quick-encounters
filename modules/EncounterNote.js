@@ -22,9 +22,6 @@ Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tra
                         Expand the available list of Note icons (perhaps would be good to have a Setting to allow/disallow this)
 */
 
-
-import {QuickEncounter} from './QuickEncounter.js';
-
 //Expand the available list of Note icons
 const moreNoteIcons = {
     "Acid" : "icons/svg/acid.svg",
