@@ -26,7 +26,7 @@ Quick Encounters works well with [TokenMold](https://github.com/Moerill/token-mo
 
 # Install
 1. Go to the "Add-on Modules" tab in Foundry Setup
-2. Click "Install Module" and search for **Quick Encounters** OR paste this link: "https://github.com/spetzel2020/quick-encounters/releases/download/v0.6.13/module.json"
+2. Click "Install Module" and search for **Quick Encounters** OR paste this link: "https://github.com/spetzel2020/quick-encounters/releases/download/latest/module.json"
 3. Open your world and go to Settings>Manage Modules and enable Quick Encounters
 
 # Using Quick Encounters
