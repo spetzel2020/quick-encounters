@@ -1,7 +1,7 @@
 # Quick Encounters
 NEW in v0.6! Add tokens to existing Quick Encounters, use die rolls for number of Actors, GM display of Combat XP and per player token, new Quick Encounter dialog, use Compendium links in Journal Entries
 
-New in this release: Foundry 0.7.8 compatibility, Copy Quick Encounters for Traps or Roving/Random Encounters, Bug fixes and layout tweaks
+New in this release: Foundry 0.7.8 compatibility, Copy Quick Encounters for Traps or Roving/Random Encounters, Bug fixes and layout tweaks, Italian!
 
 See [Release Notes](https://github.com/spetzel2020/quick-encounters/blob/master/CHANGELOG.md)
 
