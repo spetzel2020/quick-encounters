@@ -8,13 +8,14 @@
 - (v0.6.8) Use Compendium links in Method 2 (so you can defer loading of Actors)
 - (v0.6.13) Additional Note icons
 - (v0.6.13) Support multiple copies of a QE Note for Traps/Roving/Random Encounters
-- Translations: en, es, ja, de
+- Translations: en, es, ja, de, it
 
 ## 0.6.13
 Fixed: Delete all associated Scene Notes when you delete a JE    (on this Scene or others) 
 Fixed: When you copy-paste a QE Map Note, a Quick Encounter run from it would add tokens either at the original Note or at a random Note   
         - Generated tokens will be generated around the latest clicked Note; saved tokens will be shifted appropriately
 Bonus: Added Note icons to distinguish your Quick Encounters
+- Italian translation added (thanks https://github.com/riccisi)
 
 ## 0.6.12
 - German translation added (thanks @Fallayn#6414!)

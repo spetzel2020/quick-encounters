@@ -14,7 +14,7 @@
   "QE.Config.TITLE" : "Configurazione nota dell'Incontro Rapido",
   "QE.SwitchScene.TITLE" : "Cambiare scena?",
   "QE.SwitchScene.CONTENT" : "Questo Incontro Veloce è in una scena diversa; vuoi passare a",
-  "QE.SwitchScene.CONTENT.0612": "Questo Incontro Veloce è in una scena diversa; vuoi passare a {sceneName}?",
+  "QE.SwitchScene.CONTENT_v0612": "Questo Incontro Veloce è in una scena diversa; vuoi passare a {sceneName}?",
   "QE.DeletedJournalNote.TITLE" :  "Nota dell'Incontro Rapido eliminata",
   "QE.DeletedJournalNote.CONTENT" :  "Poiché hai eliminato la registrazione del diario dell'Incontro Rapido, ho eliminato anche la nota associata",
   "QE.NoMapNote.TITLE" : "Nessuna posizione per l'Incontro Rapido",
