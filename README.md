@@ -9,7 +9,7 @@ See [Release Notes](https://github.com/spetzel2020/quick-encounters/blob/master/
 * **Version**: 0.6.13
 * **Foundry VTT Compatibility**: 0.6.5-0.7.8
 * **System Compatibility (If applicable)**: All; additional features for dnd5e
-* **Translation Support**: en, es (thanks [lozalojo!](https://github.com/lozalojo), ja (thanks "touge"!), de (thanks @Fallayn#6414), it (thanks [riccisi](https://github.com/riccisi)
+* **Translation Support**: en, es (thanks [lozalojo!](https://github.com/lozalojo)), ja (thanks "touge"!), de (thanks @Fallayn#6414), it (thanks [riccisi](https://github.com/riccisi))
 
 
 # Description
