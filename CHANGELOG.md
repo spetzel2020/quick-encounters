@@ -11,21 +11,21 @@
 - Translations: en, es, ja, de, it
 
 ## 0.6.13
-Fixed: Delete all associated Scene Notes when you delete a JE    (on this Scene or others) 
-Fixed: When you copy-paste a QE Map Note, a Quick Encounter run from it would add tokens either at the original Note or at a random Note   
+- Fixed: Delete all associated Scene Notes when you delete a JE    (on this Scene or others) 
+- Fixed: When you copy-paste a QE Map Note, a Quick Encounter run from it would add tokens either at the original Note or at a random Note   
         - Generated tokens will be generated around the latest clicked Note; saved tokens will be shifted appropriately
-Bonus: Added Note icons to distinguish your Quick Encounters
+- Bonus: Added Note icons to distinguish your Quick Encounters
 - Italian translation added (thanks https://github.com/riccisi)
 
 ## 0.6.12
 - German translation added (thanks @Fallayn#6414!)
 ## 0.6.11
-Fixed: Wasn't re-rendering when you add new tokens or increase numbers
+- Fixed: Wasn't re-rendering when you add new tokens or increase numbers
 
 ## 0.6.10
-Fixed: Every change to the contents of the QE dialog popped up a new dialog
-Fixed: Changes to QE dialog contents were not triggering a re-render
-Fixed: Total XP in QE dialog wasn't updating
+- Fixed: Every change to the contents of the QE dialog popped up a new dialog
+- Fixed: Changes to QE dialog contents were not triggering a re-render
+- Fixed: Total XP in QE dialog wasn't updating
 
 ## 0.6.9
 Fixed: two QE Journal Entries would references only one QE dialog
