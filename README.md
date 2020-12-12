@@ -1,4 +1,4 @@
-![Latest Release Download Count](https://img.shields.io/badge/dynamic/json?label=Downloads@latest&query=assets%5B1%5D.download_count&url=https%3A%2F%2Fapi.github.com%2Frepos%2Fspetzel2020%2Fquick-encounters%2Freleases%2Flatest)
+![Latest Release Download Count](https://img.shields.io/badge/dynamic/json?label=Downloads@latest&query=assets%5B1%5D.download_count&url=https%3A%2F%2Fapi.github.com%2Frepos%2Fspetzel2020%2Fquick-encounters%2Freleases%2Flatest%2Feasy-exports.zip)
 ![Forge Installs](https://img.shields.io/badge/dynamic/json?label=Forge%20Installs&query=package.installs&suffix=%25&url=https%3A%2F%2Fforge-vtt.com%2Fapi%2Fbazaar%2Fpackage%2F5e-ogl-character-sheet&colorB=4aa94a)
 
 # Quick Encounters
