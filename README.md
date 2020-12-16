@@ -61,7 +61,7 @@ If you have a licensed module with existing Journal Entries you probably don't w
 ![QuickEncounterDialog](https://github.com/spetzel2020/quick-encounters/blob/master/img/CompanionDialog.png)
 
 ## Contributions
-*Coming Soon!*
+[![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/T6T82XFQD)
 
 ## License
 **Quick Encounters for Foundry VTT** by Jeffrey Pugh is licensed under the [GNU General Public License v3.0](https://github.com/spetzel2020/quick-encounters/blob/master/LICENSE)
