@@ -1,10 +1,46 @@
-# Release Notes
+# RELEASE NOTES
 ## NEW in 0.6
 - Quick Encounter dialog which shows which actors have saved tokens and which will be generated
 - Add tokens to existing Quick Encounters (open the Journal Entry, select the token(s), and click the Quick Encounter button)
 - Keyboard modifiers when you Run the Quick Encounter: Alt adds all invisible; Ctrl adds all visible
 - Use die rolls for number of Actors (e.g. 2d6)
 - GM display of Combat XP and per player token
+- (v0.6.8) Use Compendium links in Method 2 (so you can defer loading of Actors)
+- (v0.6.13) Additional Note icons
+- (v0.6.13) Support multiple copies of a QE Note for Traps/Roving/Random Encounters
+- Translations: en, es, ja, de, it
+
+## 0.6.13
+- Fixed: Delete all associated Scene Notes when you delete a JE    (on this Scene or others) 
+- Fixed: When you copy-paste a QE Map Note, a Quick Encounter run from it would add tokens either at the original Note or at a random Note   
+        - Generated tokens will be generated around the latest clicked Note; saved tokens will be shifted appropriately
+- Bonus: Added Note icons to distinguish your Quick Encounters
+- Italian translation added (thanks https://github.com/riccisi)
+
+## 0.6.12
+- German translation added (thanks @Fallayn#6414!)
+## 0.6.11
+- Fixed: Wasn't re-rendering when you add new tokens or increase numbers
+
+## 0.6.10
+- Fixed: Every change to the contents of the QE dialog popped up a new dialog
+- Fixed: Changes to QE dialog contents were not triggering a re-render
+- Fixed: Total XP in QE dialog wasn't updating
+
+## 0.6.9
+Fixed: two QE Journal Entries would references only one QE dialog
+
+## 0.6.8
+- Fixed a bug where two instances of the same actor produced too many token slots
+- Fixed a bug where the Tutorial link to Fantasy Grounds was broken
+- Tutorial: Added a link to the current README
+## 0.6.7
+ - Fixed a bug where wildcard token images didn't work in Method 2
+ - Fixed a bug where Compendium links in Journal entries weren't working
+
+## 0.6.6
+- Spanish translation updated (thanks https://github.com/lozalojo!)
+- Japanese translation added (thanks "touge"!)
 
 ## 0.6.5
 - Fixed bug: Previouly you would get repeats of the actor if you added tokens for the first Actor 

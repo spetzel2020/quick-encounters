@@ -1,4 +1,4 @@
-import {QuickEncounter, dieRollReg} from './QuickEncounter.js';
+import {QuickEncounter, dieRollReg, MODULE_NAME} from './QuickEncounter.js';
 
 /*
 Reused as EncounterCompanionSheet
@@ -12,56 +12,41 @@ Reused as EncounterCompanionSheet
                 v0.6.1n: If we removed all the Actors, then remove the whole Quick Encounter
 16-Nov-2020     v0.6.3b: Make "number" field a String so we can handle die rolls, a number, and nothing (which means remove the actor)                
                          Add validation and warning if you make a mistake
+27-Nov-2020     v0.6.7b: Display compendium info in Companion dialog           
+28-Nov-2020     v0.6.8: Use combinedTokensData on each extractedActor; that way we don't have to separate it
+                        (but still have to support the pre-0.6 method where it isn't associated with the actor)       
+                        combatants, updateObject(): Add rowNum to distinguish between same actorId instances
+30-Nov-2020     v0.6.9c: Add get id() so that we get unique identifer for the companion sheet   
+1-Dec-2020      v0.6.10: Move calculation/updating of combatants for display to getData() so it is re-rendered after update  
+                         Remove passing totalXPLine because it has to be updated as you add/remove combatants     
+                v0.6.11: update(): Update to new quickEncounter             
 */
 
 
 export class EncounterCompanionSheet extends FormApplication {
-    constructor(quickEncounter, totalXPLine, options = {}) {
+    constructor(quickEncounter, options = {}) {
         super(options);
         if (!game.user.isGM || !quickEncounter) {return;}
-
-//FIXME: Should be able to get this more directly from the quickEncounter
-        //Thie version of the Quick Encounter is what is extracted from in the Journal Entry
-        const extractedActors = quickEncounter.extractedActors;
-        const extractedActorTokenData = quickEncounter.generateTemplateExtractedActorTokenData();     //this is just sparse array with the correct numbers
-        const combinedTokenData = quickEncounter.combineTokenData(extractedActorTokenData);
-
-  
-        let combatants = [];
-        for (const eActor of extractedActors) {
-            const tokens = combinedTokenData.filter(t => t.actorId === eActor.actorID);
-
-            combatants.push({
-                numActors : eActor.numActors,
-                actorId: eActor.actorID,
-                tokens: tokens
-            });
-        }
-
-        //Regardless of how we built combatants, fill in derived data for display
-        combatants?.forEach((c, i) => {
-            const actor = game.actors.get(c.actorId);
-            //0.4.1: 5e specific: find XP for this number of this actor
-            const xp = QuickEncounter.getActorXP(actor);
-            const xpString = xp ? `(${xp}XP each)`: "";
-            combatants[i].img = actor?.img;
-            combatants[i].actorName = actor?.name;
-            combatants[i].xp = xpString;
-            combatants[i].numType = typeof c.numActors;
-        });
-
         this.quickEncounter = quickEncounter;
-        this.combatants = combatants;
-        this.totalXPLine = totalXPLine;
+
         game.users.apps.push(this)
     }
 
+    /** @override */
+//FIXME: Probably would be better to reference the Journal Entry this is for    
+	get id() {
+	    return `${MODULE_NAME}-${this.appId}`;
+    }
+
+    update(quickEncounter) {
+        if (quickEncounter) this.quickEncounter = quickEncounter;
+    }
 
     /** @override  */
     //WARNING: Do not add submitOnClose=true because that will create a submit loop
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
-            id : game.i18n.localize("QE.id"),
+            //id : game.i18n.localize("QE.id"),  - no longer setting id here because it gives the same element all the time
             title : game.i18n.localize("QE.Name"),
             template : "modules/quick-encounters/templates/quick-encounters-companion.html",
             closeOnSubmit : false,
@@ -100,10 +85,58 @@ export class EncounterCompanionSheet extends FormApplication {
 
     /** @override */
     async getData() {
+        //v0.6.10: Because the qeDialog is not (now) being re-created each time, instead we have to recompute combatants here
+        this.computeCombatantsForDisplay();
+
+        //We don't have to store totalXPLine, but this.combatants needs to be referenced in _updateData()
         return {
            combatants: this.combatants,
            totalXPLine : this.totalXPLine
         };
+    }
+
+    computeCombatantsForDisplay() {
+        //This version of the Quick Encounter is what is extracted from in the Journal Entry
+        this.quickEncounter.generateTemplateExtractedActorTokenData();     //this is just sparse array with the correct numbers
+        this.quickEncounter.combineTokenData();
+
+        let combatants = [];
+        if (this.quickEncounter.extractedActors) {
+            for (const [i,eActor] of this.quickEncounter.extractedActors.entries()) {
+                const combatant = {
+                    rowNum : i,
+                    numActors : eActor.numActors,
+                    actorName: eActor.name,             //default
+                    actorId: eActor.actorID,
+                    dataPackName : eActor.dataPackName, //non-null if a Compendium entry
+                    tokens: eActor.combinedTokensData,
+                    numType : typeof eActor.numActors
+                }
+
+                if (eActor.dataPackName) {   
+                    //Compendium: for display just use the index (can only get name, id, index)
+                    const pack = game.packs.get(eActor.dataPackName);
+                    pack.getIndex().then(index => {
+                        const entry = index.find(e => e._id === combatant.actorId)
+                        combatant.img = entry?.img || CONST.DEFAULT_TOKEN;
+                        combatant.actorName = entry?.name;
+                    });
+                } else {      //regular actor
+                    const actor = game.actors.get(eActor.actorID);
+                    //0.4.1: 5e specific: find XP for this number of this actor
+                    const xp = QuickEncounter.getActorXP(actor);
+                    const xpString = xp ? `(${xp}XP each)`: "";
+                    combatant.img = actor?.img;
+                    combatant.actorName = actor?.name;
+                    combatant.xp = xpString;
+                }
+
+                combatants.push(combatant);
+            }
+        }
+
+        this.combatants = combatants;
+        this.totalXPLine = this.quickEncounter.renderTotalXPLine();
     }
 
     /** @override */
@@ -111,10 +144,10 @@ export class EncounterCompanionSheet extends FormApplication {
         const checkIntReg = /^[0-9]*$/;   
         //Capture changes in the number of Actors or new Actors added (currently not possible through this dialog)
         let wasChanged = false;
-        for (let [actorId, numActors] of Object.entries(formData)) {
+        for (let [rowNum, numActors] of Object.entries(formData)) {
             let combatantWasChanged = false;
-            const iCombatant = this.combatants.findIndex(c => c.actorId === actorId);   //returns -1 if nothing found
-            if (iCombatant === -1) {
+            const iCombatant = rowNum;
+            if (iCombatant >= this.combatants.length) {
                 //New combatant
                 combatantWasChanged = true;
                 
@@ -154,7 +187,7 @@ export class EncounterCompanionSheet extends FormApplication {
                     numActors : c.numActors,
                     dataPackName : c.dataPackName, //if non-null then this is a Compendium reference
                     actorID : c.actorId,           //If Compendium sometimes this is the reference
-                    name : c.name,
+                    name : c.actorName,
                     savedTokensData : c.tokens.filter(td => td.isSavedToken)
                 }
             });

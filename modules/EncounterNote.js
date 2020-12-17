@@ -16,14 +16,50 @@ Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tra
                 v0.5.0: NYI: Base code for Hook on renderNoteCOnfig to change it to look like a QE Note (but need a way of determining a QE Note)
 9-Nov-2020      v0.6.1: Refactor Map Note related functions here: switchToMapNoteScene(), noMapNoteDialog(), mapNoteIsPlaced()
 15-Nov-2020     v0.6.2: Refactor to use quickEncounter rather than journalEntry
+2-Dec-2020      v0.6.12: Test parameterization of i18n strings, using Localization.format() (but be backward compatible)
+7-Dec-2020      v0.6.13: delete(): Delete ALL of the Notes (in this or other Scenes) associated with the delete journal Entry
+                        EncounterNote.create() and .place() return newNote so that we can store that in the quickEncounter before serialization
+                        Expand the available list of Note icons (perhaps would be good to have a Setting to allow/disallow this)
 */
-
-
-import {QuickEncounter} from './QuickEncounter.js';
 
 //Expand the available list of Note icons
 const moreNoteIcons = {
-    "Combat" : "icons/svg/combat.svg"
+    "Acid" : "icons/svg/acid.svg",
+    "Angel" : "icons/svg/angel.svg",
+    "Aura" : "icons/svg/aura.svg",
+    "Blind" : "icons/svg/blind.svg",
+    "Blood" : "icons/svg/blood.svg",
+    "Bones" : "icons/svg/bones.svg",
+    "Circle" : "icons/svg/circle.svg",
+    "Clockwork" : "icons/svg/clockwork.svg",
+    "Combat" : "icons/svg/combat.svg",
+    "Cowled" : "icons/svg/cowled.svg",
+    "Daze" : "icons/svg/daze.svg",
+    "Deaf" : "icons/svg/deaf.svg",
+    "Direction" : "icons/svg/direction.svg",
+    "Door-Closed" : "icons/svg/door-closed.svg",   
+    "Door-Exit" : "icons/svg/door-exit.svg",    
+    "Down" : "icons/svg/down.svg",
+    "Explosion" : "icons/svg/explosion.svg",
+    "Eye" : "icons/svg/eye.svg",
+    "Falling" : "icons/svg/falling.svg",    
+    "Frozen" : "icons/svg/frozen.svg",
+    "Hazard" : "icons/svg/hazard.svg",
+    "Heal" : "icons/svg/heal.svg",
+    "Holy Shield" : "icons/svg/holy-shield.svg",
+    "Ice Aura" : "icons/svg/ice-aura.svg",
+    "Lightning" : "icons/svg/lightning.svg",
+    "Net" : "icons/svg/net.svg",
+    "Padlock" : "icons/svg/padlock.svg",   
+    "Paralysis" : "icons/svg/paralysis.svg",
+    "Poison" : "icons/svg/posion.svg",
+    "Radiation" : "icons/svg/radiation.svg",
+    "Sleep" : "icons/svg/sleep.svg",
+    "Sound" : "icons/svg/sound.svg",  
+    "Sun" : "icons/svg/sun.svg",
+    "Terror" : "icons/svg/terror.svg",   
+    "Up" : "icons/svg/up.svg",
+    "Wing" : "icons/svg/wing.svg"      
 }
 Object.assign(CONFIG.JournalEntry.noteIcons, moreNoteIcons);
 
@@ -60,35 +96,38 @@ export class EncounterNote {
         //This is different from the JournalEntry._onDropData approach
         let newNote = await Note.create(noteData);
         newNote._sheet = new EncounterNoteConfig(newNote);
+        return newNote;
     }
 
     static async delete(journalEntry) {
         if (!game.user.isGM) {return;}
-        const scene = QuickEncounter.getEncounterScene(journalEntry);
-        if (scene) {
-            //Find the corresponding Map note - have to switch to the correct scene first
-            if (!await EncounterNote.switchToMapNoteScene(scene, journalEntry)) {return;}
-            const note = journalEntry.sceneNote;
-            const noteName = note.name;
-
-            //Delete the note from the viewed scene
-            if (note) {
-                //0.4.2: Replaces Dialog.prompt from Foundry 0.7.2
-                EncounterNote.dialogPrompt({
-                  title: game.i18n.localize("QE.DeletedJournalNote.TITLE"),
-                  content: game.i18n.localize("QE.DeletedJournalNote.CONTENT"),
-                  label : "",
-                  callback : () => {console.log(`Deleted Map Note ${noteName}`);},
-                  options: {
-                    top:  window.innerHeight - 350,
-                    left: window.innerWidth - 720,
-                    width: 400,
-                    jQuery: false
-                  }
-                });
-                canvas.notes.deleteMany([note.id]);
-            }
+        //Create filtered array of matching Notes for each scene
+        let matchingNoteIds;
+        let numNotesDeleted = 0;
+        for (const scene of game.scenes) {
+            matchingNoteIds = scene.data.notes.filter(note => note.entryId === journalEntry.id).map(note => note._id);
+            if (!matchingNoteIds?.length) {continue;}
+            //Deletion is triggered by Scene (because that's where the notes are stored)
+            scene.deleteEmbeddedEntity("Note", matchingNoteIds);
+            numNotesDeleted += matchingNoteIds.length;
         }
+
+        if (numNotesDeleted) {
+            //0.4.2: Replaces Dialog.prompt from Foundry 0.7.2
+            EncounterNote.dialogPrompt({
+                title: game.i18n.localize("QE.DeletedJournalNote.TITLE"),
+                content: game.i18n.format("QE.DeletedJournalNote.Multiple.CONTENT",{numNotesDeleted}),
+                label : "",
+                callback : () => {console.log(`Deleted ${numNotesDeleted} Map Note(s)`);},
+                options: {
+                top:  window.innerHeight - 350,
+                left: window.innerWidth - 720,
+                width: 400,
+                jQuery: false
+                }
+            });
+        }
+
     }
 
     static dialogPrompt({title, content, label, callback}={}, options={}) {
@@ -112,7 +151,7 @@ export class EncounterNote {
 
     static async place(quickEncounter, options={}) {
         if (!quickEncounter) {return;}
-
+        let qeNote = null;
         //Create a Map Note for this encounter - the default is where the saved Tokens were
         let noteAnchor = {}
         if (quickEncounter.coords) {
@@ -131,8 +170,9 @@ export class EncounterNote {
         if (canvas.grid.hitArea.contains(noteAnchor.x, noteAnchor.y) ) {
             // Create a Note; we don't pop-up the Note sheet because we really want this Note to be placed
             //(they can always edit it afterwards)
-            await EncounterNote.create(quickEncounter, noteAnchor);
+            qeNote = await EncounterNote.create(quickEncounter, noteAnchor);
         }
+        return qeNote;
     }
 
 
@@ -169,9 +209,17 @@ export class EncounterNote {
 
         //Otherwise ask if you want to switch to the scene - default is No/false
         let shouldSwitch = false;
+        //v0.6.12: Testing parameterization of i18n strings, using Localization.format()
+        // If there is an 0612 version use that with a parameter, otherwise there isn't a parameter yet and we do it the pre-0.6.12 way
+        let content; 
+        if (game.i18n.has("QE.SwitchScene.CONTENT_v0612", false)) {
+            content = game.i18n.format("QE.SwitchScene.CONTENT_v0612", {sceneName : qeScene.name});
+        } else {
+            content = game.i18n.localize("QE.SwitchScene.CONTENT") + qeScene.name + "?";
+        }
         await Dialog.confirm({
             title: game.i18n.localize("QE.SwitchScene.TITLE"),
-            content : `${game.i18n.localize("QE.SwitchScene.CONTENT")} ${qeScene.name}?`,
+            content : content,
             //0.5.0 Need the Yes response to wait until we are in the correct scene (so don't make it async)
             //and in particular, the Journal Note has been drawn
             yes : () => {shouldSwitch = true},
@@ -184,7 +232,7 @@ export class EncounterNote {
 
 }
 
-//Delete a corresponding Map Note if you delete the Journal Entry
+//Delete any corresponding Map Notes if you delete the Journal Entry
 Hooks.on("deleteJournalEntry", EncounterNote.delete);
 
 //Pretty up the first Map Note (hopefully we can do the same for others)
