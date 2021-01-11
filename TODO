@@ -21,11 +21,11 @@ v0.6.8: You can use a Compendium link - but the Image doesn't always appear in t
 - Save token positions for Compendium actors and allow deleting the Actors  
     - remember that you dragged the Compendium link to the Scene before capturing it in Method 1
 - Add to the README FAQs about handling multiple instances
-- In 0.6.13 Add more icons to the Scene Notes
+
 - Incorporate Easy XP if not already loaded
 - Add the QE button to the JE border to reopen the dialog and to show that this is Quick Encounter
     - add to the window border of the QE dialog to allow other actions
-- Remove the option to not use the QE dialog (including Setting and direction at the bottom of the QE dialog)
+
 - Refactor how we're handling token allocation: creation or addition
     - should always maintain an accurate generated tokens, incorporating saved tokens
     - combine "combineTokens" and "generate" (they are always used together)
@@ -41,7 +41,7 @@ v0.6.8: You can use a Compendium link - but the Image doesn't always appear in t
 - Synchronize with the Journal Entry if there are Actor links
 - Add the QE button to the window border of the Companion Dialog
 - Create multiple QEs (Waves/Adds) per Journal Entry
-- Use QE. constants to keep the namespace clean
+
 - Ability to copy an Encounter (if you copy the Journal Entry) - should move any placed tokens to the new Map Note
 
 - If you drag a Journal Entry to the Scene, then intercept to change the icon etc.
@@ -199,3 +199,6 @@ v0.6.12 Add German translation
 v0.6.12 Modify en.json to allow variable substitution (hopefully without breaking es and ja)
 v0.6.13 Remember which Scene Note opened the JE and place generated tokens around it
 v0.6.13 Expand list of Note icons
+
+0.7.0a Use QE. constants to keep the namespace clean
+0.7.0a Remove the option to not use the QE dialog (including Setting and direction at the bottom of the QE dialog)

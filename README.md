@@ -9,8 +9,8 @@ New in this release: Foundry 0.7.8 compatibility, Copy Quick Encounters for Trap
 See [Release Notes](https://github.com/spetzel2020/quick-encounters/blob/master/CHANGELOG.md)
 
 * **Author**: Spetzel#0103
-* **Version**: 0.6.13
-* **Foundry VTT Compatibility**: 0.6.5-0.7.8
+* **Version**: 0.7.0
+* **Foundry VTT Compatibility**: 0.6.5-0.7.9
 * **System Compatibility (If applicable)**: All; additional features for dnd5e
 * **Translation Support**: en, es (thanks [lozalojo!](https://github.com/lozalojo)), ja (thanks "touge"!), de (thanks @Fallayn#6414), it (thanks [riccisi](https://github.com/riccisi))
 

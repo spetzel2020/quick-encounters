@@ -1,4 +1,4 @@
-import {QuickEncounter, dieRollReg, MODULE_NAME} from './QuickEncounter.js';
+import {QuickEncounter, dieRollReg, QE.MODULE_NAME} from './QuickEncounter.js';
 
 /*
 Reused as EncounterCompanionSheet
@@ -35,7 +35,7 @@ export class EncounterCompanionSheet extends FormApplication {
     /** @override */
 //FIXME: Probably would be better to reference the Journal Entry this is for    
 	get id() {
-	    return `${MODULE_NAME}-${this.appId}`;
+	    return `${QE.MODULE_NAME}-${this.appId}`;
     }
 
     update(quickEncounter) {
@@ -46,7 +46,7 @@ export class EncounterCompanionSheet extends FormApplication {
     //WARNING: Do not add submitOnClose=true because that will create a submit loop
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
-            //id : game.i18n.localize("QE.id"),  - no longer setting id here because it gives the same element all the time
+            //no longer setting id here because it gives the same element all the time- override get id() so we can have multiple QE JEs open
             title : game.i18n.localize("QE.Name"),
             template : "modules/quick-encounters/templates/quick-encounters-companion.html",
             closeOnSubmit : false,

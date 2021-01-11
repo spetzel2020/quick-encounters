@@ -118,18 +118,20 @@
 7-Dec-2020      v0.6.13f: Apply shift between sourceNote and originalNote (if present) to shift tokens
                 (Note that we cannot compare savedTokens[0] coords because we might have moved the original note)
 8-Dec-2020      v0.6.13h: checkAndFixOriginalData(): For backward compatibility, if we can recover the originalNote (because it's coordinates
-                match one of the tokens) - then do so                
+                match one of the tokens) - then do so  
+11-Jan-2021     0.7.0a: Namespace constants with QE structure    
+                Remove the option to not use the QE Dialog                          
 */
 
 
 import {EncounterNote} from './EncounterNote.js';
 import {EncounterCompanionSheet} from './EncounterCompanionSheet.js';
 
-export const MODULE_NAME = "quick-encounters";
-export const MODULE_VERSION = "0.6.13";
-
-export const TOKENS_FLAG_KEY = "tokens";
-export const QE_JSON_FLAG_KEY = "quickEncounter";
+export const QE = {
+    MODULE_NAME : "quick-encounters",
+    MODULE_VERSION : "0.7.0",
+    TOKENS_FLAG_KEY : "tokens",
+    QE_JSON_FLAG_KEY : "quickEncounter"}
 
 
 //Matches "ndx+/-m" with/without spaces at the beginning of the string
@@ -187,13 +189,13 @@ export class QuickEncounter {
 
         const qeJournalEntry = game.journal.get(this.journalEntryId);
         //v0.6.1 - store created quickEncounter - but can't store object, so serialize data
-        this.qeVersion = MODULE_VERSION;
+        this.qeVersion = QE.MODULE_VERSION;
         const qeJSON = JSON.stringify(this);
-        await qeJournalEntry?.setFlag(MODULE_NAME, QE_JSON_FLAG_KEY, qeJSON);
+        await qeJournalEntry?.setFlag(QE.MODULE_NAME, QE.QE_JSON_FLAG_KEY, qeJSON);
     }
     static deserializeFromJournalEntry(journalEntry) {
         let quickEncounter = new QuickEncounter();  //makes sure it has functions etc.
-        let qeJSON = journalEntry?.getFlag(MODULE_NAME, QE_JSON_FLAG_KEY);
+        let qeJSON = journalEntry?.getFlag(QE.MODULE_NAME, QE.QE_JSON_FLAG_KEY);
         if (qeJSON) try {
             const quickEncounterFromData = JSON.parse(qeJSON);
             quickEncounter = mergeObject(quickEncounter, quickEncounterFromData);
@@ -216,7 +218,7 @@ export class QuickEncounter {
     }
     async remove() {
         const qeJournalEntry = game.journal.get(this.journalEntryId);
-        await qeJournalEntry?.setFlag(MODULE_NAME, QE_JSON_FLAG_KEY, null);
+        await qeJournalEntry?.setFlag(QE.MODULE_NAME, QE.QE_JSON_FLAG_KEY, null);
     }
 
     checkAndFixOriginalNoteData(clickedNote) {
@@ -235,15 +237,15 @@ export class QuickEncounter {
 
 
     static init() {
-        game.settings.register(MODULE_NAME, "quickEncountersVersion", {
+        game.settings.register(QE.MODULE_NAME, "quickEncountersVersion", {
             name: "Quick Encounters Version",
             hint: "",
             scope: "system",
             config: false,
-            default: MODULE_VERSION,
+            default: QE.MODULE_VERSION,
             type: String
         });
-        game.settings.register(MODULE_NAME, "freezeCapturedTokens", {
+        game.settings.register(QE.MODULE_NAME, "freezeCapturedTokens", {
             name: "QE.FreezeCapturedTokens.NAME",
             hint: "QE.FreezeCapturedTokens.HINT",
             scope: "world",
@@ -251,21 +253,13 @@ export class QuickEncounter {
             default: true,
             type: Boolean
         });
-        game.settings.register(MODULE_NAME, "displayXPAfterCombat", {
+        game.settings.register(QE.MODULE_NAME, "displayXPAfterCombat", {
             name: "QE.DisplayXPAfterCombat.NAME",
             hint: "QE.DisplayXPAfterCombat.HINT",
             scope: "world",
             config: true,
             visible: game.system.id === "dnd5e",
             default: true,
-            type: Boolean
-        });
-        game.settings.register(MODULE_NAME, "useQuickEncounterDialog", {
-            name: game.i18n.localize("QE.UseQuickEncounterDialog.NAME"),
-            hint: game.i18n.localize("QE.UseQuickEncounterDialog.HINT"),
-            scope: "world",
-            config: true,
-            default: true,  
             type: Boolean
         });
 
@@ -586,7 +580,7 @@ export class QuickEncounter {
             //Extract it the old (v0.5) way - this also still applies if you create a Journal Entry with Actor or Compendium links
             //0.6 this now potentially includes Compendium links
             const extractedActors = QuickEncounter.extractActors(journalSheet.element);
-            const savedTokensData =  journalEntry.getFlag(MODULE_NAME, TOKENS_FLAG_KEY);
+            const savedTokensData =  journalEntry.getFlag(QE.MODULE_NAME, QE.TOKENS_FLAG_KEY);
             //v0.6.1: Backwards compatibility - set the isSavedToken flga
             savedTokensData?.forEach(td => {td.isSavedToken = true;});
 
@@ -883,7 +877,7 @@ export class QuickEncounter {
         //v0.6.1d: If it's a savedToken (one that was "captured" then check if it should be frozen as is or regenerated for example by Token Mold)
         //Actor-generated tokens are always generated
         //v0.5.3d: Check the value of setting "freezeCapturedTokens"
-        const freezeCapturedTokens = game.settings.get(MODULE_NAME, "freezeCapturedTokens");
+        const freezeCapturedTokens = game.settings.get(QE.MODULE_NAME, "freezeCapturedTokens");
 
         let allCombinedTokensData = [];
         for (const ea of this.extractedActors) {
@@ -943,7 +937,7 @@ export class QuickEncounter {
     static async onDeleteCombat(combat, options, userId) {
         //Only works with 5e
         //If the display XP option is set, work out how many defeated foes and how many Player tokens
-        const shouldDisplayXPAfterCombat = game.settings.get(MODULE_NAME, "displayXPAfterCombat");
+        const shouldDisplayXPAfterCombat = game.settings.get(QE.MODULE_NAME, "displayXPAfterCombat");
         if (!shouldDisplayXPAfterCombat || !combat || !game.user.isGM) {return;}
 
         //Get list of non-friendly NPCs
@@ -1056,21 +1050,20 @@ export class QuickEncounter {
             
             let qeJournalEntryIntro = "";
             //v0.6.1: Also pop open a companion dialog with details about what tokens have been placed and XP
-            if (game.settings.get(MODULE_NAME, "useQuickEncounterDialog")) {
-                //v0.6.10: First attempt to reuse the existing QE dialog (not using app.id)
-                let qeDialog = journalSheet.qeDialog;
-                if (qeDialog) {
-                    qeDialog.update(quickEncounter);    //have to update since we extract a new one each time
-                } else {
-                    qeDialog = new EncounterCompanionSheet(quickEncounter);
-                }
-
-                qeDialog.render(true);
-                journalSheet.qeDialog = qeDialog;
-                qeJournalEntryIntro = noMapNoteWarning;
+            //0.7.0 Remove option to not use the QE Dialog
+            //v0.6.10: First attempt to reuse the existing QE dialog (not using app.id)
+            let qeDialog = journalSheet.qeDialog;
+            if (qeDialog) {
+                qeDialog.update(quickEncounter);    //have to update since we extract a new one each time
             } else {
-                qeJournalEntryIntro = await renderTemplate('modules/quick-encounters/templates/qeJournalEntryIntro.html', {totalXPLine, noMapNoteWarning});
+                qeDialog = new EncounterCompanionSheet(quickEncounter);
             }
+
+            qeDialog.render(true);
+            journalSheet.qeDialog = qeDialog;
+            qeJournalEntryIntro = noMapNoteWarning;
+            //qeJournalEntryIntro = await renderTemplate('modules/quick-encounters/templates/qeJournalEntryIntro.html', {totalXPLine, noMapNoteWarning});
+
             html.find('.editor-content').prepend(qeJournalEntryIntro);
             //If there's an embedded button, then add a listener
             html.find('button[name="addToCombatTracker"]').click(event => {

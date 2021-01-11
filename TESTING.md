@@ -1,4 +1,4 @@
-# TESTING WITH FOUNDRY 0.7.8
+# TESTING WITH FOUNDRY 0.7.9
 
 ## BASIC
 ### METHOD 1 - create JE from selected tokens

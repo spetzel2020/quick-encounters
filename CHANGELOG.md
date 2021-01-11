@@ -1,4 +1,8 @@
 # RELEASE NOTES
+
+## 0.7
+- Removed the option to not use the Quick Encounter Dialog
+
 ## NEW in 0.6
 - Quick Encounter dialog which shows which actors have saved tokens and which will be generated
 - Add tokens to existing Quick Encounters (open the Journal Entry, select the token(s), and click the Quick Encounter button)
