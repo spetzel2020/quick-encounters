@@ -60,6 +60,7 @@ More sophisticated monster entries:
 
 
 ## REFACTORING
+- createFrom(): Order of setting is fragile
 - Include JSDocs
 - Refactor EncounterCompanionDialog to QuickEncounterDialog
 - Refactor post-combat-XP to just use an included version of EasyXP

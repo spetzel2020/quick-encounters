@@ -1,4 +1,4 @@
-import {QuickEncounter, dieRollReg, QE.MODULE_NAME} from './QuickEncounter.js';
+import {QuickEncounter, dieRollReg, QE} from './QuickEncounter.js';
 
 /*
 Reused as EncounterCompanionSheet

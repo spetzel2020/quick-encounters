@@ -1,7 +1,10 @@
 # RELEASE NOTES
 
 ## 0.7
+- Save tiles as well as tokens!
+- Compatible with Foundry 0.7.9
 - Removed the option to not use the Quick Encounter Dialog
+- Spanish translation updated
 
 ## NEW in 0.6
 - Quick Encounter dialog which shows which actors have saved tokens and which will be generated
