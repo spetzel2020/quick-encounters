@@ -33,7 +33,7 @@
       "path": "lang/it.json"
     }
   ],
-  "esmodules" : ["modules/QuickEncounter.js","modules/EncounterNote.js","modules/EncounterCompanionSheet.js"
+  "esmodules" : ["modules/QuickEncounter.js","modules/EncounterNote.js","modules/QESheet.js"
   ],
   "styles": ["css/quick-encounters.css"],
   "readme": "https://github.com/spetzel2020/quick-encounters/blob/master/README.md",

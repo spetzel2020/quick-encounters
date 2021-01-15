@@ -19,11 +19,12 @@ Reused as EncounterCompanionSheet
 30-Nov-2020     v0.6.9c: Add get id() so that we get unique identifer for the companion sheet   
 1-Dec-2020      v0.6.10: Move calculation/updating of combatants for display to getData() so it is re-rendered after update  
                          Remove passing totalXPLine because it has to be updated as you add/remove combatants     
-                v0.6.11: update(): Update to new quickEncounter             
+                v0.6.11: update(): Update to new quickEncounter   
+14-Jan-2021     0.7.0c: REnamed to QESheet                          
 */
 
 
-export class EncounterCompanionSheet extends FormApplication {
+export class QESheet extends FormApplication {
     constructor(quickEncounter, options = {}) {
         super(options);
         if (!game.user.isGM || !quickEncounter) {return;}
@@ -48,7 +49,7 @@ export class EncounterCompanionSheet extends FormApplication {
         return mergeObject(super.defaultOptions, {
             //no longer setting id here because it gives the same element all the time- override get id() so we can have multiple QE JEs open
             title : game.i18n.localize("QE.Name"),
-            template : "modules/quick-encounters/templates/quick-encounters-companion.html",
+            template : "modules/quick-encounters/templates/qe-sheet.html",
             closeOnSubmit : false,
             submitOnClose : false,
             popOut : true,
@@ -211,4 +212,4 @@ export class EncounterCompanionSheet extends FormApplication {
 
 
 
-}//end class EncounterCompanionSheet
+}//end class QESHeet

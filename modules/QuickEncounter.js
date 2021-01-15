@@ -124,12 +124,12 @@
                 0.7.0b: First cut at saving tiles as well as tokens 
 14-Jan-2021     Have to (for now) add the QE button to the Tiles menu - would be better if it created a non-modal dialog that you could use for other assets
                 Check throughout for extractedActors?.length (in case you only have tiles)
-
+                0.7.0c: 
 */
 
 
 import {EncounterNote} from './EncounterNote.js';
-import {EncounterCompanionSheet} from './EncounterCompanionSheet.js';
+import {QESheet} from './QESheet.js';
 
 export const QE = {
     MODULE_NAME : "quick-encounters",
@@ -1140,7 +1140,7 @@ export class QuickEncounter {
             if (qeDialog) {
                 qeDialog.update(quickEncounter);    //have to update since we extract a new one each time
             } else {
-                qeDialog = new EncounterCompanionSheet(quickEncounter);
+                qeDialog = new QESheet(quickEncounter);
             }
 
             qeDialog.render(true);

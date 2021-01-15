@@ -7,12 +7,15 @@ v0.6.8: You can use a Compendium link - but the Image doesn't always appear in t
            
 ## FEATURES
 ### Version 0.7
+- Tiles: SHow in QEDialog
+- Make the QE button open a dialog that stays there?
 - Intercept dragging a Journal Entry (creating a new Note) or copying a Note and use EncounterNote template
+
+- Create multiple QEs (Waves/Adds) per Journal Entry
 - New things you can save: 
         - Allow tokens to be dragged over the specific Group/Wave/Actor
-        - Allow tiles to be saved in the same way as tokens (from Issues)
         - Include a Playlists or track to play when combat starts
-        - Generate Encounters from an existing Rollable Table
+
 - Ability to add tokens to the QE as relative to the Map Note rather than absolute
         - for positioning in a room you would want this to be absolute and stlll be able to reposition the Scene Note
         - so this needs to be a setting per QE or even per Actor
@@ -23,6 +26,8 @@ v0.6.8: You can use a Compendium link - but the Image doesn't always appear in t
 - Add to the README FAQs about handling multiple instances
 
 - Incorporate Easy XP if not already loaded
+        - XP to award dialog should have checkboxes for who awards XP and who gets it
+        - use the Easy XP module 
 - Add the QE button to the JE border to reopen the dialog and to show that this is Quick Encounter
     - add to the window border of the QE dialog to allow other actions
 
@@ -40,7 +45,6 @@ v0.6.8: You can use a Compendium link - but the Image doesn't always appear in t
     
 - Synchronize with the Journal Entry if there are Actor links
 - Add the QE button to the window border of the Companion Dialog
-- Create multiple QEs (Waves/Adds) per Journal Entry
 
 - Ability to copy an Encounter (if you copy the Journal Entry) - should move any placed tokens to the new Map Note
 
@@ -48,21 +52,20 @@ v0.6.8: You can use a Compendium link - but the Image doesn't always appear in t
     - Partially done: could identify it's a Quick Encounter from the inclusion of Actor links
         but perhaps a better approach would be with a flag that was set
 
-- XP to award dialog should have checkboxes for who awards XP and who gets it
-    - create a separate module from this 
+
 
 ### Later
 More sophisticated monster entries:
     - Scan Journal Entries to turn into Actor links and Quick Encounters
     - Allow dynamic generation of which monsters (use a RollTable?)
-
+- Generate Encounters from an existing Rollable Table
 - Show which Journal Entries have Quick Encounters in the Journal list
 
 
 ## REFACTORING
 - createFrom(): Order of setting is fragile
 - Include JSDocs
-- Refactor EncounterCompanionDialog to QuickEncounterDialog
+
 - Refactor post-combat-XP to just use an included version of EasyXP
 - Remove unused styles from .css
 - Remove unused variables and properties
@@ -203,3 +206,5 @@ v0.6.13 Expand list of Note icons
 
 0.7.0a Use QE. constants to keep the namespace clean
 0.7.0a Remove the option to not use the QE dialog (including Setting and direction at the bottom of the QE dialog)
+0.7.0b Allow tiles to be saved in the same way as tokens (from Issues)
+0.7.0c Refactor EncounterCompanionDialog to QuickEncounterSheet
