@@ -20,7 +20,8 @@ Reused as EncounterCompanionSheet
 1-Dec-2020      v0.6.10: Move calculation/updating of combatants for display to getData() so it is re-rendered after update  
                          Remove passing totalXPLine because it has to be updated as you add/remove combatants     
                 v0.6.11: update(): Update to new quickEncounter   
-14-Jan-2021     0.7.0c: REnamed to QESheet                          
+14-Jan-2021     0.7.0c: REnamed to QESheet       
+16-Jan-2021     0.7.0d: Show a thumbnail of any saved tiles                   
 */
 
 
@@ -92,6 +93,7 @@ export class QESheet extends FormApplication {
         //We don't have to store totalXPLine, but this.combatants needs to be referenced in _updateData()
         return {
            combatants: this.combatants,
+           tilesData: this.quickEncounter?.savedTilesData,
            totalXPLine : this.totalXPLine
         };
     }

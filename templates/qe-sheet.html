@@ -19,6 +19,11 @@
                     </div>
                 </div>
             {{/each}}
+            {{#each tilesData}}
+                <div class="flexrow">
+                    <img class='actor-portrait' src="{{this.img}}" loading="lazy"/>
+                </div>
+            {{/each}}
         </div>
         {{{totalXPLine}}}<br>
         <div class="flexrow">
