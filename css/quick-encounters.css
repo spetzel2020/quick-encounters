@@ -27,9 +27,9 @@
     opacity: 1;
     position: relative;
     margin: 0 auto;
+    flex: none;
 }
 #QEContainers .actor-portrait {
-    flex: 0 0 auto;
     max-width: 50px;
     height: 50px
 }

@@ -5,7 +5,12 @@
         <div class="flexcol">
             {{#each combatants}}
                 <div class="flexrow">
-                    <img class='actor-portrait' src="{{this.img}}" title="{{this.actorName}}" id="{{this.actorId}}" />
+                    <div class="actor-container">
+                        <img class="actor-portrait" src="{{this.img}}" title="{{this.actorName}}" id="{{this.actorId}}" />
+                        <div class="actor-subtract">
+                            <i class="fas fa-minus" title="{{this.name}}" id="{{this.id}}"></i>
+                        </div>                            
+                    </div>
                     <div class="flexcol">
                         <div class="flexrow">
                             <input type="String" name="{{this.rowNum}}" class="num-actors" id="{{this.actorId}}" value={{this.numActors}}>
@@ -21,12 +26,13 @@
             {{/each}}
             {{#each tilesData}}
                 <div class="flexrow">
-                    <div>
-                        <img class='actor-portrait' src="{{this.img}}" title="{{this.name}}" id="{{this.id}}" />
+                    <div class="actor-container">
+                        <img class='actor-portrait' src="{{this.img}}"/>
                         <div class="actor-subtract">
                             <i class="fas fa-minus" title="{{this.name}}" id="{{this.id}}"></i>
                         </div>
                     </div>
+                    <div></div>
                 </div>
             {{/each}}
         </div>
