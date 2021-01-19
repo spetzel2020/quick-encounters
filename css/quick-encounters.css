@@ -53,22 +53,6 @@
 #QEContainers .actor-container:hover .actor-subtract {
     opacity: 0.8;
 }
-#QEContainers .difficulty-rating {
-    width: 70%;
-    margin: 0 auto;
-    text-align: center;
-}
-#QEContainers .difficulty-threshold {
-    width: 50%;
-    margin: 0 auto;
-    text-align: center;
-}
-#QEContainers .daily-budget {
-    width: 80%;
-    margin: 0 auto;
-    text-align: center;
-    padding-top: 10%;
-}
 
 #QEXP {
     position: relative;

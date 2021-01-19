@@ -124,7 +124,7 @@
                 0.7.0b: First cut at saving tiles as well as tokens 
 14-Jan-2021     Have to (for now) add the QE button to the Tiles menu - would be better if it created a non-modal dialog that you could use for other assets
                 Check throughout for extractedActors?.length (in case you only have tiles)
-                0.7.0c: 
+19-Jan-2021     0.7.0d: Set QE coords from tokens, or if not set, from Tiles
 */
 
 
@@ -421,10 +421,16 @@ export class QuickEncounter {
 
         //0.7.0 Either tokens or tiles are present, but not both (for now) - but we won't depend on this always being true
         if (controlledTokens?.length) {
+            //0.6.2: If we don't already have coords, then use the tokens we just added
+            //0.7.0d: Set QE coords (where tokens are generated around)
+            if (!this.coords) {this.coords = {x: controlledTokens[0].data.x, y: controlledTokens[0].data.y}}
             this.addTokens(controlledTokens);
         }
         if (controlledTiles?.length) {
+            //0.7.0d: Set QE coords if not already set
+            if (!this.coords) {this.coords = {x: controlledTiles[0].data.x, y: controlledTiles[0].data.y}}
             this.addTiles(controlledTiles);
+
         }
         //v0.6.1k Update the created/changed QuickEncounter into the Journal Entry
         this.serializeIntoJournalEntry();
@@ -438,8 +444,7 @@ export class QuickEncounter {
         let controlledTokensData = controlledTokens.map(ct => {return ct.data});
     
         const newSavedTokensData = duplicate(controlledTokensData);
-        //0.6.2: If we don't already have coords, then use the tokens we just added
-        if (!this.coords) {this.coords = {x: newSavedTokensData[0].x, y: newSavedTokensData[0].y}}
+
 
         //Find set of distinct actors - some/all of these may be new if the addTokens is being called from create
         let tokenActorIds = new Set();

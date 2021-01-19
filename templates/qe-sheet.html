@@ -21,7 +21,12 @@
             {{/each}}
             {{#each tilesData}}
                 <div class="flexrow">
-                    <img class='actor-portrait' src="{{this.img}}" loading="lazy"/>
+                    <div>
+                        <img class='actor-portrait' src="{{this.img}}" title="{{this.name}}" id="{{this.id}}" />
+                        <div class="actor-subtract">
+                            <i class="fas fa-minus" title="{{this.name}}" id="{{this.id}}"></i>
+                        </div>
+                    </div>
                 </div>
             {{/each}}
         </div>

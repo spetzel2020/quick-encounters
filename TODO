@@ -7,7 +7,9 @@ v0.6.8: You can use a Compendium link - but the Image doesn't always appear in t
            
 ## FEATURES
 ### Version 0.7
-- Tiles: SHow in QEDialog
+DONE Tiles: SHow in QEDialog
+        - Need a (-) to delete the tile (also do this for Actor as well)
+        - Show a video camera icon for a webm or similar
 - Make the QE button open a dialog that stays there?
 - Intercept dragging a Journal Entry (creating a new Note) or copying a Note and use EncounterNote template
 
@@ -69,7 +71,7 @@ More sophisticated monster entries:
 - Refactor post-combat-XP to just use an included version of EasyXP
 - Remove unused styles from .css
 - Remove unused variables and properties
-        - this.coords
+
 - addTokens: Could just add the tokens one by one rather than filtering etc.
     - Need to refactor so we use a constructor or factory rather than setting individual instance parameters outside the class
         - may not be happening any more
