@@ -21,7 +21,8 @@ Reused as EncounterCompanionSheet
                          Remove passing totalXPLine because it has to be updated as you add/remove combatants     
                 v0.6.11: update(): Update to new quickEncounter   
 14-Jan-2021     0.7.0c: REnamed to QESheet       
-16-Jan-2021     0.7.0d: Show a thumbnail of any saved tiles                   
+16-Jan-2021     0.7.0d: Show a thumbnail of any saved tiles   
+19-Jan-2021     0.7.0f: On hover, show a - and Remove [name] for both Actors and Tiles                
 */
 
 
@@ -82,7 +83,20 @@ export class QESheet extends FormApplication {
         html.find('button[name="addToCombatTracker"]').click(event => {
             this.quickEncounter?.run(event);
         });
+        //0.7.0: Listeners for when you click - in actor or tile
+        html.find("#QEContainers .actor-container").each((i, thumbnail) => {
+            //thumbnail.setAttribute("draggable", true);
+            //thumbnail.addEventListener("dragstart", this._onDragStart, false);
+            thumbnail.addEventListener("click", this._onClickActor.bind(this));
+        });
+        html.find("#QEContainers .tile-container").each((i, thumbnail) => {
+            //thumbnail.setAttribute("draggable", true);
+            //thumbnail.addEventListener("dragstart", this._onDragStart, false);
+            thumbnail.addEventListener("click", this._onClickTile.bind(this));
+        });
     }
+
+
 
 
     /** @override */
@@ -183,35 +197,79 @@ export class QESheet extends FormApplication {
 
         //If wasChanged, then update the info into the Quick Encounter
         if (wasChanged) {
-            //Reconstitute extractedActors and update it, removing those with numActors=0
-            //Accept any non-numeric; blank has been replaced with 0
-            const extractedActors = this.combatants.filter(c => (typeof c.numActors !== "number") || (c.numActors > 0)).map(c => {
-                return {
-                    numActors : c.numActors,
-                    dataPackName : c.dataPackName, //if non-null then this is a Compendium reference
-                    actorID : c.actorId,           //If Compendium sometimes this is the reference
-                    name : c.actorName,
-                    savedTokensData : c.tokens.filter(td => td.isSavedToken)
-                }
-            });
-            //0.6.1o: The saved tokens for a removed ExtractedActor will now be discarded also
+            this._onChange();
+        }
+//TODO: Capture tokens removed
+    }
 
-            //If we removed all the Actors, then remove the whole Quick Encounter
-            if (extractedActors.length) {
-                this.quickEncounter?.update({extractedActors : extractedActors});
-            } else {
-                this.quickEncounter?.remove();
-                //And close this sheet
-                this.close();
+    //0.7.0 Split off changed check so that we can call it from the clicking the - on an Actor or Tile
+    async _onChange() {
+        //Reconstitute extractedActors and update it, removing those with numActors=0
+        //Accept any non-numeric; blank has been replaced with 0
+        const extractedActors = this.combatants.filter(c => (typeof c.numActors !== "number") || (c.numActors > 0)).map(c => {
+            return {
+                numActors : c.numActors,
+                dataPackName : c.dataPackName, //if non-null then this is a Compendium reference
+                actorID : c.actorId,           //If Compendium sometimes this is the reference
+                name : c.actorName,
+                savedTokensData : c.tokens.filter(td => td.isSavedToken)
             }
+        });
+        //0.6.1o: The saved tokens for a removed ExtractedActor will now be discarded also
+
+        //If we removed all the Actors and (0.7.0) all the Tiles, then remove the whole Quick Encounter
+        if (extractedActors.length || this.quickEncounter?.savedTilesData?.length) {
+            this.quickEncounter?.update({extractedActors : extractedActors});
+        } else {
+            this.quickEncounter?.remove();
+            //And close this sheet
+            this.close();
         }
 
+        //FIXME: DO we need to call this.render() explicitly?
+    }
 
-//TODO: Capture tokens removed
+    /**
+     * Remove actor from Quick Encounter on clicking the portrait.
+     *
+     * @param {*} event
+     * @memberof EncounterBuilderApplication
+     */
+    _onClickActor(event) {
+        event.stopPropagation();
 
+        const srcClass = event.srcElement.classList.value;
+        const isPortrait = srcClass === "actor-portrait";
+        const isHoverIcon = (srcClass === "actor-subtract") || (srcClass === "fas fa-minus");
+        if ((isPortrait) || (isHoverIcon)) {
+            const rowNum = event.srcElement.id;
 
+            //Handle this by clearing the appropriate combatant field and re-rendering
+            if ((rowNum >= 0) && (rowNum < this.combatants.length)) {
+                this.combatants.splice(rowNum,1);
+            }
+            this._onChange();
+        }
+    }
+    _onClickTile(event) {
+        event.stopPropagation();
+
+        const srcClass = event.srcElement.classList.value;
+        const isPortrait = srcClass === "actor-portrait";
+        const isHoverIcon = (srcClass === "actor-subtract") || (srcClass === "fas fa-minus");
+        if ((isPortrait) || (isHoverIcon)) {
+            const rowNum = event.srcElement.id;
+
+            //Handle this by clearing the appropriate combatant field and re-rendering
+            if ((rowNum >= 0) && (rowNum < this.quickEncounter?.savedTilesData.length)) {
+                this.quickEncounter.savedTilesData.splice(rowNum,1);
+            }
+            this._onChange();
+        }
+            
     }
 
 
-
 }//end class QESHeet
+
+

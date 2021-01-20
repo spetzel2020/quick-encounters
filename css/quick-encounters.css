@@ -23,7 +23,7 @@
     flex-wrap: wrap;
     position: relative;
 }
-#QEContainers .actor-container {
+#QEContainers .actor-container,.tile-container {
     opacity: 1;
     position: relative;
     margin: 0 auto;
@@ -51,6 +51,12 @@
     opacity: 0.3;
 }
 #QEContainers .actor-container:hover .actor-subtract {
+    opacity: 0.8;
+}
+#QEContainers .tile-container:hover .actor-portrait {
+    opacity: 0.3;
+}
+#QEContainers .tile-container:hover .actor-subtract {
     opacity: 0.8;
 }
 

@@ -6,9 +6,9 @@
             {{#each combatants}}
                 <div class="flexrow">
                     <div class="actor-container">
-                        <img class="actor-portrait" src="{{this.img}}" title="{{this.actorName}}" id="{{this.actorId}}" />
+                        <img class="actor-portrait" src="{{this.img}}" title="{{localize 'QE.QuickEncounterDialog.Remove' name=this.actorName}}" id="{{this.rowNum}}" />
                         <div class="actor-subtract">
-                            <i class="fas fa-minus" title="{{this.name}}" id="{{this.id}}"></i>
+                            <i class="fas fa-minus" title="{{localize 'QE.QuickEncounterDialog.Remove' name=this.actorName}}" id="{{this.rowNum}}"></i>
                         </div>                            
                     </div>
                     <div class="flexcol">
@@ -26,13 +26,15 @@
             {{/each}}
             {{#each tilesData}}
                 <div class="flexrow">
-                    <div class="actor-container">
-                        <img class='actor-portrait' src="{{this.img}}"/>
+                    <div class="tile-container">
+                        <img class='actor-portrait' title="{{localize 'QE.QuickEncounterDialog.Remove'  name=''}}" src="{{this.img}}" id="{{@index}}"/>
                         <div class="actor-subtract">
-                            <i class="fas fa-minus" title="{{this.name}}" id="{{this.id}}"></i>
+                            <i class="fas fa-minus" title="{{localize 'QE.QuickEncounterDialog.Remove' name=''}}" id="{{@index}}"></i>
                         </div>
                     </div>
-                    <div></div>
+                    <div class="flexrow">
+                        <span>{{this.img}}</span>
+                    </div>
                 </div>
             {{/each}}
         </div>
