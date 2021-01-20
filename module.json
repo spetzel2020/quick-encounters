@@ -39,7 +39,7 @@
   "readme": "https://github.com/spetzel2020/quick-encounters/blob/master/README.md",
   "bugs": "https://github.com/spetzel2020/quick-encounters/issues",
   "changelog": "https://github.com/spetzel2020/quick-encounters/blob/master/CHANGELOG.md",
-  "manifest": "https://github.com/spetzel2020/quick-encounters/releases/download/latest/module.json",
-  "download": "https://github.com/spetzel2020/quick-encounters/releases/download/latest/quick-encounters.zip",
+  "manifest": "https://github.com/spetzel2020/quick-encounters/releases/download/v0.7.0/module.json",
+  "download": "https://github.com/spetzel2020/quick-encounters/releases/download/v0.7.0/quick-encounters.zip",
   "url": "https://github.com/spetzel2020/quick-encounters"
 }
