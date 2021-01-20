@@ -2,6 +2,7 @@
 
 ## 0.7
 - Save tiles as well as tokens!
+- Quick remove (hover over the token/tile icon)
 - Compatible with Foundry 0.7.9
 - Removed the option to not use the Quick Encounter Dialog
 - Spanish translation updated
