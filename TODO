@@ -10,6 +10,7 @@ v0.7.1: hidden flag should be set by ctrl/alt BEFORE creation because otherwise 
         - done for Tiles
 v0.7.1: Translation is working only for freshly-created Method 1 QEs, not for Linked/Added ones?                 
         - can we save originalNoteData after recomputing it?
+v0.7.1: Should switch back to Basic Controls after add Tiles (so  you can add PCs)        
            
 ## FEATURES
 ### Version 0.7
