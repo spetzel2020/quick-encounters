@@ -127,7 +127,7 @@
 19-Jan-2021     0.7.0d: Set QE coords from tokens, or if not set, from Tiles
 20-Jan-2021     0.7.1a: Fixed: If you run an Encounter and then try to edit the setting, will choke on the JSON save (because of sourceNote)
                 - save as sourceNoteData instead
-                M
+                Move shift calculation to run() and pass to createTokens and createTiles
 */
 
 
@@ -769,6 +769,15 @@ export class QuickEncounter {
             mapNote = qeJournalEntry.sceneNote;
         }
         this.sourceNoteData = mapNote.data;
+        //v0.6.13 If sourceNote != originalNote, then translate the savedTokens
+        //0.7.1 Move shift calculation here (from combineTokenData) so it can be passed to both combineTokenData() and createTiles()
+        let shift = {x:0, y:0};
+        if ((this.sourceNoteData && this.originalNoteData) && (this.sourceNoteData._id !== this.originalNoteData._id)) {
+            shift = {
+                x: (this.sourceNoteData.x - this.originalNoteData.x),
+                y: (this.sourceNoteData.y - this.originalNoteData.y)
+            }
+        }
 
         canvas.tokens.activate();
         //0.6.1: createTokenDataFromActors() sets isSavedToken=false
@@ -777,12 +786,16 @@ export class QuickEncounter {
         await this.generateFullExtractedActorTokenData();
         //0.6.8: combineTokenData now puts the combined generated and saved tokens in combinedTokensData on each eActor
         //0.6.13 Compare this.sourceNote with this.originalNote to see if we should translate savedTokens
-        this.combineTokenData();
+        this.combineTokenData(shift);
 
         //Now create the Tokens
         //v0.6.1 If you used Alt-[Run] then pass that
         //v0.6.8 Make createTokens an instance method because it reference extractedActors
-        const createdTokens = await this.createTokens({alt : event?.altKey, ctrl: event?.ctrlKey});
+        const options = {
+            alt : event?.altKey, 
+            ctrl: event?.ctrlKey
+        }
+        const createdTokens = await this.createTokens(options);
 
         //And add them to the Combat Tracker (wait 200ms for drawing to finish)
         setTimeout(() => {
@@ -791,12 +804,12 @@ export class QuickEncounter {
 
         if (savedTilesData) {
             canvas.tiles.activate();
-            await this.createTiles(savedTilesData, {alt : event?.altKey, ctrl: event?.ctrlKey});
+            await this.createTiles(savedTilesData, shift, options);
         }
     }
 
 
-    combineTokenData() {
+    combineTokenData(shift={x:0, y:0}) {
         //v0.5.1 If we have more actors than saved tokens, create more tokens
         //If we have fewer actors than saved tokens, skip some
 
@@ -808,14 +821,6 @@ export class QuickEncounter {
         //If we have no savedTokens, do none of this checking
         //v0.6.1: savedTokensData is stored with each actor
         //v0.6.8: generatedTokensData and the resulting combinedTokensData is now also stored with each actor
-        //v0.6.13 If sourceNote != originalNote, then translate the savedTokens
-        let shift = {x:0, y:0};
-        if ((this.sourceNoteData && this.originalNoteData) && (this.sourceNoteData._id !== this.originalNoteData._id)) {
-            shift = {
-                x: (this.sourceNoteData.x - this.originalNoteData.x),
-                y: (this.sourceNoteData.y - this.originalNoteData.y)
-            }
-        }
 
         if (this.extractedActors?.length) {
             for (const [indexExtractedActor, ea] of this.extractedActors.entries()) {
@@ -993,9 +998,23 @@ export class QuickEncounter {
         return createdTokens;
     }
 
-    async createTiles(savedTilesData, options) {
+    async createTiles(savedTilesData, shift={x:0, y:0}, options=null) {
         if (!savedTilesData?.length) {return;}
-        const createdTiles = await Tile.create(duplicate(savedTilesData));
+        //0.7.1: Translate tiles if appropriate (copy/pasted the Map Note)
+        let shiftedTilesData = savedTilesData.map(std => {
+            std.x += shift.x;
+            std.y += shift.y;
+            return std;
+        });
+
+        //0.6.1/0.7.1: If you use Alt-Run then create all tiles hidden regardless of how they were saved; Ctrl-Run make them visible
+        //saved tiles retain their original visibility unless overridden
+        for (let i=0; i<shiftedTilesData.length; i++) {
+            if (options?.ctrl) {shiftedTilesData[i].hidden = false;}  
+            if (options?.alt) {shiftedTilesData[i].hidden = true;}
+        }
+        const createdTiles = await Tile.create(duplicate(shiftedTilesData));
+        return createdTiles;
     }
 
     static async createCombat(createdTokens) {

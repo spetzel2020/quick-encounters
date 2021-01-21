@@ -6,7 +6,10 @@ v0.6.8: You can use a Compendium link - but the Image doesn't always appear in t
 v0.7.0 Tiles with a webm video show broken link; show a video camera instead    
 v0.7.0: Tile name needs to wrap because otherwise it forces the tile thumbnail into the middle 
         - Not a wrapping problem, because flexrow has flex-wrap: wrap. Instead we want the icon to always be left-justified     
-v0.7.0: Tiles are not translated like tokens are              
+v0.7.1: hidden flag should be set by ctrl/alt BEFORE creation because otherwise they can appear briefly    
+        - done for Tiles
+v0.7.1: Translation is working only for freshly-created Method 1 QEs, not for Linked/Added ones?                 
+        - can we save originalNoteData after recomputing it?
            
 ## FEATURES
 ### Version 0.7
@@ -51,7 +54,6 @@ v0.7.0: Tiles are not translated like tokens are
 - If you drag a Journal Entry to the Scene, then intercept to change the icon etc.
     - Partially done: could identify it's a Quick Encounter from the inclusion of Actor links
         but perhaps a better approach would be with a flag that was set
-
 
 
 ### Later
@@ -169,7 +171,7 @@ FIXED in 0.6.13: Backward compatibility (because we don't have originalNote): Wh
                 = checks when you open a Map Note and savedTokens[0] has the Map Note coords.                
 FIXED in 0.7.1: v0.7.0: Can't properly save a QE Dialog with sourceNote, because it's a circular reference 
         - It's meant to be only temporary anyway and this problem will only occur if you run the Encounter and then try to save a change 
-
+FIXED in 0.7.1: Tile translation and tile hide/show override should work now
 
 ## COMPLETED FEATURES
 (v0.4.0): If you're on a different scene, pops a dialog to check that you want to switch scenes
