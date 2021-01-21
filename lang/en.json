@@ -1,6 +1,6 @@
 {
   "QE.id": "quick-encounters",
-  "QE.Version" : "v0.7.1",
+  "QE.Version" : "v0.7.2",
   "QE.Name": "Quick Encounters",
   "QE.Welcome" : "Welcome to Quick Encounters v0.6",
   "QE.Description": "Pin your Encounters to the Scene or in the Journal and run them with one click!<h4>Method 1:</h4><p>Place and select your hostile tokens and click the <i class='fas fa-fist-raised'></i>Quick Encounter button to save them into an Encounter Journal Entry. To run the Encounter, double-click the Combat icon and click the Run Quick Encounter button</p><h4>Method 2:</h4><p>Create a Journal Entry with your descriptive text. Drag Actors into the Journal Entry. Drag the Journal Entry to the desired Encounter location on your map. To run the Encounter, select the Map Note, or open the Encounter Journal Entry and click the Quick Encounters button",

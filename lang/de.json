@@ -3,7 +3,7 @@
   "I18N.MAINTAINERS": "@Fallayn#6414",
 
   "QE.id": "quick-encounters",
-  "QE.Version" : "v0.7.1",
+  "QE.Version" : "v0.7.2",
   "QE.Name": "Quick Encounters",
   "QE.Welcome" : "Willkommen zu Quick Encounters v0.6",
   "QE.Description": "Platziere Begegnungen in der Szene oder im Notizbuch und starte sie mit einem Klick!<h4>Methode 1:</h4><p>Platziere die Gegner, wähle sie aus und klicke auf den <i class='fas fa-fist-raised'></i>Quick Encounter Button, um sie in einem Quick Encounter Notizbucheintrag zu speichern. Doppelklicke auf das Kampfsymbol und wähle den Schnelle Begegnung starten Button, um die Begegnung zu starten.</p><h4>Methode 2:</h4><p>Erstelle einen Notizbucheintrag mit deiner Beschreibung. Ziehe Charaktere in den Notizbucheintrag. Ziehe den Notizbucheintrag zum gewünschten Ort der Begegnung auf der Karte. Wähle die Kartennotiz oder öffne den Notizbucheintrag der Begegnung und klicke auf den Quick Encounters Button, um die Begegnung zu starten.",
