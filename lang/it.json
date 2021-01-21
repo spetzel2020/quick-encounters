@@ -1,6 +1,6 @@
 {
   "QE.id": "quick-encounters",
-  "QE.Version" : "v0.7.0",
+  "QE.Version" : "v0.7.1",
   "QE.Name": "Quick Encounters",
   "QE.Welcome" : "Benvenuto in Quick Encounters v0.6",
   "QE.Description": "Posiziona i tuoi incontri sulla Scena o nel Diario ed eseguili con un clic!<h4>Metodo 1:</h4><p>Posiziona e seleziona i tuoi token ostili e fai clic sul bottone <i class='fas fa-fist-raised'></i>Quick Encounter per salvarli in una registrazione del Diario degli Incontri. Per eseguire l'incontro, fai doppio clic sull'icona Combattimento e fai clic sul pulsante Esegui Incontro Metodo 2:</h4><p>Crea una voce di diario con il tuo testo descrittivo. Trascina gli attori nella voce del diario. Trascina la voce del diario nella posizione dell'incontro desiderata sulla mappa. Per eseguire l'incontro, seleziona la nota sulla mappa o apri la voce del diario dell'incontro e fai clic sul pulsante Quick Encounter",

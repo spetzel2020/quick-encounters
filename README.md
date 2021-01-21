@@ -7,7 +7,7 @@ NEW in v0.7! Add tiles (including animated effects) to your Quick Encounters jus
 See [Release Notes](https://github.com/spetzel2020/quick-encounters/blob/master/CHANGELOG.md)
 
 * **Author**: Spetzel#0103
-* **Version**: 0.7.0
+* **Version**: 0.7.1
 * **Foundry VTT Compatibility**: 0.6.5-0.7.9
 * **System Compatibility (If applicable)**: All; additional features for dnd5e
 * **Translation Support**: en, es (thanks [lozalojo!](https://github.com/lozalojo)), ja (thanks "touge"!), de (thanks @Fallayn#6414), it (thanks [riccisi](https://github.com/riccisi))

@@ -3,7 +3,10 @@
 ## BUGS
 v0.6.8: You can use a Compendium link - but the Image doesn't always appear in the QE dialog
         - use the lazy loading method from Compendiums?
-- Tiles with a webm video show broken link; show a video camera instead             
+v0.7.0 Tiles with a webm video show broken link; show a video camera instead    
+v0.7.0: Tile name needs to wrap because otherwise it forces the tile thumbnail into the middle 
+        - Not a wrapping problem, because flexrow has flex-wrap: wrap. Instead we want the icon to always be left-justified     
+v0.7.0: Tiles are not translated like tokens are              
            
 ## FEATURES
 ### Version 0.7
@@ -164,6 +167,9 @@ FIXED in 0.6.13: 0.6.12: When you copy-paste a QE Map Note, a Quick Encounter ru
                 This would only require one code change to the QuickEncounter (Stored in the Journal Entry)
 FIXED in 0.6.13: Backward compatibility (because we don't have originalNote): What happens when you copy-paste older Map Notes?
                 = checks when you open a Map Note and savedTokens[0] has the Map Note coords.                
+FIXED in 0.7.1: v0.7.0: Can't properly save a QE Dialog with sourceNote, because it's a circular reference 
+        - It's meant to be only temporary anyway and this problem will only occur if you run the Encounter and then try to save a change 
+
 
 ## COMPLETED FEATURES
 (v0.4.0): If you're on a different scene, pops a dialog to check that you want to switch scenes

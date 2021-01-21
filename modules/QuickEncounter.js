@@ -125,6 +125,9 @@
 14-Jan-2021     Have to (for now) add the QE button to the Tiles menu - would be better if it created a non-modal dialog that you could use for other assets
                 Check throughout for extractedActors?.length (in case you only have tiles)
 19-Jan-2021     0.7.0d: Set QE coords from tokens, or if not set, from Tiles
+20-Jan-2021     0.7.1a: Fixed: If you run an Encounter and then try to edit the setting, will choke on the JSON save (because of sourceNote)
+                - save as sourceNoteData instead
+                M
 */
 
 
@@ -133,7 +136,7 @@ import {QESheet} from './QESheet.js';
 
 export const QE = {
     MODULE_NAME : "quick-encounters",
-    MODULE_VERSION : "0.7.0",
+    MODULE_VERSION : "0.7.1",
     TOKENS_FLAG_KEY : "tokens",
     QE_JSON_FLAG_KEY : "quickEncounter"
 }
@@ -765,7 +768,7 @@ export class QuickEncounter {
             //Something is desperately wrong if this is null
             mapNote = qeJournalEntry.sceneNote;
         }
-        this.sourceNote = mapNote;
+        this.sourceNoteData = mapNote.data;
 
         canvas.tokens.activate();
         //0.6.1: createTokenDataFromActors() sets isSavedToken=false
@@ -807,10 +810,10 @@ export class QuickEncounter {
         //v0.6.8: generatedTokensData and the resulting combinedTokensData is now also stored with each actor
         //v0.6.13 If sourceNote != originalNote, then translate the savedTokens
         let shift = {x:0, y:0};
-        if ((this.sourceNote && this.originalNoteData) && (this.sourceNote.data._id !== this.originalNoteData._id)) {
+        if ((this.sourceNoteData && this.originalNoteData) && (this.sourceNoteData._id !== this.originalNoteData._id)) {
             shift = {
-                x: (this.sourceNote.data.x - this.originalNoteData.x),
-                y: (this.sourceNote.data.y - this.originalNoteData.y)
+                x: (this.sourceNoteData.x - this.originalNoteData.x),
+                y: (this.sourceNoteData.y - this.originalNoteData.y)
             }
         }
 
@@ -918,7 +921,7 @@ export class QuickEncounter {
 
     async generateFullExtractedActorTokenData() {
         //v0.6.13: sourceNote is either the Scene Note we double-clicked, or the first one we find (if started from the Journal Entry)
-        const coords = {x: this.sourceNote?.data?.x, y: this.sourceNote?.data?.y}
+        const coords = {x: this.sourceNoteData?.x, y: this.sourceNoteData?.y}
 
         if (!this.extractedActors?.length || !coords) {return;}
         const gridSize = canvas.dimensions.size;
