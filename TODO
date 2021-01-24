@@ -3,29 +3,40 @@
 ## BUGS
 v0.6.8: You can use a Compendium link - but the Image doesn't always appear in the QE dialog
         - use the lazy loading method from Compendiums?
-             
+v0.7.0 Tiles with a webm video show broken link; show a video camera instead    
+v0.7.0: Tile name needs to wrap because otherwise it forces the tile thumbnail into the middle 
+        - Not a wrapping problem, because flexrow has flex-wrap: wrap. Instead we want the icon to always be left-justified     
+v0.7.1: hidden flag should be set by ctrl/alt BEFORE creation because otherwise they can appear briefly    
+        - done for Tiles
+v0.7.1: Translation is working only for freshly-created Method 1 QEs, not for Linked/Added ones?                 
+        - can we save originalNoteData after recomputing it?
+v0.7.1: Should switch back to Basic Controls after add Tiles (so  you can add PCs)        
            
 ## FEATURES
 ### Version 0.7
+- Make the QE button open a dialog that stays there?
 - Intercept dragging a Journal Entry (creating a new Note) or copying a Note and use EncounterNote template
-- New things you can save: 
-        - Allow tokens to be dragged over the specific Group/Wave/Actor
-        - Allow tiles to be saved in the same way as tokens (from Issues)
-        - Include a Playlists or track to play when combat starts
-        - Generate Encounters from an existing Rollable Table
+
+- Create multiple QEs (Waves/Adds) per Journal Entry
+>>> Allow tokens/tiles to be dragged over the specific Group/Wave/Actor
+- Ability to drag Actors OR Tokens directly into the QE (in the former case there is no positioning)
+- Include a Playlists or track to play when combat starts
+
 - Ability to add tokens to the QE as relative to the Map Note rather than absolute
         - for positioning in a room you would want this to be absolute and stlll be able to reposition the Scene Note
         - so this needs to be a setting per QE or even per Actor
         - store the saved Tokens with the Map NOte rather than with the Journal Entry
-- Ability to drag Actors OR Tokens directly into the QE (in the former case there is no positioning)
+
 - Save token positions for Compendium actors and allow deleting the Actors  
     - remember that you dragged the Compendium link to the Scene before capturing it in Method 1
 - Add to the README FAQs about handling multiple instances
-- In 0.6.13 Add more icons to the Scene Notes
+
 - Incorporate Easy XP if not already loaded
+        - XP to award dialog should have checkboxes for who awards XP and who gets it
+        - use the Easy XP module 
 - Add the QE button to the JE border to reopen the dialog and to show that this is Quick Encounter
-    - add to the window border of the QE dialog to allow other actions
-- Remove the option to not use the QE dialog (including Setting and direction at the bottom of the QE dialog)
+    - Add the QE button to the window border of the QE Dialog to allow other actions
+
 - Refactor how we're handling token allocation: creation or addition
     - should always maintain an accurate generated tokens, incorporating saved tokens
     - combine "combineTokens" and "generate" (they are always used together)
@@ -39,33 +50,29 @@ v0.6.8: You can use a Compendium link - but the Image doesn't always appear in t
     - maybe an option to place all the tokens and move them around, then they get automatically captured and removed
     
 - Synchronize with the Journal Entry if there are Actor links
-- Add the QE button to the window border of the Companion Dialog
-- Create multiple QEs (Waves/Adds) per Journal Entry
-- Use QE. constants to keep the namespace clean
-- Ability to copy an Encounter (if you copy the Journal Entry) - should move any placed tokens to the new Map Note
+- Can currently duplicate a Note; add Ability to copy an Encounter (if you copy the Journal Entry) - should move any placed tokens to the new Map Note
 
 - If you drag a Journal Entry to the Scene, then intercept to change the icon etc.
     - Partially done: could identify it's a Quick Encounter from the inclusion of Actor links
         but perhaps a better approach would be with a flag that was set
 
-- XP to award dialog should have checkboxes for who awards XP and who gets it
-    - create a separate module from this 
 
 ### Later
 More sophisticated monster entries:
     - Scan Journal Entries to turn into Actor links and Quick Encounters
     - Allow dynamic generation of which monsters (use a RollTable?)
-
+- Generate Encounters from an existing Rollable Table
 - Show which Journal Entries have Quick Encounters in the Journal list
 
 
 ## REFACTORING
+- createFrom(): Order of setting is fragile
 - Include JSDocs
-- Refactor EncounterCompanionDialog to QuickEncounterDialog
+
 - Refactor post-combat-XP to just use an included version of EasyXP
 - Remove unused styles from .css
 - Remove unused variables and properties
-        - this.coords
+
 - addTokens: Could just add the tokens one by one rather than filtering etc.
     - Need to refactor so we use a constructor or factory rather than setting individual instance parameters outside the class
         - may not be happening any more
@@ -163,6 +170,9 @@ FIXED in 0.6.13: 0.6.12: When you copy-paste a QE Map Note, a Quick Encounter ru
                 This would only require one code change to the QuickEncounter (Stored in the Journal Entry)
 FIXED in 0.6.13: Backward compatibility (because we don't have originalNote): What happens when you copy-paste older Map Notes?
                 = checks when you open a Map Note and savedTokens[0] has the Map Note coords.                
+FIXED in 0.7.1: v0.7.0: Can't properly save a QE Dialog with sourceNote, because it's a circular reference 
+        - It's meant to be only temporary anyway and this problem will only occur if you run the Encounter and then try to save a change 
+FIXED in 0.7.1: Tile translation and tile hide/show override should work now
 
 ## COMPLETED FEATURES
 (v0.4.0): If you're on a different scene, pops a dialog to check that you want to switch scenes
@@ -199,3 +209,10 @@ v0.6.12 Add German translation
 v0.6.12 Modify en.json to allow variable substitution (hopefully without breaking es and ja)
 v0.6.13 Remember which Scene Note opened the JE and place generated tokens around it
 v0.6.13 Expand list of Note icons
+
+0.7.0a Use QE. constants to keep the namespace clean
+0.7.0a Remove the option to not use the QE dialog (including Setting and direction at the bottom of the QE dialog)
+0.7.0b Allow tiles to be saved in the same way as tokens (from Issues)
+0.7.0c Refactor EncounterCompanionDialog to QuickEncounterSheet
+0.7.0f Tiles: SHow in QEDialog
+0.7.0f SHow a (-) Remove for Actors or Tiles

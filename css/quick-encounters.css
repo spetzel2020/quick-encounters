@@ -23,13 +23,13 @@
     flex-wrap: wrap;
     position: relative;
 }
-#QEContainers .actor-container {
+#QEContainers .actor-container,.tile-container {
     opacity: 1;
     position: relative;
     margin: 0 auto;
+    flex: none;
 }
 #QEContainers .actor-portrait {
-    flex: 0 0 auto;
     max-width: 50px;
     height: 50px
 }
@@ -53,21 +53,11 @@
 #QEContainers .actor-container:hover .actor-subtract {
     opacity: 0.8;
 }
-#QEContainers .difficulty-rating {
-    width: 70%;
-    margin: 0 auto;
-    text-align: center;
+#QEContainers .tile-container:hover .actor-portrait {
+    opacity: 0.3;
 }
-#QEContainers .difficulty-threshold {
-    width: 50%;
-    margin: 0 auto;
-    text-align: center;
-}
-#QEContainers .daily-budget {
-    width: 80%;
-    margin: 0 auto;
-    text-align: center;
-    padding-top: 10%;
+#QEContainers .tile-container:hover .actor-subtract {
+    opacity: 0.8;
 }
 
 #QEXP {

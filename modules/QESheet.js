@@ -1,4 +1,4 @@
-import {QuickEncounter, dieRollReg, MODULE_NAME} from './QuickEncounter.js';
+import {QuickEncounter, dieRollReg, QE} from './QuickEncounter.js';
 
 /*
 Reused as EncounterCompanionSheet
@@ -19,11 +19,14 @@ Reused as EncounterCompanionSheet
 30-Nov-2020     v0.6.9c: Add get id() so that we get unique identifer for the companion sheet   
 1-Dec-2020      v0.6.10: Move calculation/updating of combatants for display to getData() so it is re-rendered after update  
                          Remove passing totalXPLine because it has to be updated as you add/remove combatants     
-                v0.6.11: update(): Update to new quickEncounter             
+                v0.6.11: update(): Update to new quickEncounter   
+14-Jan-2021     0.7.0c: REnamed to QESheet       
+16-Jan-2021     0.7.0d: Show a thumbnail of any saved tiles   
+19-Jan-2021     0.7.0f: On hover, show a - and Remove [name] for both Actors and Tiles                
 */
 
 
-export class EncounterCompanionSheet extends FormApplication {
+export class QESheet extends FormApplication {
     constructor(quickEncounter, options = {}) {
         super(options);
         if (!game.user.isGM || !quickEncounter) {return;}
@@ -35,7 +38,7 @@ export class EncounterCompanionSheet extends FormApplication {
     /** @override */
 //FIXME: Probably would be better to reference the Journal Entry this is for    
 	get id() {
-	    return `${MODULE_NAME}-${this.appId}`;
+	    return `${QE.MODULE_NAME}-${this.appId}`;
     }
 
     update(quickEncounter) {
@@ -46,9 +49,9 @@ export class EncounterCompanionSheet extends FormApplication {
     //WARNING: Do not add submitOnClose=true because that will create a submit loop
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
-            //id : game.i18n.localize("QE.id"),  - no longer setting id here because it gives the same element all the time
+            //no longer setting id here because it gives the same element all the time- override get id() so we can have multiple QE JEs open
             title : game.i18n.localize("QE.Name"),
-            template : "modules/quick-encounters/templates/quick-encounters-companion.html",
+            template : "modules/quick-encounters/templates/qe-sheet.html",
             closeOnSubmit : false,
             submitOnClose : false,
             popOut : true,
@@ -80,7 +83,20 @@ export class EncounterCompanionSheet extends FormApplication {
         html.find('button[name="addToCombatTracker"]').click(event => {
             this.quickEncounter?.run(event);
         });
+        //0.7.0: Listeners for when you click - in actor or tile
+        html.find("#QEContainers .actor-container").each((i, thumbnail) => {
+            //thumbnail.setAttribute("draggable", true);
+            //thumbnail.addEventListener("dragstart", this._onDragStart, false);
+            thumbnail.addEventListener("click", this._onClickActor.bind(this));
+        });
+        html.find("#QEContainers .tile-container").each((i, thumbnail) => {
+            //thumbnail.setAttribute("draggable", true);
+            //thumbnail.addEventListener("dragstart", this._onDragStart, false);
+            thumbnail.addEventListener("click", this._onClickTile.bind(this));
+        });
     }
+
+
 
 
     /** @override */
@@ -91,6 +107,7 @@ export class EncounterCompanionSheet extends FormApplication {
         //We don't have to store totalXPLine, but this.combatants needs to be referenced in _updateData()
         return {
            combatants: this.combatants,
+           tilesData: this.quickEncounter?.savedTilesData,
            totalXPLine : this.totalXPLine
         };
     }
@@ -180,35 +197,79 @@ export class EncounterCompanionSheet extends FormApplication {
 
         //If wasChanged, then update the info into the Quick Encounter
         if (wasChanged) {
-            //Reconstitute extractedActors and update it, removing those with numActors=0
-            //Accept any non-numeric; blank has been replaced with 0
-            const extractedActors = this.combatants.filter(c => (typeof c.numActors !== "number") || (c.numActors > 0)).map(c => {
-                return {
-                    numActors : c.numActors,
-                    dataPackName : c.dataPackName, //if non-null then this is a Compendium reference
-                    actorID : c.actorId,           //If Compendium sometimes this is the reference
-                    name : c.actorName,
-                    savedTokensData : c.tokens.filter(td => td.isSavedToken)
-                }
-            });
-            //0.6.1o: The saved tokens for a removed ExtractedActor will now be discarded also
+            this._onChange();
+        }
+//TODO: Capture tokens removed
+    }
 
-            //If we removed all the Actors, then remove the whole Quick Encounter
-            if (extractedActors.length) {
-                this.quickEncounter?.update({extractedActors : extractedActors});
-            } else {
-                this.quickEncounter?.remove();
-                //And close this sheet
-                this.close();
+    //0.7.0 Split off changed check so that we can call it from the clicking the - on an Actor or Tile
+    async _onChange() {
+        //Reconstitute extractedActors and update it, removing those with numActors=0
+        //Accept any non-numeric; blank has been replaced with 0
+        const extractedActors = this.combatants.filter(c => (typeof c.numActors !== "number") || (c.numActors > 0)).map(c => {
+            return {
+                numActors : c.numActors,
+                dataPackName : c.dataPackName, //if non-null then this is a Compendium reference
+                actorID : c.actorId,           //If Compendium sometimes this is the reference
+                name : c.actorName,
+                savedTokensData : c.tokens.filter(td => td.isSavedToken)
             }
+        });
+        //0.6.1o: The saved tokens for a removed ExtractedActor will now be discarded also
+
+        //If we removed all the Actors and (0.7.0) all the Tiles, then remove the whole Quick Encounter
+        if (extractedActors.length || this.quickEncounter?.savedTilesData?.length) {
+            this.quickEncounter?.update({extractedActors : extractedActors});
+        } else {
+            this.quickEncounter?.remove();
+            //And close this sheet
+            this.close();
         }
 
+        //FIXME: DO we need to call this.render() explicitly?
+    }
 
-//TODO: Capture tokens removed
+    /**
+     * Remove actor from Quick Encounter on clicking the portrait.
+     *
+     * @param {*} event
+     * @memberof EncounterBuilderApplication
+     */
+    _onClickActor(event) {
+        event.stopPropagation();
 
+        const srcClass = event.srcElement.classList.value;
+        const isPortrait = srcClass === "actor-portrait";
+        const isHoverIcon = (srcClass === "actor-subtract") || (srcClass === "fas fa-minus");
+        if ((isPortrait) || (isHoverIcon)) {
+            const rowNum = event.srcElement.id;
 
+            //Handle this by clearing the appropriate combatant field and re-rendering
+            if ((rowNum >= 0) && (rowNum < this.combatants.length)) {
+                this.combatants.splice(rowNum,1);
+            }
+            this._onChange();
+        }
+    }
+    _onClickTile(event) {
+        event.stopPropagation();
+
+        const srcClass = event.srcElement.classList.value;
+        const isPortrait = srcClass === "actor-portrait";
+        const isHoverIcon = (srcClass === "actor-subtract") || (srcClass === "fas fa-minus");
+        if ((isPortrait) || (isHoverIcon)) {
+            const rowNum = event.srcElement.id;
+
+            //Handle this by clearing the appropriate combatant field and re-rendering
+            if ((rowNum >= 0) && (rowNum < this.quickEncounter?.savedTilesData.length)) {
+                this.quickEncounter.savedTilesData.splice(rowNum,1);
+            }
+            this._onChange();
+        }
+            
     }
 
 
+}//end class QESHeet
 
-}//end class EncounterCompanionSheet
+

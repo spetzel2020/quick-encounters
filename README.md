@@ -2,15 +2,13 @@
 ![Forge Installs](https://img.shields.io/badge/dynamic/json?label=Forge%20Installs&query=package.installs&suffix=%25&url=https%3A%2F%2Fforge-vtt.com%2Fapi%2Fbazaar%2Fpackage%2Fquick-encounters&colorB=4aa94a)
 
 # Quick Encounters
-NEW in v0.6! Add tokens to existing Quick Encounters, use die rolls for number of Actors, GM display of Combat XP and per player token, new Quick Encounter dialog, use Compendium links in Journal Entries
-
-New in this release: Foundry 0.7.8 compatibility, Copy Quick Encounters for Traps or Roving/Random Encounters, Bug fixes and layout tweaks, Italian!
+NEW in v0.7! Add tiles (including animated effects) to your Quick Encounters just like tokens! Also, quick remove by clicking the thumbnail in the Quick Encounter dialog, updated Spanish, and Foundry 0.7.9 compatibility
 
 See [Release Notes](https://github.com/spetzel2020/quick-encounters/blob/master/CHANGELOG.md)
 
 * **Author**: Spetzel#0103
-* **Version**: 0.6.13
-* **Foundry VTT Compatibility**: 0.6.5-0.7.8
+* **Version**: 0.7.1
+* **Foundry VTT Compatibility**: 0.6.5-0.7.9
 * **System Compatibility (If applicable)**: All; additional features for dnd5e
 * **Translation Support**: en, es (thanks [lozalojo!](https://github.com/lozalojo)), ja (thanks "touge"!), de (thanks @Fallayn#6414), it (thanks [riccisi](https://github.com/riccisi))
 
@@ -34,10 +32,10 @@ Quick Encounters works well with [TokenMold](https://github.com/Moerill/token-mo
 
 # Using Quick Encounters
 ## Method 1 (like Fantasy Grounds "Encounters")
-1. Drag your Hostile tokens to the map and select them
-2. Then click the Quick Encounters button (in the Basic Controls palette on the left); a new Journal Entry will be created with your tokens and their positions saved in it
+1. Drag your Hostile tokens (or now Tiles!) to the map and select them
+2. Then click the Quick Encounters button (in the Basic Controls palette on the left); a new Journal Entry will be created with your tokens/tiles and their positions saved in it
 3. Close the Journal Entry and you will see a new Quick Encounter Map Note on the Scene; double-right-click to edit the icon, color, etc.
-4. To run your Quick Encounter, simply double-click the map Note and click the "Add to Combat Tracker" button; all your saved tokens will be positioned on the map and added to the Combat Tracker, ready to fight!
+4. To run your Quick Encounter, simply double-click the map Note and click the "Add to Combat Tracker" button; all your saved tokens/tiles will be positioned on the map and added to the Combat Tracker, ready to fight!
 
 ## Method 2
 1. Drag Actors into an existing or new Journal Entry describing the encounter (you can add how many of them you want).
@@ -50,14 +48,19 @@ Quick Encounters works well with [TokenMold](https://github.com/Moerill/token-mo
 * In Step 1, you can select Actors from a Compendium and drag them directly into the Journal Entry. This lets you defer importing Actors until you actually need them (for example for rare Encounters). Currently you need to manually remove the imported Actors when and if you run the Quick Encounter.
 * Note that you cannot drag the Compendium Actor to the Scene to place tokens, because that will automatically import the Actor and the link will then be to the imported Actor, not to the Compendium.
 
-## Method 3 (save tokens into existing Journal Entries)
-If you have a licensed module with existing Journal Entries you probably don't want to edit all of them to insert Actors (Method 2). If you're using the new Quick Encounter Dialog instead:
+## Method 3 (save tokens/tiles into existing Journal Entries)
+If you have a licensed module with existing Journal Entries you probably don't want to edit all of them to insert Actors (Method 2). Using the new Quick Encounter Dialog instead:
 1. Create Hostile tokens (representing the Encounter) and drag them to the Scene
 2. Open the Journal Entry you want to associate with the Quick Encounter
 3. Click the Quick Encounter button and you will be asked if you want to create a new Encounter (Method 1) or add the tokens to this Journal Entry
 4. To run the Encounter later, open the Journal Entry and use the Run Quick Encounter button in the Quick Encounter Dialog
 
-## The New Quick Encounter dialog
+## v0.7: Working with Tokens and Tiles
+If you have BOTH Tokens and Tiles you want in your Quick Encounter, create the Quick Encounter with the tokens (and of the above methods). Leave the Quick Encounter open and switch to the Tiles menu (left side-bar). Place and select your tokens and click the Quick Encounter button to add the tiles to the open Quick Encounter.
+
+Coming soon: Drag-and-drop for tokens, tiles, and other stuff!
+
+## The Quick Encounter dialog
 ![QuickEncounterDialog](https://github.com/spetzel2020/quick-encounters/blob/master/img/CompanionDialog.png)
 
 ## Contributions
