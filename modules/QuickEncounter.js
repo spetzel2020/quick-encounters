@@ -128,6 +128,9 @@
 20-Jan-2021     0.7.1a: Fixed: If you run an Encounter and then try to edit the setting, will choke on the JSON save (because of sourceNote)
                 - save as sourceNoteData instead
                 Move shift calculation to run() and pass to createTokens and createTiles
+6-Feb-2021      0.7.3a: Add Setting: Automatic QE on Embedded Actors (open QE with any JE with embedded Actors, even if you haven't saved tokens/tiles)                
+                If showQEAutomatically === true, then put a Hide QE button on the QE dialog
+                If showQEAutomatically === false, then put a Show QE button on the JE dialog
 */
 
 
@@ -265,7 +268,15 @@ export class QuickEncounter {
             default: true,
             type: Boolean
         });
-        game.settings.register(QE.MODULE_NAME, "displayXPAfterCombat", {
+        game.settings.register(QE.MODULE_NAME, "showQEAutomatically", {
+            name: "QE.Setting.OpenQEAutomatically.NAME",
+            hint: "QE.Setting.OpenQEAutomatically.HINT",
+            scope: "world",
+            config: true,
+            default: true,
+            type: Boolean
+        });
+       game.settings.register(QE.MODULE_NAME, "displayXPAfterCombat", {
             name: "QE.DisplayXPAfterCombat.NAME",
             hint: "QE.DisplayXPAfterCombat.HINT",
             scope: "world",
@@ -274,7 +285,6 @@ export class QuickEncounter {
             default: true,
             type: Boolean
         });
-
         //0.6.13 Initialize which Note you are hovering over
         QuickEncounter.hoveredNote = null;
     }
@@ -360,7 +370,7 @@ export class QuickEncounter {
             }
             //Existing Quick Encounter: Ask whether to run, add new assets, or create one from scratch
             if (quickEncounter && (controlledNonFriendlyTokens?.length || controlledTiles?.length)) {
-                QEDialog.buttons3({
+                Dialog3.buttons3({
                     title: game.i18n.localize("QE.AddToQuickEncounter.TITLE"),
                     content: game.i18n.localize("QE.AddToQuickEncounter.CONTENT"),
                     button1cb: () => {quickEncounter.run(event);},
@@ -370,7 +380,7 @@ export class QuickEncounter {
                 });
             } else if (candidateJournalEntry &&  (controlledNonFriendlyTokens?.length || controlledTiles?.length)) {
                 //Existing Journal Entry, ask if you want to create a Quick Encounter out of it
-                QEDialog.buttons3({
+                Dialog3.buttons3({
                     title: game.i18n.localize("QE.LinkToQuickEncounter.TITLE"),
                     content: game.i18n.localize("QE.LinkToQuickEncounter.CONTENT"),
                     button1cb: () => {QuickEncounter.link(candidateJournalEntry,controlledAssets)},
@@ -528,7 +538,7 @@ export class QuickEncounter {
         canvas.tiles.deleteMany(controlledTilesIds);
     }
 
-    /** Method 1: createFromTokens
+    /* Method 1: createFromTokens
     * Delete the controlled (selected) tokens and record their tokenData in a created Journal Entry
     * Also embed Actors they represent (for clarity)
     **/
@@ -1124,7 +1134,23 @@ export class QuickEncounter {
         return `${game.i18n.localize("QE.TotalXP.CONTENT")} ${totalXP}XP<br>`;
     }
 
-
+    static async getJournalSheetHeaderButtons(journalSheet, buttons) {
+        //0.7.3: Add a Show QE button if this JE has a Quick Encounter and showQEAutomatically is true OR the QuickEncounter has set it
+        const quickEncounter = QuickEncounter.extractQuickEncounter(journalSheet);
+        const displayShowQEButton = game.settings.get(QE.MODULE_NAME,"showQEAutomatically") || quickEncounter?.showQE;
+        if (quickEncounter && displayShowQEButton) {
+            buttons.unshift({
+                label: "QE.JEBorder.ShowQE",
+                class: "showQE",
+                icon: "fas fa-fist-raised",
+                onclick: async ev => {
+                    //Toggle the default to always show from now on (otherwise you have no way of turning it on again)
+                    quickEncounter.showQE = true;
+                    journalSheet.qeDialog?.render(true);
+                }
+            });
+        }
+    }
 
     static async onRenderJournalSheet(journalSheet, html) {
         if (!game.user.isGM) {return;}
@@ -1159,7 +1185,6 @@ export class QuickEncounter {
                 noMapNoteWarning = `${game.i18n.localize("QE.AddToCombatTracker.NoMapNote")}`;
             }
             
-            let qeJournalEntryIntro = "";
             //v0.6.1: Also pop open a companion dialog with details about what tokens have been placed and XP
             //0.7.0 Remove option to not use the QE Dialog
             //v0.6.10: First attempt to reuse the existing QE dialog (not using app.id)
@@ -1168,11 +1193,18 @@ export class QuickEncounter {
                 qeDialog.update(quickEncounter);    //have to update since we extract a new one each time
             } else {
                 qeDialog = new QESheet(quickEncounter);
+                journalSheet.qeDialog = qeDialog;
             }
 
-            qeDialog.render(true);
-            journalSheet.qeDialog = qeDialog;
-            qeJournalEntryIntro = noMapNoteWarning;
+            //0.7.3 OPen the QE automatically (default) in general (otherwise you can open it from the border menu)
+            if (game.settings.get(QE.MODULE_NAME, "showQEAutomatically") && !quickEncounter.hideQE) {
+                qeDialog.render(true);
+            }
+
+            //0.7.3: Add a QE button to the border
+
+
+            const qeJournalEntryIntro = noMapNoteWarning;
             //qeJournalEntryIntro = await renderTemplate('modules/quick-encounters/templates/qeJournalEntryIntro.html', {totalXPLine, noMapNoteWarning});
 
             html.find('.editor-content').prepend(qeJournalEntryIntro);
@@ -1183,9 +1215,10 @@ export class QuickEncounter {
         }
     }
 
+
 }
 
-export class QEDialog extends Dialog {
+export class Dialog3 extends Dialog {
     static async buttons3({title, content, button1cb, button2cb, button3cb, buttonLabels, options={}}) {
         //Also can function as a generic 2-button dialog by passing button3b=null
             return new Promise((resolve, reject) => {
@@ -1270,7 +1303,7 @@ Hooks.on('closeJournalSheet', async (journalSheet, html) => {
     delete journalEntry.clickedNote;
 });
 
-
+Hooks.on("getJournalSheetHeaderButtons", QuickEncounter.getJournalSheetHeaderButtons);
 Hooks.on("init", QuickEncounter.init);
 Hooks.on('getSceneControlButtons', QuickEncounter.getSceneControlButtons);
 Hooks.on("deleteCombat", (combat, options, userId) => {

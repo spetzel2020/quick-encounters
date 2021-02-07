@@ -22,7 +22,8 @@ Reused as EncounterCompanionSheet
                 v0.6.11: update(): Update to new quickEncounter   
 14-Jan-2021     0.7.0c: REnamed to QESheet       
 16-Jan-2021     0.7.0d: Show a thumbnail of any saved tiles   
-19-Jan-2021     0.7.0f: On hover, show a - and Remove [name] for both Actors and Tiles                
+19-Jan-2021     0.7.0f: On hover, show a - and Remove [name] for both Actors and Tiles       
+        
 */
 
 
@@ -225,16 +226,8 @@ export class QESheet extends FormApplication {
             //And close this sheet
             this.close();
         }
-
-        //FIXME: DO we need to call this.render() explicitly?
     }
 
-    /**
-     * Remove actor from Quick Encounter on clicking the portrait.
-     *
-     * @param {*} event
-     * @memberof EncounterBuilderApplication
-     */
     _onClickActor(event) {
         event.stopPropagation();
 
