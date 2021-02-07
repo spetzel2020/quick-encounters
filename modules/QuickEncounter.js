@@ -131,6 +131,8 @@
 6-Feb-2021      0.7.3a: Add Setting: Automatic QE on Embedded Actors (open QE with any JE with embedded Actors, even if you haven't saved tokens/tiles)                
                 Always put a Show QE button on the JE dialog (in case you close it)
                 0.7.3b: Put a Hide QE button on the QE Dialog
+7-Feb-2021      0.7.3c: Initialize hideQE null       
+                Add journalEntry.showQEOnce to force showing on creation          
 */
 
 
@@ -139,7 +141,7 @@ import {QESheet} from './QESheet.js';
 
 export const QE = {
     MODULE_NAME : "quick-encounters",
-    MODULE_VERSION : "0.7.2",
+    MODULE_VERSION : "0.7.3",
     TOKENS_FLAG_KEY : "tokens",
     QE_JSON_FLAG_KEY : "quickEncounter"
 }
@@ -156,6 +158,7 @@ export class QuickEncounter {
         this.extractedActors = qeData.extractedActors;
         //0.7 Now has tiles as well
         this.savedTilesData = qeData.savedTilesData;
+        this.hideQE = null;     //Means it has never been set, so follow the Auto flag
         
         if (this.extractedActors?.length) {
             for (const [i,eActor] of this.extractedActors.entries()) {
@@ -204,7 +207,9 @@ export class QuickEncounter {
         const qeJournalEntry = game.journal.get(this.journalEntryId);
         //v0.6.1 - store created quickEncounter - but can't store object, so serialize data
         this.qeVersion = QE.MODULE_VERSION;
+        //0.7.3 When we've changed the Quick Encounter we want to force showing the QE dialog
         const qeJSON = JSON.stringify(this);
+        qeJournalEntry.showQEOnce = true;   //because we made a change
         await qeJournalEntry?.setFlag(QE.MODULE_NAME, QE.QE_JSON_FLAG_KEY, qeJSON);
     }
     static deserializeFromJournalEntry(journalEntry) {
@@ -815,6 +820,8 @@ export class QuickEncounter {
         if (savedTilesData) {
             canvas.tiles.activate();
             await this.createTiles(savedTilesData, shift, options);
+            //0.7.3 Switch back to Basic Controls
+            canvas.tokens.activate();
         }
     }
 
@@ -1200,7 +1207,9 @@ export class QuickEncounter {
             }
 
             //0.7.3 OPen the QE automatically (default) in general unless you have hidden it
-            if ((game.settings.get(QE.MODULE_NAME, "showQEAutomatically") && (quickEncounter.hideQE === null)) || !quickEncounter.hideQE) {
+            const showQEDialog =  ((quickEncounter.hideQE === null) && game.settings.get(QE.MODULE_NAME, "showQEAutomatically")) || !(quickEncounter.hideQE ?? true);
+            if (showQEDialog || qeJournalEntry?.showQEOnce) {
+                delete qeJournalEntry.showQEOnce;
                 qeDialog.render(true);
             }
 
