@@ -129,8 +129,8 @@
                 - save as sourceNoteData instead
                 Move shift calculation to run() and pass to createTokens and createTiles
 6-Feb-2021      0.7.3a: Add Setting: Automatic QE on Embedded Actors (open QE with any JE with embedded Actors, even if you haven't saved tokens/tiles)                
-                If showQEAutomatically === true, then put a Hide QE button on the QE dialog
-                If showQEAutomatically === false, then put a Show QE button on the JE dialog
+                Always put a Show QE button on the JE dialog (in case you close it)
+                0.7.3b: Put a Hide QE button on the QE Dialog
 */
 
 
@@ -190,7 +190,7 @@ export class QuickEncounter {
         }
     }
     
-    async serializeIntoJournalEntry(journalEntryId) {
+    async serializeIntoJournalEntry(journalEntryId=null) {
         /*Handles three possibilities as a form of polymorphism:
         1. journalEntryId is non-null and this.journalEntryId is non null; set the qe.journalEntryId and update
         2. journalEntryId is null, but the qe.journalEntryId is non-null - update
@@ -269,8 +269,8 @@ export class QuickEncounter {
             type: Boolean
         });
         game.settings.register(QE.MODULE_NAME, "showQEAutomatically", {
-            name: "QE.Setting.OpenQEAutomatically.NAME",
-            hint: "QE.Setting.OpenQEAutomatically.HINT",
+            name: "QE.Setting.ShowQEAutomatically.NAME",
+            hint: "QE.Setting.ShowQEAutomatically.HINT",
             scope: "world",
             config: true,
             default: true,
@@ -1134,10 +1134,11 @@ export class QuickEncounter {
         return `${game.i18n.localize("QE.TotalXP.CONTENT")} ${totalXP}XP<br>`;
     }
 
+    /* Hook on JournalSheet Header buttons */
     static async getJournalSheetHeaderButtons(journalSheet, buttons) {
-        //0.7.3: Add a Show QE button if this JE has a Quick Encounter and showQEAutomatically is true OR the QuickEncounter has set it
+        //0.7.3: Add a Show QE button if this JE has a Quick Encounter and showQEAutomatically is false OR the QE has been hidden
         const quickEncounter = QuickEncounter.extractQuickEncounter(journalSheet);
-        const displayShowQEButton = game.settings.get(QE.MODULE_NAME,"showQEAutomatically") || quickEncounter?.showQE;
+        const displayShowQEButton = !game.settings.get(QE.MODULE_NAME,"showQEAutomatically") || quickEncounter?.hideQE;
         if (quickEncounter && displayShowQEButton) {
             buttons.unshift({
                 label: "QE.JEBorder.ShowQE",
@@ -1145,13 +1146,15 @@ export class QuickEncounter {
                 icon: "fas fa-fist-raised",
                 onclick: async ev => {
                     //Toggle the default to always show from now on (otherwise you have no way of turning it on again)
-                    quickEncounter.showQE = true;
+                    quickEncounter.hideQE = false;
+                    quickEncounter.serializeIntoJournalEntry();
                     journalSheet.qeDialog?.render(true);
                 }
             });
         }
     }
 
+    /* Hook on renderJournalSheet */
     static async onRenderJournalSheet(journalSheet, html) {
         if (!game.user.isGM) {return;}
 
@@ -1196,13 +1199,10 @@ export class QuickEncounter {
                 journalSheet.qeDialog = qeDialog;
             }
 
-            //0.7.3 OPen the QE automatically (default) in general (otherwise you can open it from the border menu)
-            if (game.settings.get(QE.MODULE_NAME, "showQEAutomatically") && !quickEncounter.hideQE) {
+            //0.7.3 OPen the QE automatically (default) in general unless you have hidden it
+            if ((game.settings.get(QE.MODULE_NAME, "showQEAutomatically") && (quickEncounter.hideQE === null)) || !quickEncounter.hideQE) {
                 qeDialog.render(true);
             }
-
-            //0.7.3: Add a QE button to the border
-
 
             const qeJournalEntryIntro = noMapNoteWarning;
             //qeJournalEntryIntro = await renderTemplate('modules/quick-encounters/templates/qeJournalEntryIntro.html', {totalXPLine, noMapNoteWarning});
