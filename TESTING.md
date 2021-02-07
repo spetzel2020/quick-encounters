@@ -1,4 +1,4 @@
-# TESTING v0.7.1 WITH FOUNDRY 0.7.9
+# TESTING v0.7.3 WITH FOUNDRY 0.7.9
 
 ## BASIC
 ### METHOD 1 - create JE from selected tokens
@@ -33,6 +33,14 @@
 ## v0.7.0
 1. Hover over Token in QE dialog and remove								                                    0.7.0
 2. Hover over Tile in QE dialog and remove								                                    0.7.0								
+
+## 0.7.3
+1. ShowAuto = Yes:
+1.1 New QE should show QE first and second time
+1.2 Hide QE; now should not show until you click Show again and then should show always
+2. ShowAuto=No
+2.1 new QE should now show QE unless you use Show button
+
 
 ### BACKWARD COMPATIBILITY
 - Create a QE in v0.5 and make sure it mostly works in 0.6.8
