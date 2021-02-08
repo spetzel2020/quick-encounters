@@ -132,7 +132,8 @@
                 Always put a Show QE button on the JE dialog (in case you close it)
                 0.7.3b: Put a Hide QE button on the QE Dialog
 7-Feb-2021      0.7.3c: Initialize hideQE null       
-                Add journalEntry.showQEOnce to force showing on creation          
+                Add journalEntry.showQEOnce to force showing on creation   
+                0.7.3e: Re-extract the quickEncounter at show button press time, because otherwise if a QE was created from the HTML, it is not available at button creation time
 */
 
 
@@ -1146,16 +1147,21 @@ export class QuickEncounter {
         //0.7.3: Add a Show QE button if this JE has a Quick Encounter and showQEAutomatically is false OR the QE has been hidden
         const quickEncounter = QuickEncounter.extractQuickEncounter(journalSheet);
         const displayShowQEButton = !game.settings.get(QE.MODULE_NAME,"showQEAutomatically") || quickEncounter?.hideQE;
-        if (quickEncounter && displayShowQEButton) {
+        //If this is an inferred QE (from the presence of Actors), quickEncounter=null because the the journalSheet HTML hasn't been built yet
+        if (displayShowQEButton) {
             buttons.unshift({
                 label: "QE.JEBorder.ShowQE",
                 class: "showQE",
                 icon: "fas fa-fist-raised",
                 onclick: async ev => {
+                    //re-extract the Quick Encounter because the HTML is now available
+                    const qe2 = QuickEncounter.extractQuickEncounter(journalSheet);
                     //Toggle the default to always show from now on (otherwise you have no way of turning it on again)
-                    quickEncounter.hideQE = false;
-                    quickEncounter.serializeIntoJournalEntry();
-                    journalSheet.qeDialog?.render(true);
+                    if (qe2) {
+                        qe2.hideQE = false;
+                        qe2.serializeIntoJournalEntry();
+                        journalSheet.qeDialog?.render(true);
+                    }
                 }
             });
         }

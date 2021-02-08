@@ -10,8 +10,8 @@ v0.7.1: hidden flag should be set by ctrl/alt BEFORE creation because otherwise 
         - done for Tiles
 v0.7.1: Translation is working only for freshly-created Method 1 QEs, not for Linked/Added ones?                 
         - can we save originalNoteData after recomputing it?
->>>v0.7.1: Should switch back to Basic Controls after add Tiles (so  you can add PCs)  
 v0.7.3: QE Dialog should show Tokens not Actor image      
+        - Need to allow for wildcard tokens (could use actor.img if you have wildcard set, OR just create a temporary token)
 
            
 ## FEATURES
@@ -176,6 +176,9 @@ FIXED in 0.7.1: v0.7.0: Can't properly save a QE Dialog with sourceNote, because
         - It's meant to be only temporary anyway and this problem will only occur if you run the Encounter and then try to save a change 
 FIXED in 0.7.1: Tile translation and tile hide/show override should work now
 FIXED in 0.7.3: Should always show newly created/linked QEs regardless of Auto setting
+FIXED in 0.7.3: 0.7.1: Should switch back to Basic Controls after add Tiles (so  you can add PCs) 
+
+
 
 ## COMPLETED FEATURES
 (v0.4.0): If you're on a different scene, pops a dialog to check that you want to switch scenes
