@@ -128,6 +128,12 @@
 20-Jan-2021     0.7.1a: Fixed: If you run an Encounter and then try to edit the setting, will choke on the JSON save (because of sourceNote)
                 - save as sourceNoteData instead
                 Move shift calculation to run() and pass to createTokens and createTiles
+6-Feb-2021      0.7.3a: Add Setting: Automatic QE on Embedded Actors (open QE with any JE with embedded Actors, even if you haven't saved tokens/tiles)                
+                Always put a Show QE button on the JE dialog (in case you close it)
+                0.7.3b: Put a Hide QE button on the QE Dialog
+7-Feb-2021      0.7.3c: Initialize hideQE null       
+                Add journalEntry.showQEOnce to force showing on creation   
+                0.7.3e: Re-extract the quickEncounter at show button press time, because otherwise if a QE was created from the HTML, it is not available at button creation time
 */
 
 
@@ -136,7 +142,7 @@ import {QESheet} from './QESheet.js';
 
 export const QE = {
     MODULE_NAME : "quick-encounters",
-    MODULE_VERSION : "0.7.1",
+    MODULE_VERSION : "0.7.3",
     TOKENS_FLAG_KEY : "tokens",
     QE_JSON_FLAG_KEY : "quickEncounter"
 }
@@ -153,6 +159,7 @@ export class QuickEncounter {
         this.extractedActors = qeData.extractedActors;
         //0.7 Now has tiles as well
         this.savedTilesData = qeData.savedTilesData;
+        this.hideQE = null;     //Means it has never been set, so follow the Auto flag
         
         if (this.extractedActors?.length) {
             for (const [i,eActor] of this.extractedActors.entries()) {
@@ -187,7 +194,7 @@ export class QuickEncounter {
         }
     }
     
-    async serializeIntoJournalEntry(journalEntryId) {
+    async serializeIntoJournalEntry(journalEntryId=null) {
         /*Handles three possibilities as a form of polymorphism:
         1. journalEntryId is non-null and this.journalEntryId is non null; set the qe.journalEntryId and update
         2. journalEntryId is null, but the qe.journalEntryId is non-null - update
@@ -201,7 +208,9 @@ export class QuickEncounter {
         const qeJournalEntry = game.journal.get(this.journalEntryId);
         //v0.6.1 - store created quickEncounter - but can't store object, so serialize data
         this.qeVersion = QE.MODULE_VERSION;
+        //0.7.3 When we've changed the Quick Encounter we want to force showing the QE dialog
         const qeJSON = JSON.stringify(this);
+        qeJournalEntry.showQEOnce = true;   //because we made a change
         await qeJournalEntry?.setFlag(QE.MODULE_NAME, QE.QE_JSON_FLAG_KEY, qeJSON);
     }
     static deserializeFromJournalEntry(journalEntry) {
@@ -265,7 +274,15 @@ export class QuickEncounter {
             default: true,
             type: Boolean
         });
-        game.settings.register(QE.MODULE_NAME, "displayXPAfterCombat", {
+        game.settings.register(QE.MODULE_NAME, "showQEAutomatically", {
+            name: "QE.Setting.ShowQEAutomatically.NAME",
+            hint: "QE.Setting.ShowQEAutomatically.HINT",
+            scope: "world",
+            config: true,
+            default: true,
+            type: Boolean
+        });
+       game.settings.register(QE.MODULE_NAME, "displayXPAfterCombat", {
             name: "QE.DisplayXPAfterCombat.NAME",
             hint: "QE.DisplayXPAfterCombat.HINT",
             scope: "world",
@@ -274,7 +291,6 @@ export class QuickEncounter {
             default: true,
             type: Boolean
         });
-
         //0.6.13 Initialize which Note you are hovering over
         QuickEncounter.hoveredNote = null;
     }
@@ -360,7 +376,7 @@ export class QuickEncounter {
             }
             //Existing Quick Encounter: Ask whether to run, add new assets, or create one from scratch
             if (quickEncounter && (controlledNonFriendlyTokens?.length || controlledTiles?.length)) {
-                QEDialog.buttons3({
+                Dialog3.buttons3({
                     title: game.i18n.localize("QE.AddToQuickEncounter.TITLE"),
                     content: game.i18n.localize("QE.AddToQuickEncounter.CONTENT"),
                     button1cb: () => {quickEncounter.run(event);},
@@ -370,7 +386,7 @@ export class QuickEncounter {
                 });
             } else if (candidateJournalEntry &&  (controlledNonFriendlyTokens?.length || controlledTiles?.length)) {
                 //Existing Journal Entry, ask if you want to create a Quick Encounter out of it
-                QEDialog.buttons3({
+                Dialog3.buttons3({
                     title: game.i18n.localize("QE.LinkToQuickEncounter.TITLE"),
                     content: game.i18n.localize("QE.LinkToQuickEncounter.CONTENT"),
                     button1cb: () => {QuickEncounter.link(candidateJournalEntry,controlledAssets)},
@@ -528,7 +544,7 @@ export class QuickEncounter {
         canvas.tiles.deleteMany(controlledTilesIds);
     }
 
-    /** Method 1: createFromTokens
+    /* Method 1: createFromTokens
     * Delete the controlled (selected) tokens and record their tokenData in a created Journal Entry
     * Also embed Actors they represent (for clarity)
     **/
@@ -805,6 +821,8 @@ export class QuickEncounter {
         if (savedTilesData) {
             canvas.tiles.activate();
             await this.createTiles(savedTilesData, shift, options);
+            //0.7.3 Switch back to Basic Controls
+            canvas.tokens.activate();
         }
     }
 
@@ -1124,8 +1142,32 @@ export class QuickEncounter {
         return `${game.i18n.localize("QE.TotalXP.CONTENT")} ${totalXP}XP<br>`;
     }
 
+    /* Hook on JournalSheet Header buttons */
+    static async getJournalSheetHeaderButtons(journalSheet, buttons) {
+        //0.7.3: Add a Show QE button if this JE has a Quick Encounter and showQEAutomatically is false OR the QE has been hidden
+        const quickEncounter = QuickEncounter.extractQuickEncounter(journalSheet);
+        const displayShowQEButton = !game.settings.get(QE.MODULE_NAME,"showQEAutomatically") || quickEncounter?.hideQE;
+        //If this is an inferred QE (from the presence of Actors), quickEncounter=null because the the journalSheet HTML hasn't been built yet
+        if (displayShowQEButton) {
+            buttons.unshift({
+                label: "QE.JEBorder.ShowQE",
+                class: "showQE",
+                icon: "fas fa-fist-raised",
+                onclick: async ev => {
+                    //re-extract the Quick Encounter because the HTML is now available
+                    const qe2 = QuickEncounter.extractQuickEncounter(journalSheet);
+                    //Toggle the default to always show from now on (otherwise you have no way of turning it on again)
+                    if (qe2) {
+                        qe2.hideQE = false;
+                        qe2.serializeIntoJournalEntry();
+                        journalSheet.qeDialog?.render(true);
+                    }
+                }
+            });
+        }
+    }
 
-
+    /* Hook on renderJournalSheet */
     static async onRenderJournalSheet(journalSheet, html) {
         if (!game.user.isGM) {return;}
 
@@ -1159,7 +1201,6 @@ export class QuickEncounter {
                 noMapNoteWarning = `${game.i18n.localize("QE.AddToCombatTracker.NoMapNote")}`;
             }
             
-            let qeJournalEntryIntro = "";
             //v0.6.1: Also pop open a companion dialog with details about what tokens have been placed and XP
             //0.7.0 Remove option to not use the QE Dialog
             //v0.6.10: First attempt to reuse the existing QE dialog (not using app.id)
@@ -1168,11 +1209,17 @@ export class QuickEncounter {
                 qeDialog.update(quickEncounter);    //have to update since we extract a new one each time
             } else {
                 qeDialog = new QESheet(quickEncounter);
+                journalSheet.qeDialog = qeDialog;
             }
 
-            qeDialog.render(true);
-            journalSheet.qeDialog = qeDialog;
-            qeJournalEntryIntro = noMapNoteWarning;
+            //0.7.3 OPen the QE automatically (default) in general unless you have hidden it
+            const showQEDialog =  ((quickEncounter.hideQE === null) && game.settings.get(QE.MODULE_NAME, "showQEAutomatically")) || !(quickEncounter.hideQE ?? true);
+            if (showQEDialog || qeJournalEntry?.showQEOnce) {
+                delete qeJournalEntry.showQEOnce;
+                qeDialog.render(true);
+            }
+
+            const qeJournalEntryIntro = noMapNoteWarning;
             //qeJournalEntryIntro = await renderTemplate('modules/quick-encounters/templates/qeJournalEntryIntro.html', {totalXPLine, noMapNoteWarning});
 
             html.find('.editor-content').prepend(qeJournalEntryIntro);
@@ -1183,9 +1230,10 @@ export class QuickEncounter {
         }
     }
 
+
 }
 
-export class QEDialog extends Dialog {
+export class Dialog3 extends Dialog {
     static async buttons3({title, content, button1cb, button2cb, button3cb, buttonLabels, options={}}) {
         //Also can function as a generic 2-button dialog by passing button3b=null
             return new Promise((resolve, reject) => {
@@ -1270,7 +1318,7 @@ Hooks.on('closeJournalSheet', async (journalSheet, html) => {
     delete journalEntry.clickedNote;
 });
 
-
+Hooks.on("getJournalSheetHeaderButtons", QuickEncounter.getJournalSheetHeaderButtons);
 Hooks.on("init", QuickEncounter.init);
 Hooks.on('getSceneControlButtons', QuickEncounter.getSceneControlButtons);
 Hooks.on("deleteCombat", (combat, options, userId) => {

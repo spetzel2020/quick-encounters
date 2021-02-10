@@ -6,6 +6,13 @@
 - Compatible with Foundry 0.7.9
 - Removed the option to not use the Quick Encounter Dialog
 - Spanish translation updated
+- Global setting to auto-show/hide Quick Encounters + buttons to show/hide individual ones
+
+### 0.7.3
+- Bug fixes
+- Setting to auto-show Quick Encounters (default Yes)
+- Hide button on the QE dialog border to hide individual QEs
+- Show button on the JE border to re-show a hidden (or closed) QE
 
 ### 0.7.1
 - Fixed: Tile translation and tile hide/show override also work

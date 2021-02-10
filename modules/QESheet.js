@@ -22,7 +22,9 @@ Reused as EncounterCompanionSheet
                 v0.6.11: update(): Update to new quickEncounter   
 14-Jan-2021     0.7.0c: REnamed to QESheet       
 16-Jan-2021     0.7.0d: Show a thumbnail of any saved tiles   
-19-Jan-2021     0.7.0f: On hover, show a - and Remove [name] for both Actors and Tiles                
+19-Jan-2021     0.7.0f: On hover, show a - and Remove [name] for both Actors and Tiles       
+6-Feb-2021      0.7.3b: Put a Hide QE button on the QE dialog
+        
 */
 
 
@@ -73,7 +75,18 @@ export class QESheet extends FormApplication {
         if (closeButtonIndex !== null) {
             buttons[closeButtonIndex].label = game.i18n.localize("Cancel");
         }
-
+        //0.7.3b: Add a Hide QE button in case you don't want to see this particular one
+        buttons.unshift({
+            label: "QE.JEBorder.HideQE",
+            class: "hideQE",
+            icon: "fas fa-fist-raised",
+            onclick: async ev => {
+                //Toggle the default to not show from now on (you'll have to click the Show button in the JE)
+                this.quickEncounter.hideQE = true;
+                this.quickEncounter.serializeIntoJournalEntry();
+                this.close();
+            }
+        });
         return buttons;
     }
 
@@ -225,16 +238,8 @@ export class QESheet extends FormApplication {
             //And close this sheet
             this.close();
         }
-
-        //FIXME: DO we need to call this.render() explicitly?
     }
 
-    /**
-     * Remove actor from Quick Encounter on clicking the portrait.
-     *
-     * @param {*} event
-     * @memberof EncounterBuilderApplication
-     */
     _onClickActor(event) {
         event.stopPropagation();
 
