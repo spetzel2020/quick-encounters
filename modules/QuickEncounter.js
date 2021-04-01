@@ -134,6 +134,8 @@
 7-Feb-2021      0.7.3c: Initialize hideQE null       
                 Add journalEntry.showQEOnce to force showing on creation   
                 0.7.3e: Re-extract the quickEncounter at show button press time, because otherwise if a QE was created from the HTML, it is not available at button creation time
+29-Mar-2021     0.8.0b: If you are viewing the Journal Entry directly out of a Compendium, make a read-only QE dialog without token placement operations
+                and instructions about how to use it
 */
 
 
@@ -142,7 +144,7 @@ import {QESheet} from './QESheet.js';
 
 export const QE = {
     MODULE_NAME : "quick-encounters",
-    MODULE_VERSION : "0.7.4",
+    MODULE_VERSION : "0.8.0",
     TOKENS_FLAG_KEY : "tokens",
     QE_JSON_FLAG_KEY : "quickEncounter"
 }
@@ -1208,7 +1210,8 @@ export class QuickEncounter {
             if (qeDialog) {
                 qeDialog.update(quickEncounter);    //have to update since we extract a new one each time
             } else {
-                qeDialog = new QESheet(quickEncounter);
+                //0.8.0: If this is being viewed out of a Compendium, present a different read-only Quick Encounter Dialog with instructions
+                qeDialog = new QESheet(quickEncounter, {isFromCompendium : !(qeJournalEntry.compendium === null)});
                 journalSheet.qeDialog = qeDialog;
             }
 

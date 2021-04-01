@@ -15,7 +15,14 @@ v0.7.3: QE Dialog should show Tokens not Actor image
 
            
 ## FEATURES
-### Version 0.7
+### v0.8.0: Support Compendium lifecycle for Instant Encounter (no Scene)
+- Convert a Quick Encounter Journal Entry into a QE Compendium
+-- Drag Compendium Actors into Journal Entry (can you drag directly into Compendium Journal Entry?)
+-- QE button/command to standardize the Compendium Actor entry into something generic (only requires a change to the Journal Entry??)
+-- When re-imported, QE button/command reads and cross-references back to Compendium Actor
+
+
+### Not Scheduled
 - Make the QE button open a dialog that stays there?
 - Intercept dragging a Journal Entry (creating a new Note) or copying a Note and use EncounterNote template
 
@@ -58,8 +65,6 @@ v0.7.3: QE Dialog should show Tokens not Actor image
     - Partially done: could identify it's a Quick Encounter from the inclusion of Actor links
         but perhaps a better approach would be with a flag that was set
 
-
-### Later
 More sophisticated monster entries:
     - Scan Journal Entries to turn into Actor links and Quick Encounters
     - Allow dynamic generation of which monsters (use a RollTable?)

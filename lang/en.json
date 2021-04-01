@@ -54,6 +54,7 @@
   "QE.UseQuickEncounterDialog.NAME" : "Use new Quick Encounter dialog",
   "QE.UseQuickEncounterDialog.HINT" : "The new Quick Encounter dialog (default in 0.6) pops up next to the Quick Encounter Journal Entry and lets you add or remove actors/tokens and quickly run the Encounter, without having to scroll through the Journal Entry for the actors or Quick Encounter button",
   "QE.QuickEncounterDialog.INTRO" : "Checkmarks show which Actors have saved tokens; to save more, select them on the Scene and press the Quick Encounter (fist) button. You can change the number of existing Actors or click on the token/tile icon to remove completely.<br><strong>Warning: </strong>Changes you make here will not (yet) synchronize with the Journal Entry",
+  "QE.QuickEncounterDialog.INTRO_COMPENDIUM" : "To edit, place tokens, or run this Quick Encounter, first import the Journal Entry from the Compendium",
   "QE.QuickEncounterDialog.Save.BUTTON" : "Save",
    "QE.QuickEncounterDialog.PS" : "<p><i>This is the new Quick Encounters dialog. Uncheck </i><strong>Use new Quick Encounter dialog</strong><i> in Settings if you want to switch back.</i></p>",
    "QE.QuickEncounterDialog.InvalidNumActors.WARNING" : "Enter blank, a positive integer, or a die roll (for example, 2d6+5); you entered an invalid number: ",
