@@ -1,8 +1,19 @@
 # TO DO
 
+
+## BUGS with Foundry 0.8.X
+- When attempting to create a new QE, when you press the QE (fist) icon
+        - Uncaught ReferenceError: TOKEN_DISPOSITIONS is not defined
+        at QuickEncounter.js:364
+        at Array.filter (<anonymous>)
+        at Function.runAddOrCreate (QuickEncounter.js:364)
+        at Object.onClick (QuickEncounter.js:314)
+        at SceneControls._onClickTool (foundry.js:27261)
+        at HTMLLIElement.dispatch (jquery.min.js:2)
+        at HTMLLIElement.v.handle (jquery.min.js:2)
+- Change made to set QE dialog read-only is happening every time (presumably because .compendium is set)
+
 ## BUGS
-v0.6.8: You can use a Compendium link - but the Image doesn't always appear in the QE dialog
-        - use the lazy loading method from Compendiums?
 v0.7.0 Tiles with a webm video show broken link; show a video camera instead    
 v0.7.0: Tile name needs to wrap because otherwise it forces the tile thumbnail into the middle 
         - Not a wrapping problem, because flexrow has flex-wrap: wrap. Instead we want the icon to always be left-justified     
@@ -13,9 +24,11 @@ v0.7.1: Translation is working only for freshly-created Method 1 QEs, not for Li
 v0.7.3: QE Dialog should show Tokens not Actor image      
         - Need to allow for wildcard tokens (could use actor.img if you have wildcard set, OR just create a temporary token)
 
-           
+
 ## FEATURES
 ### v0.8.0: Support Compendium lifecycle for Instant Encounter (no Scene)
+- Fix the links in imported Compendia?? as part of importing or prior?
+
 - Convert a Quick Encounter Journal Entry into a QE Compendium
 -- Drag Compendium Actors into Journal Entry (can you drag directly into Compendium Journal Entry?)
 -- QE button/command to standardize the Compendium Actor entry into something generic (only requires a change to the Journal Entry??)
@@ -182,6 +195,8 @@ FIXED in 0.7.1: v0.7.0: Can't properly save a QE Dialog with sourceNote, because
 FIXED in 0.7.1: Tile translation and tile hide/show override should work now
 FIXED in 0.7.3: Should always show newly created/linked QEs regardless of Auto setting
 FIXED in 0.7.3: 0.7.1: Should switch back to Basic Controls after add Tiles (so  you can add PCs) 
+FIXED in 0.8.0: v0.6.8: You can use a Compendium link - but the Image doesn't always appear in the QE dialog
+        - use the lazy loading method from Compendiums?
 
 
 

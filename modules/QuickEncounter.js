@@ -136,6 +136,10 @@
                 0.7.3e: Re-extract the quickEncounter at show button press time, because otherwise if a QE was created from the HTML, it is not available at button creation time
 29-Mar-2021     0.8.0b: If you are viewing the Journal Entry directly out of a Compendium, make a read-only QE dialog without token placement operations
                 and instructions about how to use it
+25-May-2021     0.8.0c: Testing with Foundry 0.8.5: (but will need to verify/edit for Foundry 0.7.x)
+                    - TOKEN_DISPOSITIONS -> CONST.TOKEN_DISPOSITIONS                
+                    - canvas.tiles no longer exists; replace with Tile.layer.controlled or Tile.layer.placeables as appropriate
+                    - replace deleteMany with canvas.scene.deleteEmbeddedDocuments()
 */
 
 
@@ -361,10 +365,10 @@ export class QuickEncounter {
         //Method 1: Get the selected tokens and the scene
         //Exclude friendly tokens unless you say yes to the dialog
         const controlledTokens = Array.from(canvas.tokens?.controlled);
-        const controlledNonFriendlyTokens = controlledTokens?.filter(t => t.data?.disposition !== TOKEN_DISPOSITIONS.FRIENDLY );
-        const controlledFriendlyTokens = controlledTokens?.filter(t => t.data?.disposition === TOKEN_DISPOSITIONS.FRIENDLY );
+        const controlledNonFriendlyTokens = controlledTokens?.filter(t => t.data?.disposition !== CONST.TOKEN_DISPOSITIONS.FRIENDLY );
+        const controlledFriendlyTokens = controlledTokens?.filter(t => t.data?.disposition === CONST.TOKEN_DISPOSITIONS.FRIENDLY );
         //0.7.0b: Capture controlled tiles (will be one or the other
-        const controlledTiles = Array.from(canvas.tiles?.controlled);
+        const controlledTiles = Array.from(Tile.layer.controlled);
 
         const candidateJournalEntry = QuickEncounter.findCandidateJournalEntry();
         const quickEncounter = (candidateJournalEntry instanceof QuickEncounter ) ? candidateJournalEntry : null;
@@ -527,7 +531,8 @@ export class QuickEncounter {
         //Delete the existing tokens (because they will be replaced)
     
         const controlledTokensIds = controlledTokens.map(ct => {return ct.id});
-        canvas.tokens.deleteMany(controlledTokensIds);
+        //0.7.x: canvas.tokens.deleteMany(controlledTokensIds);
+        canvas.scene.deleteEmbeddedDocuments("Token", controlledTokensIds);
     }//end addTokens()
 
     addTiles(controlledTiles) {
@@ -543,7 +548,8 @@ export class QuickEncounter {
 
         //Delete the existing tokens (because they will be replaced)
         const controlledTilesIds = controlledTiles.map(ct => {return ct.id});
-        canvas.tiles.deleteMany(controlledTilesIds);
+        //0.7.x: canvas.tiles.deleteMany(controlledTilesIds);
+        canvas.scene.deleteEmbeddedDocuments("Tile", controlledTilesIds);
     }
 
     /* Method 1: createFromTokens
@@ -1070,7 +1076,7 @@ export class QuickEncounter {
         if (!shouldDisplayXPAfterCombat || !combat || !game.user.isGM) {return;}
 
         //Get list of non-friendly NPCs
-        const nonFriendlyNPCTokens = combat.turns?.filter(t => ((t.token?.disposition === TOKEN_DISPOSITIONS.HOSTILE) && (!t.actor || !t.players?.length)));
+        const nonFriendlyNPCTokens = combat.turns?.filter(t => ((t.token?.disposition === CONST.TOKEN_DISPOSITIONS.HOSTILE) && (!t.actor || !t.players?.length)));
         //And of player-owned tokens
         const pcTokens = combat.turns?.filter(t => (t.actor && t.players?.length));
 
