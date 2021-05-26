@@ -140,6 +140,7 @@
                     - TOKEN_DISPOSITIONS -> CONST.TOKEN_DISPOSITIONS                
                     - canvas.tiles no longer exists; replace with Tile.layer.controlled or Tile.layer.placeables as appropriate
                     - replace deleteMany with canvas.scene.deleteEmbeddedDocuments()
+                0.8.0d: createCombat(): Adjust for Token object now being on TokenDocument.object
 */
 
 
@@ -974,7 +975,9 @@ export class QuickEncounter {
                  }
                  //Use the prototype token from the Actors
                  //v0.6.7: Call Token.fromActor() which does the merge but also handles wildcard token images
-                 const tempToken = await Token.fromActor(actor, tokenData);
+                 //FOundry 0.7.x: const tempToken = await Token.fromActor(actor, tokenData);
+                 //0.8.0d: Use new TokenDocument constructor; does it handle token wildcarding?
+                 const tempToken = new TokenDocument(tokenData, {actor: actor});
                  tokenData = tempToken.data;
                  //If from a Compendium, we remember that and the original Compendium actorID
                  if (eActor.dataPackName) {tokenData.compendiumActorId = eActor.actorID;}
@@ -1048,14 +1051,21 @@ export class QuickEncounter {
 
         //Control the tokens (because that is checked in adding them to the Combat Tracker)
         //But release any others first (so that we don't inadvertently add them to combat)
-        createdTokens[0].control({releaseOthers : true, updateSight : false, pan : true});
+        //Foundry 0.7.x: const createdToken0 = createdTokens[0];
+        //0.8.0d: 
+        const createdToken0 = createdTokens[0].object;
+         createdToken0.control({releaseOthers : true, updateSight : false, pan : true});
+
         for (const token of createdTokens) {
-            token.control({releaseOthers : false, updateSight : false});
+            //Foundry 0.7.x: const tokenObject = token;
+            //0.8.0d
+            const tokenObject = token.object;
+            tokenObject.control({releaseOthers : false, updateSight : false});
         }
 
         //Load the recovered tokens into the combat Tracker
         //Only have to toggle one of them to add all the controlled tokens
-        await createdTokens[0].toggleCombat();
+        await createdToken0.toggleCombat();
 
         //0.6: Moved after toggling combat in case that actually creates the combat entity
         const tabApp = ui.combat;
@@ -1064,7 +1074,10 @@ export class QuickEncounter {
 
         //Now release control of them as a group, because otherwise the stack is hard to see
         for (const token of createdTokens) {
-            token.release();
+            //Foundry 0.7.x: const tokenObject = token;
+            //0.8.0d
+            const tokenObject = token.object;
+            tokenObject.release();
         }
 
     }
@@ -1217,7 +1230,8 @@ export class QuickEncounter {
                 qeDialog.update(quickEncounter);    //have to update since we extract a new one each time
             } else {
                 //0.8.0: If this is being viewed out of a Compendium, present a different read-only Quick Encounter Dialog with instructions
-                qeDialog = new QESheet(quickEncounter, {isFromCompendium : !(qeJournalEntry.compendium === null)});
+                //0.8.0d: Relax the null test for qeJournalEntry.compendium
+                qeDialog = new QESheet(quickEncounter, {isFromCompendium : qeJournalEntry.compendium});
                 journalSheet.qeDialog = qeDialog;
             }
 
