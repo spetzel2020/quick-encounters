@@ -143,6 +143,7 @@
                 0.8.0d: createCombat(): Adjust for Token object now being on TokenDocument.object
 27-May-2021     0.8.0e: Test for 0.8.x vs 0.7.x and use new methods accordingly                
                 - constructor(): Check this.extractedActors (was failing on iteration is extractedActors was null because of old QE method)
+28-May-2021     0.8.0f: Use TOKEN_DISPOSITIONS or CONST.TOKEN_DISPOSITIONS as appropriate                
 */
 
 
@@ -364,14 +365,21 @@ export class QuickEncounter {
     }
 */
     static runAddOrCreate(event) {
+        const isFoundryV8 = game.data.version.startsWith("0.8");
+        let FRIENDLY_TOKEN_DISPOSITIONS;
+        if (isFoundryV8) {
+            FRIENDLY_TOKEN_DISPOSITIONS = CONST.TOKEN_DISPOSITIONS.FRIENDLY;
+        } else {//0.7.x
+            FRIENDLY_TOKEN_DISPOSITIONS = TOKEN_DISPOSITIONS.FRIENDLY;
+        }
         //Called when you press the Quick Encounters button (fist) from the sidebar
         //If you are controlling tokens it creates a new Quick Encounter Journal Entry
         //0.6.4: If there's an open Journal Entry it asks if you want to add the tokens to it or run it
         //Method 1: Get the selected tokens and the scene
         //Exclude friendly tokens unless you say yes to the dialog
         const controlledTokens = Array.from(canvas.tokens?.controlled);
-        const controlledNonFriendlyTokens = controlledTokens?.filter(t => t.data?.disposition !== CONST.TOKEN_DISPOSITIONS.FRIENDLY );
-        const controlledFriendlyTokens = controlledTokens?.filter(t => t.data?.disposition === CONST.TOKEN_DISPOSITIONS.FRIENDLY );
+        const controlledNonFriendlyTokens = controlledTokens?.filter(t => t.data?.disposition !== FRIENDLY_TOKEN_DISPOSITIONS );
+        const controlledFriendlyTokens = controlledTokens?.filter(t => t.data?.disposition === FRIENDLY_TOKEN_DISPOSITIONS );
         //0.7.0b: Capture controlled tiles (will be one or the other
         const controlledTiles = Array.from(Tile.layer.controlled);
 
@@ -536,7 +544,7 @@ export class QuickEncounter {
         //Delete the existing tokens (because they will be replaced)
         const controlledTokensIds = controlledTokens.map(ct => {return ct.id});
         const isFoundryV8 = game.data.version.startsWith("0.8");
-        if (isFoundryV8) {//Foundry 0.8.0e
+        if (isFoundryV8) {//Foundry 0.8.x
             canvas.scene.deleteEmbeddedDocuments("Token", controlledTokensIds);
         } else {//Foundry 0.7.x
             canvas.tokens.deleteMany(controlledTokensIds);
@@ -558,7 +566,7 @@ export class QuickEncounter {
         //Delete the existing tokens (because they will be replaced)
         const controlledTilesIds = controlledTiles.map(ct => {return ct.id});
         const isFoundryV8 = game.data.version.startsWith("0.8");
-        if (isFoundryV8) {//Foundry 0.8.0e
+        if (isFoundryV8) {//Foundry 0.8.x
             canvas.scene.deleteEmbeddedDocuments("Tile", controlledTilesIds);
         } else {//Foundry 0.7.x
             canvas.tiles.deleteMany(controlledTilesIds);
@@ -988,7 +996,7 @@ export class QuickEncounter {
                 //Use the prototype token from the Actors
                 const isFoundryV8 = game.data.version.startsWith("0.8");
                 let tempToken;
-                if (isFoundryV8) {//Foundry 0.8.0e
+                if (isFoundryV8) {//Foundry 0.8.x
                     //0.8.0d: Use new TokenDocument constructor; does it handle token wildcarding?
                     tempToken = new TokenDocument(tokenData, {actor: actor});
                 } else {//Foundry 0.7.x
@@ -1071,7 +1079,7 @@ export class QuickEncounter {
         //But release any others first (so that we don't inadvertently add them to combat)
         let createdToken0;
         const isFoundryV8 = game.data.version.startsWith("0.8");
-        if (isFoundryV8) {//Foundry 0.8.0e 
+        if (isFoundryV8) {//Foundry 0.8.x
             createdToken0 = createdTokens[0].object;
         } else {//Foundry 0.7.x
             createdToken0 = createdTokens[0];

@@ -1,17 +1,8 @@
 # TO DO
-
-
 ## BUGS with Foundry 0.8.X
-- When attempting to create a new QE, when you press the QE (fist) icon
-        - Uncaught ReferenceError: TOKEN_DISPOSITIONS is not defined
-        at QuickEncounter.js:364
-        at Array.filter (<anonymous>)
-        at Function.runAddOrCreate (QuickEncounter.js:364)
-        at Object.onClick (QuickEncounter.js:314)
-        at SceneControls._onClickTool (foundry.js:27261)
-        at HTMLLIElement.dispatch (jquery.min.js:2)
-        at HTMLLIElement.v.handle (jquery.min.js:2)
-- Change made to set QE dialog read-only is happening every time (presumably because .compendium is set)
+
+## BUGS with Foundry 0.7.10:
+v0.8.0: CONST.TOKEN_DISPOSITIONS will not be defined - need to test/change to internal constant
 
 ## BUGS
 v0.7.0 Tiles with a webm video show broken link; show a video camera instead    
@@ -197,6 +188,9 @@ FIXED in 0.7.3: Should always show newly created/linked QEs regardless of Auto s
 FIXED in 0.7.3: 0.7.1: Should switch back to Basic Controls after add Tiles (so  you can add PCs) 
 FIXED in 0.8.0: v0.6.8: You can use a Compendium link - but the Image doesn't always appear in the QE dialog
         - use the lazy loading method from Compendiums?
+FIXED in 0.8.0: With FOundry 0.8.6: When attempting to create a new QE, when you press the QE (fist) icon
+        - Uncaught ReferenceError: TOKEN_DISPOSITIONS is not defined
+FIXED in 0.8.0: With Foundry 0.8.6: Change made to set QE dialog read-only is happening every time (presumably because .compendium is set)        
 
 
 
