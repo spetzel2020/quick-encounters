@@ -141,6 +141,8 @@
                     - canvas.tiles no longer exists; replace with Tile.layer.controlled or Tile.layer.placeables as appropriate
                     - replace deleteMany with canvas.scene.deleteEmbeddedDocuments()
                 0.8.0d: createCombat(): Adjust for Token object now being on TokenDocument.object
+27-May-2021     0.8.0e: Test for 0.8.x vs 0.7.x and use new methods accordingly                
+                - constructor(): Check this.extractedActors (was failing on iteration is extractedActors was null because of old QE method)
 */
 
 
@@ -183,6 +185,8 @@ export class QuickEncounter {
                 //Create a map of actors to tokens
                 let actorToTokensMap = {}
 //FIXME: If you have multiple actors, this will reset the map multiple times  - must be a better way to do this                
+                //0.8.0e: Was failing with "this.extractedActors not iterable"; non-fatal, but now check to be cleaner               
+                if (!this.extractedActors) {return;}
                 for (const eActor of this.extractedActors) {
                     actorToTokensMap[eActor.actorID] = qeData.savedTokensData.filter(td => (td.actorId === eActor.actorID));
                 }
@@ -530,10 +534,14 @@ export class QuickEncounter {
         }//end for tokenActorIds
 
         //Delete the existing tokens (because they will be replaced)
-    
         const controlledTokensIds = controlledTokens.map(ct => {return ct.id});
-        //0.7.x: canvas.tokens.deleteMany(controlledTokensIds);
-        canvas.scene.deleteEmbeddedDocuments("Token", controlledTokensIds);
+        const isFoundryV8 = game.data.version.startsWith("0.8");
+        if (isFoundryV8) {//Foundry 0.8.0e
+            canvas.scene.deleteEmbeddedDocuments("Token", controlledTokensIds);
+        } else {//Foundry 0.7.x
+            canvas.tokens.deleteMany(controlledTokensIds);
+        }
+        
     }//end addTokens()
 
     addTiles(controlledTiles) {
@@ -549,8 +557,12 @@ export class QuickEncounter {
 
         //Delete the existing tokens (because they will be replaced)
         const controlledTilesIds = controlledTiles.map(ct => {return ct.id});
-        //0.7.x: canvas.tiles.deleteMany(controlledTilesIds);
-        canvas.scene.deleteEmbeddedDocuments("Tile", controlledTilesIds);
+        const isFoundryV8 = game.data.version.startsWith("0.8");
+        if (isFoundryV8) {//Foundry 0.8.0e
+            canvas.scene.deleteEmbeddedDocuments("Tile", controlledTilesIds);
+        } else {//Foundry 0.7.x
+            canvas.tiles.deleteMany(controlledTilesIds);
+        }
     }
 
     /* Method 1: createFromTokens
@@ -966,23 +978,29 @@ export class QuickEncounter {
 
              for (let iToken=0; iToken < numActors; iToken++) {
                  //Slightly vary the (x,y) coords so we don't pile all the tokens on top of each other and make them hard to find
-                 let tokenData = {
-                     name : eActor.name,
-                     x: coords.x + (Math.random() * 2*gridSize) - gridSize, //adjust position within +/- full grid increment,
-                     y: coords.y + (Math.random() * 2*gridSize) - gridSize, //adjust position within +/- full grid increment,
-                     hidden: true,
-                     isSavedToken : false
-                 }
-                 //Use the prototype token from the Actors
-                 //v0.6.7: Call Token.fromActor() which does the merge but also handles wildcard token images
-                 //FOundry 0.7.x: const tempToken = await Token.fromActor(actor, tokenData);
-                 //0.8.0d: Use new TokenDocument constructor; does it handle token wildcarding?
-                 const tempToken = new TokenDocument(tokenData, {actor: actor});
-                 tokenData = tempToken.data;
-                 //If from a Compendium, we remember that and the original Compendium actorID
-                 if (eActor.dataPackName) {tokenData.compendiumActorId = eActor.actorID;}
-                 //0.6.8: Put the generatedTokensData on the extractedActor, just like the savedTokensData
-                 this.extractedActors[iExtractedActor].generatedTokensData.push(tokenData);
+                let tokenData = {
+                    name : eActor.name,
+                    x: coords.x + (Math.random() * 2*gridSize) - gridSize, //adjust position within +/- full grid increment,
+                    y: coords.y + (Math.random() * 2*gridSize) - gridSize, //adjust position within +/- full grid increment,
+                    hidden: true,
+                    isSavedToken : false
+                }
+                //Use the prototype token from the Actors
+                const isFoundryV8 = game.data.version.startsWith("0.8");
+                let tempToken;
+                if (isFoundryV8) {//Foundry 0.8.0e
+                    //0.8.0d: Use new TokenDocument constructor; does it handle token wildcarding?
+                    tempToken = new TokenDocument(tokenData, {actor: actor});
+                } else {//Foundry 0.7.x
+                    //v0.6.7: Call Token.fromActor() which does the merge but also handles wildcard token images
+                    tempToken = await Token.fromActor(actor, tokenData);
+                }                 
+
+                tokenData = tempToken.data;
+                //If from a Compendium, we remember that and the original Compendium actorID
+                if (eActor.dataPackName) {tokenData.compendiumActorId = eActor.actorID;}
+                //0.6.8: Put the generatedTokensData on the extractedActor, just like the savedTokensData
+                this.extractedActors[iExtractedActor].generatedTokensData.push(tokenData);
              }
         }
     }
@@ -1051,15 +1069,22 @@ export class QuickEncounter {
 
         //Control the tokens (because that is checked in adding them to the Combat Tracker)
         //But release any others first (so that we don't inadvertently add them to combat)
-        //Foundry 0.7.x: const createdToken0 = createdTokens[0];
-        //0.8.0d: 
-        const createdToken0 = createdTokens[0].object;
-         createdToken0.control({releaseOthers : true, updateSight : false, pan : true});
+        let createdToken0;
+        const isFoundryV8 = game.data.version.startsWith("0.8");
+        if (isFoundryV8) {//Foundry 0.8.0e 
+            createdToken0 = createdTokens[0].object;
+        } else {//Foundry 0.7.x
+            createdToken0 = createdTokens[0];
+        }
+        createdToken0.control({releaseOthers : true, updateSight : false, pan : true});
 
+        let tokenObject;
         for (const token of createdTokens) {
-            //Foundry 0.7.x: const tokenObject = token;
-            //0.8.0d
-            const tokenObject = token.object;
+            if (isFoundryV8) {//0.8.0e: 
+                tokenObject = token.object;
+            } else {//Foundry 0.7.x
+                tokenObject = token;
+            }            
             tokenObject.control({releaseOthers : false, updateSight : false});
         }
 
@@ -1072,11 +1097,13 @@ export class QuickEncounter {
         tabApp.renderPopout(tabApp);
         //If the tokens are not on the Scene then add them
 
-        //Now release control of them as a group, because otherwise the stack is hard to see
+        //Now release control of them as a group, because otherwise the stack is hard to see             
         for (const token of createdTokens) {
-            //Foundry 0.7.x: const tokenObject = token;
-            //0.8.0d
-            const tokenObject = token.object;
+            if (isFoundryV8) {//0.8.0e: 
+                tokenObject = token.object;
+            } else {//Foundry 0.7.x
+                tokenObject = token;
+            } 
             tokenObject.release();
         }
 
