@@ -57,6 +57,7 @@
   "QE.UseQuickEncounterDialog.NAME" : "Usar el nuevo diálogo de Encuentros Rápidos",
   "QE.UseQuickEncounterDialog.HINT" : "El nuevo diálogo de Encuentros Rápidos (por defecto desde la 0.6) se mostrará automáticamente junto a la Entrada de Diario de Encuentro Rápido y le permitirá añadir o quitar actores/iconos y le permitirá activar rápidamente el Encuentro, sin tener que buscar los actores o el botón de Encuentro Rápido en la Entrada de Diario",
   "QE.QuickEncounterDialog.INTRO" : "Las marcas de verificación muestra qué actores tienen los iconos guardados; para guardar más, selecciónelos en la Escena y pulse (primer) botón de Encuentro Rápido. También puede cambiar más adelante el número de actores presentes (limpie los campos para quitar un actor).<br><strong>Aviso: </strong>Los cambios que realice no se sincronizarán (aún) con la Entrada de Diario",
+  "QE.QuickEncounterDialog.INTRO_COMPENDIUM" : "Para editar, coloca los iconos, o ejecute este Encuentro Rápido, primero importe la entrada del diario desde el compendio",
   "QE.QuickEncounterDialog.Save.BUTTON" : "Guardar",
   "QE.QuickEncounterDialog.PS" : "<p><i>Este es el nuevo diálogo de Encuentros Rápidos. Desmarque </i><strong>Usar el nuevo diálogo de Encuentros Rápidos</strong><i> en los Ajustes si quiere deshabilitar esta opción.</i></p>",
   "QE.QuickEncounterDialog.InvalidNumActors.WARNING" : "Déjelo vacío o introduzca un valor entero positivo, o bien una fórmula de dados (por ejemplo, 2d6+5); ha introducido un valor inválido: ",
