@@ -143,7 +143,8 @@
                 0.8.0d: createCombat(): Adjust for Token object now being on TokenDocument.object
 27-May-2021     0.8.0e: Test for 0.8.x vs 0.7.x and use new methods accordingly                
                 - constructor(): Check this.extractedActors (was failing on iteration is extractedActors was null because of old QE method)
-28-May-2021     0.8.0f: Use TOKEN_DISPOSITIONS or CONST.TOKEN_DISPOSITIONS as appropriate                
+28-May-2021     0.8.0f: Use TOKEN_DISPOSITIONS or CONST.TOKEN_DISPOSITIONS as appropriate     
+5-Jun-2021      0.8.1a: Fixed: Issue #43: onDeleteCombat() was not correctly computing nonFriendlyNPCTokens using t.token.data          
 */
 
 
@@ -1118,13 +1119,21 @@ export class QuickEncounter {
     }
 
     static async onDeleteCombat(combat, options, userId) {
+        const isFoundryV8 = game.data.version.startsWith("0.8");
+
         //Only works with 5e
         //If the display XP option is set, work out how many defeated foes and how many Player tokens
         const shouldDisplayXPAfterCombat = game.settings.get(QE.MODULE_NAME, "displayXPAfterCombat");
         if (!shouldDisplayXPAfterCombat || !combat || !game.user.isGM) {return;}
 
         //Get list of non-friendly NPCs
-        const nonFriendlyNPCTokens = combat.turns?.filter(t => ((t.token?.disposition === CONST.TOKEN_DISPOSITIONS.HOSTILE) && (!t.actor || !t.players?.length)));
+        let nonFriendlyNPCTokens;
+        if (isFoundryV8) {//Foundry 0.8.x
+            nonFriendlyNPCTokens = combat.turns?.filter(t => ((t.token?.data?disposition === CONST.TOKEN_DISPOSITIONS.HOSTILE) && (!t.actor || !t.players?.length)));
+        } else {//Foundry 0.7.x
+            nonFriendlyNPCTokens = combat.turns?.filter(t => ((t.token?.disposition === CONST.TOKEN_DISPOSITIONS.HOSTILE) && (!t.actor || !t.players?.length)));
+        }
+
         //And of player-owned tokens
         const pcTokens = combat.turns?.filter(t => (t.actor && t.players?.length));
 

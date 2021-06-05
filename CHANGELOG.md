@@ -1,4 +1,16 @@
 # RELEASE NOTES
+## 0.8
+- Make QE dialog read-only if from QE is in Compendium Journal
+- Updated Spanish translation
+- COmpatible with Foundry 0.8
+
+## 0.8.1
+- Updated Spanish translation
+- Compatible with Foundry 0.8.6
+## 0.8.0
+- Updates to support Foundry 0.8.x
+- Make QE dialog read-only if from QE is in Compendium Journal
+- Support League standard for module.json format (switch to implicit Github latest link)
 
 ## 0.7
 - Save tiles as well as tokens!
