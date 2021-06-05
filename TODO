@@ -1,10 +1,8 @@
 # TO DO
 ## BUGS with Foundry 0.8.x
 
-## BUGS with Foundry 0.7.10:
 
-
-## BUGS
+## BUGS with Foundry 0.7.x
 v0.7.0 Tiles with a webm video show broken link; show a video camera instead    
 v0.7.0: Tile name needs to wrap because otherwise it forces the tile thumbnail into the middle 
         - Not a wrapping problem, because flexrow has flex-wrap: wrap. Instead we want the icon to always be left-justified     
@@ -87,7 +85,7 @@ More sophisticated monster entries:
 - addTokens: Could just add the tokens one by one rather than filtering etc.
     - Need to refactor so we use a constructor or factory rather than setting individual instance parameters outside the class
         - may not be happening any more
->>>- Serializing should happen when we update quickEncounter        
+- Serializing should happen when we update quickEncounter        
 - Improve the way the Journal Entry gets built to do more with the template and handlebars
 
 ## DOCS
@@ -192,6 +190,8 @@ FIXED in 0.8.0: With FOundry 0.8.6: When attempting to create a new QE, when you
         - Uncaught ReferenceError: TOKEN_DISPOSITIONS is not defined
 FIXED in 0.8.0: With Foundry 0.8.6: Change made to set QE dialog read-only is happening every time (presumably because .compendium is set)        
 FIXED: v0.8.0: CONST.TOKEN_DISPOSITIONS will not be defined - need to test/change to internal constant
+FIXED in 0.8.1: v0.8.0 Issue #43: Display XP after Combat was not working
+FIXED in 0.8.1: v0.8.0 Issue #42: QE Dialog doesn't open if you install Core French (or probably any other language)
 
 
 ## COMPLETED FEATURES
