@@ -1129,7 +1129,7 @@ export class QuickEncounter {
         //Get list of non-friendly NPCs
         let nonFriendlyNPCTokens;
         if (isFoundryV8) {//Foundry 0.8.x
-            nonFriendlyNPCTokens = combat.turns?.filter(t => ((t.token?.data?disposition === CONST.TOKEN_DISPOSITIONS.HOSTILE) && (!t.actor || !t.players?.length)));
+            nonFriendlyNPCTokens = combat.turns?.filter(t => ((t.token?.data?.disposition === CONST.TOKEN_DISPOSITIONS.HOSTILE) && (!t.actor || !t.players?.length)));
         } else {//Foundry 0.7.x
             nonFriendlyNPCTokens = combat.turns?.filter(t => ((t.token?.disposition === CONST.TOKEN_DISPOSITIONS.HOSTILE) && (!t.actor || !t.players?.length)));
         }
