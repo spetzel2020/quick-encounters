@@ -1,6 +1,10 @@
 <form>
     <div id="QEContainers">
-        <header>{{{localize 'QE.QuickEncounterDialog.INTRO'}}}</header>
+        {{#unless isFromCompendium}}
+            <header>{{{localize 'QE.QuickEncounterDialog.INTRO'}}}</header>
+        {{else}}
+            <header>{{{localize 'QE.QuickEncounterDialog.INTRO_COMPENDIUM'}}}</header>
+        {{/unless}}
         <hr>
         <div class="flexcol">
             {{#each combatants}}
@@ -13,14 +17,16 @@
                     </div>
                     <div class="flexcol">
                         <div class="flexrow">
-                            <input type="String" name="{{this.rowNum}}" class="num-actors" id="{{this.actorId}}" value={{this.numActors}}>
+                            <input type="String" name="{{this.rowNum}}" class="num-actors" id="{{this.actorId}}" value={{this.numActors}} {{#if @root/isFromCompendium}}disabled{{/if}}>
                             x {{this.actorName}} {{this.xp}}
                         </div>
+                        {{#unless @root/isFromCompendium}}
                         <div class="flexrow">
                             {{#each this.tokens}}
                                 <input type="checkbox" {{#if this.isSavedToken}}{{checked}}{{/if}} disabled>
                             {{/each}}
                         </div>
+                        {{/unless}}
                     </div>
                 </div>
             {{/each}}
@@ -39,13 +45,15 @@
             {{/each}}
         </div>
         {{{totalXPLine}}}<br>
-        <div class="flexrow">
-            <button type="button" name="addToCombatTracker"><i class="fas fa-fist-raised"></i>
-                {{localize 'QE.AddToCombatTracker.BUTTON'}}
-            </button>
-            <button type="submit" name="save">
-                {{localize 'QE.QuickEncounterDialog.Save.BUTTON'}}
-            </button>
-        </div>
+        {{#unless isFromCompendium}}
+            <div class="flexrow">
+                <button type="button" name="addToCombatTracker"><i class="fas fa-fist-raised"></i>
+                    {{localize 'QE.AddToCombatTracker.BUTTON'}}
+                </button>
+                <button type="submit" name="save">
+                    {{localize 'QE.QuickEncounterDialog.Save.BUTTON'}}
+                </button>
+            </div>
+        {{/unless}}
     </div>
 </form>

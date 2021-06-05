@@ -24,6 +24,9 @@ Reused as EncounterCompanionSheet
 16-Jan-2021     0.7.0d: Show a thumbnail of any saved tiles   
 19-Jan-2021     0.7.0f: On hover, show a - and Remove [name] for both Actors and Tiles       
 6-Feb-2021      0.7.3b: Put a Hide QE button on the QE dialog
+15-Mar-2021     0.8.0a: Proper Compendium Support
+                        - See if you can get image info directly from the Compendium index; computeCombatantsForDisplay() now awaits on pack.getIndex
+31-Mar-2021     0.8.0b: If you're looking at a Compendium, pop a read-only QESheet                        
         
 */
 
@@ -93,20 +96,22 @@ export class QESheet extends FormApplication {
     /** @override */
     activateListeners(html) {
         super.activateListeners(html);
-        html.find('button[name="addToCombatTracker"]').click(event => {
-            this.quickEncounter?.run(event);
-        });
-        //0.7.0: Listeners for when you click - in actor or tile
-        html.find("#QEContainers .actor-container").each((i, thumbnail) => {
-            //thumbnail.setAttribute("draggable", true);
-            //thumbnail.addEventListener("dragstart", this._onDragStart, false);
-            thumbnail.addEventListener("click", this._onClickActor.bind(this));
-        });
-        html.find("#QEContainers .tile-container").each((i, thumbnail) => {
-            //thumbnail.setAttribute("draggable", true);
-            //thumbnail.addEventListener("dragstart", this._onDragStart, false);
-            thumbnail.addEventListener("click", this._onClickTile.bind(this));
-        });
+        if (!this.object?.isFromCompendium) {
+            html.find('button[name="addToCombatTracker"]').click(event => {
+                this.quickEncounter?.run(event);
+            });
+            //0.7.0: Listeners for when you click - in actor or tile
+            html.find("#QEContainers .actor-container").each((i, thumbnail) => {
+                //thumbnail.setAttribute("draggable", true);
+                //thumbnail.addEventListener("dragstart", this._onDragStart, false);
+                thumbnail.addEventListener("click", this._onClickActor.bind(this));
+            });
+            html.find("#QEContainers .tile-container").each((i, thumbnail) => {
+                //thumbnail.setAttribute("draggable", true);
+                //thumbnail.addEventListener("dragstart", this._onDragStart, false);
+                thumbnail.addEventListener("click", this._onClickTile.bind(this));
+            });
+        }
     }
 
 
@@ -115,17 +120,18 @@ export class QESheet extends FormApplication {
     /** @override */
     async getData() {
         //v0.6.10: Because the qeDialog is not (now) being re-created each time, instead we have to recompute combatants here
-        this.computeCombatantsForDisplay();
+        await this.computeCombatantsForDisplay();
 
         //We don't have to store totalXPLine, but this.combatants needs to be referenced in _updateData()
         return {
            combatants: this.combatants,
            tilesData: this.quickEncounter?.savedTilesData,
-           totalXPLine : this.totalXPLine
+           totalXPLine : this.totalXPLine,
+           isFromCompendium : this.object?.isFromCompendium
         };
     }
 
-    computeCombatantsForDisplay() {
+    async computeCombatantsForDisplay() {
         //This version of the Quick Encounter is what is extracted from in the Journal Entry
         this.quickEncounter.generateTemplateExtractedActorTokenData();     //this is just sparse array with the correct numbers
         this.quickEncounter.combineTokenData();
@@ -146,11 +152,12 @@ export class QESheet extends FormApplication {
                 if (eActor.dataPackName) {   
                     //Compendium: for display just use the index (can only get name, id, index)
                     const pack = game.packs.get(eActor.dataPackName);
-                    pack.getIndex().then(index => {
-                        const entry = index.find(e => e._id === combatant.actorId)
-                        combatant.img = entry?.img || CONST.DEFAULT_TOKEN;
-                        combatant.actorName = entry?.name;
-                    });
+                    //0.8.0a: Block on getting the name and image information, fortunately from the index
+                    //FIXME: Probably could be improved by getting all the indexes in one group so not doing this multiple times for the same index
+                    const index = await pack.getIndex();
+                    const entry = index.find(e => e._id === combatant.actorId);
+                    combatant.img = entry?.img || CONST.DEFAULT_TOKEN;
+                    combatant.actorName = entry?.name;
                 } else {      //regular actor
                     const actor = game.actors.get(eActor.actorID);
                     //0.4.1: 5e specific: find XP for this number of this actor

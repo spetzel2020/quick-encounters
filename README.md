@@ -2,13 +2,13 @@
 ![Forge Installs](https://img.shields.io/badge/dynamic/json?label=Forge%20Installs&query=package.installs&suffix=%25&url=https%3A%2F%2Fforge-vtt.com%2Fapi%2Fbazaar%2Fpackage%2Fquick-encounters&colorB=4aa94a)
 
 # Quick Encounters
-NEW in v0.7! Add tiles (including animated effects) to your Quick Encounters just like tokens! Also, quick remove by clicking the thumbnail in the Quick Encounter dialog, updated Spanish, and Foundry 0.7.9 compatibility
+NEW in v0.8! Better Compendium support, updated Spanish, and Foundry 0.8.x compatibility
 
 See [Release Notes](https://github.com/spetzel2020/quick-encounters/blob/master/CHANGELOG.md)
 
 * **Author**: Spetzel#0103
-* **Version**: 0.7.1
-* **Foundry VTT Compatibility**: 0.6.5-0.7.9
+* **Version**: 0.8.0
+* **Foundry VTT Compatibility**: 0.6.5-0.8.5
 * **System Compatibility (If applicable)**: All; additional features for dnd5e
 * **Translation Support**: en, es (thanks [lozalojo!](https://github.com/lozalojo)), ja (thanks "touge"!), de (thanks @Fallayn#6414), it (thanks [riccisi](https://github.com/riccisi))
 
@@ -27,7 +27,7 @@ Quick Encounters works well with [TokenMold](https://github.com/Moerill/token-mo
 
 # Install
 1. Go to the "Add-on Modules" tab in Foundry Setup
-2. Click "Install Module" and search for **Quick Encounters** OR paste this link: "https://github.com/spetzel2020/quick-encounters/releases/download/latest/module.json"
+2. Click "Install Module" and search for **Quick Encounters** OR paste this link: "https://github.com/spetzel2020/quick-encounters/releases/latest/download/module.json"
 3. Open your world and go to Settings>Manage Modules and enable Quick Encounters
 
 # Using Quick Encounters

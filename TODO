@@ -1,8 +1,10 @@
 # TO DO
+## BUGS with Foundry 0.8.x
+
+## BUGS with Foundry 0.7.10:
+
 
 ## BUGS
-v0.6.8: You can use a Compendium link - but the Image doesn't always appear in the QE dialog
-        - use the lazy loading method from Compendiums?
 v0.7.0 Tiles with a webm video show broken link; show a video camera instead    
 v0.7.0: Tile name needs to wrap because otherwise it forces the tile thumbnail into the middle 
         - Not a wrapping problem, because flexrow has flex-wrap: wrap. Instead we want the icon to always be left-justified     
@@ -13,9 +15,18 @@ v0.7.1: Translation is working only for freshly-created Method 1 QEs, not for Li
 v0.7.3: QE Dialog should show Tokens not Actor image      
         - Need to allow for wildcard tokens (could use actor.img if you have wildcard set, OR just create a temporary token)
 
-           
+
 ## FEATURES
-### Version 0.7
+### v0.8.0: Support Compendium lifecycle for Instant Encounter (no Scene)
+- Fix the links in imported Compendia?? as part of importing or prior?
+
+- Convert a Quick Encounter Journal Entry into a QE Compendium
+-- Drag Compendium Actors into Journal Entry (can you drag directly into Compendium Journal Entry?)
+-- QE button/command to standardize the Compendium Actor entry into something generic (only requires a change to the Journal Entry??)
+-- When re-imported, QE button/command reads and cross-references back to Compendium Actor
+
+
+### Not Scheduled
 - Make the QE button open a dialog that stays there?
 - Intercept dragging a Journal Entry (creating a new Note) or copying a Note and use EncounterNote template
 
@@ -58,8 +69,6 @@ v0.7.3: QE Dialog should show Tokens not Actor image
     - Partially done: could identify it's a Quick Encounter from the inclusion of Actor links
         but perhaps a better approach would be with a flag that was set
 
-
-### Later
 More sophisticated monster entries:
     - Scan Journal Entries to turn into Actor links and Quick Encounters
     - Allow dynamic generation of which monsters (use a RollTable?)
@@ -177,7 +186,12 @@ FIXED in 0.7.1: v0.7.0: Can't properly save a QE Dialog with sourceNote, because
 FIXED in 0.7.1: Tile translation and tile hide/show override should work now
 FIXED in 0.7.3: Should always show newly created/linked QEs regardless of Auto setting
 FIXED in 0.7.3: 0.7.1: Should switch back to Basic Controls after add Tiles (so  you can add PCs) 
-
+FIXED in 0.8.0: v0.6.8: You can use a Compendium link - but the Image doesn't always appear in the QE dialog
+        - use the lazy loading method from Compendiums?
+FIXED in 0.8.0: With FOundry 0.8.6: When attempting to create a new QE, when you press the QE (fist) icon
+        - Uncaught ReferenceError: TOKEN_DISPOSITIONS is not defined
+FIXED in 0.8.0: With Foundry 0.8.6: Change made to set QE dialog read-only is happening every time (presumably because .compendium is set)        
+FIXED: v0.8.0: CONST.TOKEN_DISPOSITIONS will not be defined - need to test/change to internal constant
 
 
 ## COMPLETED FEATURES

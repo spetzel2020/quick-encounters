@@ -1,11 +1,11 @@
 {
   "name": "quick-encounters",
   "title": "Quick Encounters",
-  "description" : "<p>Keeps your Scene map clean and your encounters simple by saving tokens/Actors into Quick Encounter Journal Entries:</p><p><strong>NEW in v0.7!</strong><ul><li>Control which Journal Entries automatically open the associated Quick Encounter (new Setting and button)</li><li>Quick remove by clicking the thumbnail in the Quick Encounter dialog, updated Spanish, and Foundry 0.7.9 compatibility</li></ul><ul><li>Design encounters by positioning and configuring Hostile tokens, then save the tokens into a Quick Encounter Journal Entry, marked with a single Map Note on the Scene which only you the DM see</li><li>Click the Run Quick Encounter button and all your saved tokens will be positioned back on the map and added to the Combat Tracker, ready to fight!</li><li>Run encounters from converted or packaged modules with embedded Actors</li><li>Easily scale-up encounters by changing 3 Zombies to 10 Zombies</li><li>Similar to the Encounter ability in Fantasy Grounds</li><li>For Roving Encounters move a single Map Note, not many tokens</li></ul>",
+  "description" : "<p>Keeps your Scene map clean and your encounters simple by saving tokens/Actors into Quick Encounter Journal Entries:</p><p><strong>NEW in v0.8:</strong> Better Compendium support, updated Spanish, and Foundry 0.8.x compatibility<br><ul><li>Design encounters by positioning and configuring Hostile tokens, then save the tokens into a Quick Encounter Journal Entry, marked with a single Map Note on the Scene which only you the DM see</li><li>Click the Run Quick Encounter button and all your saved tokens will be positioned back on the map and added to the Combat Tracker, ready to fight!</li><li>Run encounters from converted or packaged modules with embedded Actors</li><li>Easily scale-up encounters by changing 3 Zombies to 10 Zombies</li><li>Similar to the Encounter ability in Fantasy Grounds</li><li>For Roving Encounters move a single Map Note, not many tokens</li></ul>",
   "author" : "Spetzel",
-  "version": "0.7.3",
+  "version": "0.8.0",
   "minimumCoreVersion": "0.6.5",
-  "compatibleCoreVersion": "0.7.9",
+  "compatibleCoreVersion": "0.8.5",
   "languages": [
     {
       "lang": "en",
@@ -37,9 +37,10 @@
   ],
   "styles": ["css/quick-encounters.css"],
   "readme": "https://github.com/spetzel2020/quick-encounters/blob/master/README.md",
+  "allowBugReporter": true,
   "bugs": "https://github.com/spetzel2020/quick-encounters/issues",
   "changelog": "https://github.com/spetzel2020/quick-encounters/blob/master/CHANGELOG.md",
-  "manifest": "https://github.com/spetzel2020/quick-encounters/releases/download/latest/module.json",
-  "download": "https://github.com/spetzel2020/quick-encounters/releases/download/latest/quick-encounters.zip",
+  "manifest": "https://github.com/spetzel2020/quick-encounters/releases/latest/download/module.json",
+  "download": "https://github.com/spetzel2020/quick-encounters/releases/download/v0.8.0/quick-encounters.zip",
   "url": "https://github.com/spetzel2020/quick-encounters"
 }

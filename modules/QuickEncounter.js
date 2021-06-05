@@ -134,6 +134,16 @@
 7-Feb-2021      0.7.3c: Initialize hideQE null       
                 Add journalEntry.showQEOnce to force showing on creation   
                 0.7.3e: Re-extract the quickEncounter at show button press time, because otherwise if a QE was created from the HTML, it is not available at button creation time
+29-Mar-2021     0.8.0b: If you are viewing the Journal Entry directly out of a Compendium, make a read-only QE dialog without token placement operations
+                and instructions about how to use it
+25-May-2021     0.8.0c: Testing with Foundry 0.8.5: (but will need to verify/edit for Foundry 0.7.x)
+                    - TOKEN_DISPOSITIONS -> CONST.TOKEN_DISPOSITIONS                
+                    - canvas.tiles no longer exists; replace with Tile.layer.controlled or Tile.layer.placeables as appropriate
+                    - replace deleteMany with canvas.scene.deleteEmbeddedDocuments()
+                0.8.0d: createCombat(): Adjust for Token object now being on TokenDocument.object
+27-May-2021     0.8.0e: Test for 0.8.x vs 0.7.x and use new methods accordingly                
+                - constructor(): Check this.extractedActors (was failing on iteration is extractedActors was null because of old QE method)
+28-May-2021     0.8.0f: Use TOKEN_DISPOSITIONS or CONST.TOKEN_DISPOSITIONS as appropriate                
 */
 
 
@@ -142,7 +152,7 @@ import {QESheet} from './QESheet.js';
 
 export const QE = {
     MODULE_NAME : "quick-encounters",
-    MODULE_VERSION : "0.7.3",
+    MODULE_VERSION : "0.8.0",
     TOKENS_FLAG_KEY : "tokens",
     QE_JSON_FLAG_KEY : "quickEncounter"
 }
@@ -176,6 +186,8 @@ export class QuickEncounter {
                 //Create a map of actors to tokens
                 let actorToTokensMap = {}
 //FIXME: If you have multiple actors, this will reset the map multiple times  - must be a better way to do this                
+                //0.8.0e: Was failing with "this.extractedActors not iterable"; non-fatal, but now check to be cleaner               
+                if (!this.extractedActors) {return;}
                 for (const eActor of this.extractedActors) {
                     actorToTokensMap[eActor.actorID] = qeData.savedTokensData.filter(td => (td.actorId === eActor.actorID));
                 }
@@ -353,16 +365,23 @@ export class QuickEncounter {
     }
 */
     static runAddOrCreate(event) {
+        const isFoundryV8 = game.data.version.startsWith("0.8");
+        let FRIENDLY_TOKEN_DISPOSITIONS;
+        if (isFoundryV8) {
+            FRIENDLY_TOKEN_DISPOSITIONS = CONST.TOKEN_DISPOSITIONS.FRIENDLY;
+        } else {//0.7.x
+            FRIENDLY_TOKEN_DISPOSITIONS = TOKEN_DISPOSITIONS.FRIENDLY;
+        }
         //Called when you press the Quick Encounters button (fist) from the sidebar
         //If you are controlling tokens it creates a new Quick Encounter Journal Entry
         //0.6.4: If there's an open Journal Entry it asks if you want to add the tokens to it or run it
         //Method 1: Get the selected tokens and the scene
         //Exclude friendly tokens unless you say yes to the dialog
         const controlledTokens = Array.from(canvas.tokens?.controlled);
-        const controlledNonFriendlyTokens = controlledTokens?.filter(t => t.data?.disposition !== TOKEN_DISPOSITIONS.FRIENDLY );
-        const controlledFriendlyTokens = controlledTokens?.filter(t => t.data?.disposition === TOKEN_DISPOSITIONS.FRIENDLY );
+        const controlledNonFriendlyTokens = controlledTokens?.filter(t => t.data?.disposition !== FRIENDLY_TOKEN_DISPOSITIONS );
+        const controlledFriendlyTokens = controlledTokens?.filter(t => t.data?.disposition === FRIENDLY_TOKEN_DISPOSITIONS );
         //0.7.0b: Capture controlled tiles (will be one or the other
-        const controlledTiles = Array.from(canvas.tiles?.controlled);
+        const controlledTiles = Array.from(Tile.layer.controlled);
 
         const candidateJournalEntry = QuickEncounter.findCandidateJournalEntry();
         const quickEncounter = (candidateJournalEntry instanceof QuickEncounter ) ? candidateJournalEntry : null;
@@ -523,9 +542,14 @@ export class QuickEncounter {
         }//end for tokenActorIds
 
         //Delete the existing tokens (because they will be replaced)
-    
         const controlledTokensIds = controlledTokens.map(ct => {return ct.id});
-        canvas.tokens.deleteMany(controlledTokensIds);
+        const isFoundryV8 = game.data.version.startsWith("0.8");
+        if (isFoundryV8) {//Foundry 0.8.x
+            canvas.scene.deleteEmbeddedDocuments("Token", controlledTokensIds);
+        } else {//Foundry 0.7.x
+            canvas.tokens.deleteMany(controlledTokensIds);
+        }
+        
     }//end addTokens()
 
     addTiles(controlledTiles) {
@@ -541,7 +565,12 @@ export class QuickEncounter {
 
         //Delete the existing tokens (because they will be replaced)
         const controlledTilesIds = controlledTiles.map(ct => {return ct.id});
-        canvas.tiles.deleteMany(controlledTilesIds);
+        const isFoundryV8 = game.data.version.startsWith("0.8");
+        if (isFoundryV8) {//Foundry 0.8.x
+            canvas.scene.deleteEmbeddedDocuments("Tile", controlledTilesIds);
+        } else {//Foundry 0.7.x
+            canvas.tiles.deleteMany(controlledTilesIds);
+        }
     }
 
     /* Method 1: createFromTokens
@@ -957,21 +986,29 @@ export class QuickEncounter {
 
              for (let iToken=0; iToken < numActors; iToken++) {
                  //Slightly vary the (x,y) coords so we don't pile all the tokens on top of each other and make them hard to find
-                 let tokenData = {
-                     name : eActor.name,
-                     x: coords.x + (Math.random() * 2*gridSize) - gridSize, //adjust position within +/- full grid increment,
-                     y: coords.y + (Math.random() * 2*gridSize) - gridSize, //adjust position within +/- full grid increment,
-                     hidden: true,
-                     isSavedToken : false
-                 }
-                 //Use the prototype token from the Actors
-                 //v0.6.7: Call Token.fromActor() which does the merge but also handles wildcard token images
-                 const tempToken = await Token.fromActor(actor, tokenData);
-                 tokenData = tempToken.data;
-                 //If from a Compendium, we remember that and the original Compendium actorID
-                 if (eActor.dataPackName) {tokenData.compendiumActorId = eActor.actorID;}
-                 //0.6.8: Put the generatedTokensData on the extractedActor, just like the savedTokensData
-                 this.extractedActors[iExtractedActor].generatedTokensData.push(tokenData);
+                let tokenData = {
+                    name : eActor.name,
+                    x: coords.x + (Math.random() * 2*gridSize) - gridSize, //adjust position within +/- full grid increment,
+                    y: coords.y + (Math.random() * 2*gridSize) - gridSize, //adjust position within +/- full grid increment,
+                    hidden: true,
+                    isSavedToken : false
+                }
+                //Use the prototype token from the Actors
+                const isFoundryV8 = game.data.version.startsWith("0.8");
+                let tempToken;
+                if (isFoundryV8) {//Foundry 0.8.x
+                    //0.8.0d: Use new TokenDocument constructor; does it handle token wildcarding?
+                    tempToken = new TokenDocument(tokenData, {actor: actor});
+                } else {//Foundry 0.7.x
+                    //v0.6.7: Call Token.fromActor() which does the merge but also handles wildcard token images
+                    tempToken = await Token.fromActor(actor, tokenData);
+                }                 
+
+                tokenData = tempToken.data;
+                //If from a Compendium, we remember that and the original Compendium actorID
+                if (eActor.dataPackName) {tokenData.compendiumActorId = eActor.actorID;}
+                //0.6.8: Put the generatedTokensData on the extractedActor, just like the savedTokensData
+                this.extractedActors[iExtractedActor].generatedTokensData.push(tokenData);
              }
         }
     }
@@ -1040,23 +1077,42 @@ export class QuickEncounter {
 
         //Control the tokens (because that is checked in adding them to the Combat Tracker)
         //But release any others first (so that we don't inadvertently add them to combat)
-        createdTokens[0].control({releaseOthers : true, updateSight : false, pan : true});
+        let createdToken0;
+        const isFoundryV8 = game.data.version.startsWith("0.8");
+        if (isFoundryV8) {//Foundry 0.8.x
+            createdToken0 = createdTokens[0].object;
+        } else {//Foundry 0.7.x
+            createdToken0 = createdTokens[0];
+        }
+        createdToken0.control({releaseOthers : true, updateSight : false, pan : true});
+
+        let tokenObject;
         for (const token of createdTokens) {
-            token.control({releaseOthers : false, updateSight : false});
+            if (isFoundryV8) {//0.8.0e: 
+                tokenObject = token.object;
+            } else {//Foundry 0.7.x
+                tokenObject = token;
+            }            
+            tokenObject.control({releaseOthers : false, updateSight : false});
         }
 
         //Load the recovered tokens into the combat Tracker
         //Only have to toggle one of them to add all the controlled tokens
-        await createdTokens[0].toggleCombat();
+        await createdToken0.toggleCombat();
 
         //0.6: Moved after toggling combat in case that actually creates the combat entity
         const tabApp = ui.combat;
         tabApp.renderPopout(tabApp);
         //If the tokens are not on the Scene then add them
 
-        //Now release control of them as a group, because otherwise the stack is hard to see
+        //Now release control of them as a group, because otherwise the stack is hard to see             
         for (const token of createdTokens) {
-            token.release();
+            if (isFoundryV8) {//0.8.0e: 
+                tokenObject = token.object;
+            } else {//Foundry 0.7.x
+                tokenObject = token;
+            } 
+            tokenObject.release();
         }
 
     }
@@ -1068,7 +1124,7 @@ export class QuickEncounter {
         if (!shouldDisplayXPAfterCombat || !combat || !game.user.isGM) {return;}
 
         //Get list of non-friendly NPCs
-        const nonFriendlyNPCTokens = combat.turns?.filter(t => ((t.token?.disposition === TOKEN_DISPOSITIONS.HOSTILE) && (!t.actor || !t.players?.length)));
+        const nonFriendlyNPCTokens = combat.turns?.filter(t => ((t.token?.disposition === CONST.TOKEN_DISPOSITIONS.HOSTILE) && (!t.actor || !t.players?.length)));
         //And of player-owned tokens
         const pcTokens = combat.turns?.filter(t => (t.actor && t.players?.length));
 
@@ -1208,7 +1264,9 @@ export class QuickEncounter {
             if (qeDialog) {
                 qeDialog.update(quickEncounter);    //have to update since we extract a new one each time
             } else {
-                qeDialog = new QESheet(quickEncounter);
+                //0.8.0: If this is being viewed out of a Compendium, present a different read-only Quick Encounter Dialog with instructions
+                //0.8.0d: Relax the null test for qeJournalEntry.compendium
+                qeDialog = new QESheet(quickEncounter, {isFromCompendium : qeJournalEntry.compendium});
                 journalSheet.qeDialog = qeDialog;
             }
 
