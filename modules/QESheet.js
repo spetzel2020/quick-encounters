@@ -27,7 +27,8 @@ Reused as EncounterCompanionSheet
 15-Mar-2021     0.8.0a: Proper Compendium Support
                         - See if you can get image info directly from the Compendium index; computeCombatantsForDisplay() now awaits on pack.getIndex
 31-Mar-2021     0.8.0b: If you're looking at a Compendium, pop a read-only QESheet    
-5-Jun-2021      0.8.1a: Fixed: Issue #42: _getHeaderButtons() was incorrectly checking closeButtonIndex to indicate it was found                    
+5-Jun-2021      0.8.1a: Fixed: Issue #42: _getHeaderButtons() was incorrectly checking closeButtonIndex to indicate it was found   
+                0.8.1b: _getHeaderButtons() was incorrectly comparing/replacing translated button labels, but apparently they are still in base language at this point                 
         
 */
 
@@ -75,10 +76,10 @@ export class QESheet extends FormApplication {
     /** @override */
     _getHeaderButtons() {
         let buttons = super._getHeaderButtons();
-        let closeButtonIndex = buttons.findIndex(button => button.label === game.i18n.localize("Close"));
+        let closeButtonIndex = buttons.findIndex(button => button.label === "Close");
         //0.8.1: Issue #42: closeButtonIndex==-1 if not found
         if ((closeButtonIndex ?? -1) !== -1) {
-            buttons[closeButtonIndex].label = game.i18n.localize("Cancel");
+            buttons[closeButtonIndex].label = "Cancel";
         }
         //0.7.3b: Add a Hide QE button in case you don't want to see this particular one
         buttons.unshift({
