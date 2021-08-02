@@ -2,8 +2,11 @@
 ## 0.8
 - Make QE dialog read-only if from QE is in Compendium Journal
 - Updated Spanish translation
-- COmpatible with Foundry 0.8
+- Compatible with Foundry 0.8
 
+## 0.8.2
+- Fixed: Issue [#46](https://github.com/spetzel2020/quick-encounters/issues/46)
+- Updated Japanese translation
 ## 0.8.1
 - Updated Spanish translation
 - Compatible with Foundry 0.8.6

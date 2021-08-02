@@ -978,6 +978,8 @@ export class QuickEncounter {
 
         if (!this.extractedActors?.length || !coords) {return;}
         const gridSize = canvas.dimensions.size;
+        const isFoundryV8 = game.data.version.startsWith("0.8");
+
         for (let [iExtractedActor, eActor] of this.extractedActors.entries()) {
             this.extractedActors[iExtractedActor].generatedTokensData = [];  //clear this every time
             const actor = await QuickEncounter.getActor(eActor);
@@ -991,15 +993,15 @@ export class QuickEncounter {
                     name : eActor.name,
                     x: coords.x + (Math.random() * 2*gridSize) - gridSize, //adjust position within +/- full grid increment,
                     y: coords.y + (Math.random() * 2*gridSize) - gridSize, //adjust position within +/- full grid increment,
-                    hidden: true,
-                    isSavedToken : false
+                    hidden: true
                 }
                 //Use the prototype token from the Actors
-                const isFoundryV8 = game.data.version.startsWith("0.8");
                 let tempToken;
                 if (isFoundryV8) {//Foundry 0.8.x
-                    //0.8.0d: Use new TokenDocument constructor; does it handle token wildcarding?
-                    tempToken = new TokenDocument(tokenData, {actor: actor});
+                    //0.8.0d: Use new TokenDocument constructor; does it handle token wildcarding? [probably didn't]
+                    //0.8.2a: Per foundry.js#40276 use Actor.getTokenData (does handle token wildcarding)
+                    const tempTokenData = await actor.getTokenData(tokenData);
+                    tempToken = new TokenDocument(tempTokenData, {actor: actor});
                 } else {//Foundry 0.7.x
                     //v0.6.7: Call Token.fromActor() which does the merge but also handles wildcard token images
                     tempToken = await Token.fromActor(actor, tokenData);
@@ -1009,6 +1011,7 @@ export class QuickEncounter {
                 //If from a Compendium, we remember that and the original Compendium actorID
                 if (eActor.dataPackName) {tokenData.compendiumActorId = eActor.actorID;}
                 //0.6.8: Put the generatedTokensData on the extractedActor, just like the savedTokensData
+                tokenData.isSavedToken = false; //0.8.2a: Moved here
                 this.extractedActors[iExtractedActor].generatedTokensData.push(tokenData);
              }
         }
