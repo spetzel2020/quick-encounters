@@ -149,6 +149,7 @@
                 - generateExpandedTokenData() - needed to call actor.getTokenData() to correctly set token info      
                 0.8.2b: run(): Switch background/foreground and create relevant tiles
                 addTiles(): Store .layer ("background" or "foreground" or undefined)
+                
 */
 
 
