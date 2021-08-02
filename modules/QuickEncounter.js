@@ -144,7 +144,11 @@
 27-May-2021     0.8.0e: Test for 0.8.x vs 0.7.x and use new methods accordingly                
                 - constructor(): Check this.extractedActors (was failing on iteration is extractedActors was null because of old QE method)
 28-May-2021     0.8.0f: Use TOKEN_DISPOSITIONS or CONST.TOKEN_DISPOSITIONS as appropriate     
-5-Jun-2021      0.8.1a: Fixed: Issue #43: onDeleteCombat() was not correctly computing nonFriendlyNPCTokens using t.token.data          
+5-Jun-2021      0.8.1a: Fixed: Issue #43: onDeleteCombat() was not correctly computing nonFriendlyNPCTokens using t.token.data    
+2-Aug-2021      0.8.2a: Fixed: Issue #46: : Reducing and then increasing the number of placed tokens creates ghost tokens
+                - generateExpandedTokenData() - needed to call actor.getTokenData() to correctly set token info      
+                0.8.2b: run(): Switch background/foreground and create relevant tiles
+                addTiles(): Store .layer ("background" or "foreground" or undefined)
 */
 
 
@@ -559,7 +563,12 @@ export class QuickEncounter {
 
         //Add the new tiles to the existing ones (or creates new ones)
         //Use tilesData because tiles is too deep to store in flags
-        let controlledTilesData = controlledTiles.map(ct => {return ct.data});
+        //v0.8.2b: Store whether this tile is background (default) or foreground - for Foundry 0.7.x should set ctd.layer="background"    
+        let controlledTilesData = controlledTiles.map(ct => {
+            let ctd = ct.data;
+            ctd.layer = ct.document?.layer?.options?.name ?? "background";
+            return ctd;
+        });
 
         if (!this.savedTilesData) {this.savedTilesData = [];}
         this.savedTilesData = this.savedTilesData.concat(duplicate(controlledTilesData));
@@ -849,8 +858,23 @@ export class QuickEncounter {
         },200);
 
         if (savedTilesData) {
-            canvas.tiles.activate();
-            await this.createTiles(savedTilesData, shift, options);
+            const isFoundryV8 = game.data.version.startsWith("0.8");
+            if (isFoundryV8) {
+                //0.8.2b: Activate foreground/background
+                const savedBackgroundTilesData = savedTilesData.filter(std => std.layer === "background");
+                if (savedBackgroundTilesData.length) {
+                    canvas.background.activate();
+                    await this.createTiles(savedBackgroundTilesData, shift, options);
+                }
+                const savedForegroundTilesData = savedTilesData.filter(std => std.layer !== "background");
+                if (savedForegroundTilesData.length) {
+                    canvas.foreground.activate();
+                    await this.createTiles(savedForegroundTilesData, shift, options);
+                }
+            } else {//Foundry 0.7.x
+                canvas.tiles.activate();
+                await this.createTiles(savedTilesData, shift, options);
+            }
             //0.7.3 Switch back to Basic Controls
             canvas.tokens.activate();
         }
