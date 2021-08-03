@@ -149,7 +149,8 @@
                 - generateExpandedTokenData() - needed to call actor.getTokenData() to correctly set token info      
                 0.8.2b: run(): Switch background/foreground and create relevant tiles
                 addTiles(): Store .layer ("background" or "foreground" or undefined)
-                
+
+
 */
 
 
@@ -158,7 +159,7 @@ import {QESheet} from './QESheet.js';
 
 export const QE = {
     MODULE_NAME : "quick-encounters",
-    MODULE_VERSION : "0.8.1",
+    MODULE_VERSION : "0.8.2",
     TOKENS_FLAG_KEY : "tokens",
     QE_JSON_FLAG_KEY : "quickEncounter"
 }
