@@ -149,7 +149,7 @@
                 - generateExpandedTokenData() - needed to call actor.getTokenData() to correctly set token info      
                 0.8.2b: run(): Switch background/foreground and create relevant tiles
                 addTiles(): Store .layer ("background" or "foreground" or undefined)
-
+3-Aug-2021      0.8.2c: createTokens()  - set hidden flag before creating tokens; this seems to correctly override saved tokens but still not the generated ones
 
 */
 
@@ -1064,7 +1064,16 @@ export class QuickEncounter {
         //v0.5.0 Clone the token data so if the token is "frozen" change from TokenMold (for example) can be recovered
         //Also, use the ability of Token.create to handle an array
         //Annoyingly, Token.create returns a single token if you passed in a single element array
-        const tempCreatedTokens = await Token.create(duplicate(allCombinedTokensData));
+        //v0.8.2c: Pass options to force hidden/visible because setting it after seems to create a race condition
+        //0.6.1: If you use Alt-Run then create all tokens hidden regardless of how they were saved; Ctrl-Run make them visible
+        //(generated tokens are hidden by default; saved tokens retain their original visibility unless overridden)
+        let isHidden = null;
+        if (options?.ctrl) {isHidden = false;}  
+        if (options?.alt) {isHidden = true;}
+        if (isHidden !== null) {
+            for (const ctd of allCombinedTokensData ) {ctd.hidden = isHidden;}
+        }
+        const tempCreatedTokens = await Token.create(duplicate(allCombinedTokensData),{hidden: isHidden});
         let createdTokens = tempCreatedTokens.length ? tempCreatedTokens : [tempCreatedTokens];
         //v0.5.0: Now reset the token data in case it was adjusted (e.g. by Token Mold), just for those that are frozen
         //v0.6.1d: If freezeCapturedTokens = true, then reset the savedTokens
@@ -1075,10 +1084,7 @@ export class QuickEncounter {
                     createdTokens[i] = await createdTokens[i].update(allCombinedTokensData[i]);
                 } catch {}
             }
-            //0.6.1: If you use Alt-Run then create all tokens hidden regardless of how they were saved; Ctrl-Run make them visible
-            //(generated tokens are hidden by default; saved tokens retain their original visibility unless overridden)
-            if (options?.ctrl) {createdTokens[i].data.hidden = false;}  
-            if (options?.alt) {createdTokens[i].data.hidden = true;}
+
         }
         return createdTokens;
     }
