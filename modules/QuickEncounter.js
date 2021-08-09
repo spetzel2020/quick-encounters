@@ -1041,7 +1041,7 @@ export class QuickEncounter {
                     //v0.6.7: Call Token.fromActor() which does the merge but also handles wildcard token images
                     tempToken = await Token.fromActor(actor, tokenData);
                 }                 
-                //v0.8.3b: Use Object.entries copying to get only the ownProperties (otherwise duplicate() chokes later on)
+                //v0.8.3b: Use Object.entries copying to get only the ownProperties (otherwise duplicate() chokes in createTokens())
                 tokenData = Object.fromEntries(Object.entries(tempToken.data));
                 //If from a Compendium, we remember that and the original Compendium actorID
                 if (eActor.dataPackName) {tokenData.compendiumActorId = eActor.actorID;}
