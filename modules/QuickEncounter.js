@@ -152,6 +152,8 @@
 3-Aug-2021      0.8.2c: createTokens()  - set hidden flag before creating tokens; this seems to correctly override saved tokens but still not the generated ones
 8-Aug-2021      0.8.3a: #50 v0.8.2: getEncounterScene() is failing because of the new structure of scene.notes
                 - if Foundryv8 check scene.notes map
+                0.8.3b: #49: generateFullExtractedActorTokenData() was storing the full TokenData() object with prototypes (it used to be just a simple object of data)
+                Used Object.fromEntries(Object.entries(tokenData)) to strip off non own properties
 */
 
 
@@ -1039,8 +1041,8 @@ export class QuickEncounter {
                     //v0.6.7: Call Token.fromActor() which does the merge but also handles wildcard token images
                     tempToken = await Token.fromActor(actor, tokenData);
                 }                 
-
-                tokenData = tempToken.data;
+                //v0.8.3b: Use Object.entries copying to get only the ownProperties (otherwise duplicate() chokes later on)
+                tokenData = Object.fromEntries(Object.entries(tempToken.data));
                 //If from a Compendium, we remember that and the original Compendium actorID
                 if (eActor.dataPackName) {tokenData.compendiumActorId = eActor.actorID;}
                 //0.6.8: Put the generatedTokensData on the extractedActor, just like the savedTokensData
