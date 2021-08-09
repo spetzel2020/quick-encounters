@@ -150,7 +150,8 @@
                 0.8.2b: run(): Switch background/foreground and create relevant tiles
                 addTiles(): Store .layer ("background" or "foreground" or undefined)
 3-Aug-2021      0.8.2c: createTokens()  - set hidden flag before creating tokens; this seems to correctly override saved tokens but still not the generated ones
-
+8-Aug-2021      0.8.3a: #50 v0.8.2: getEncounterScene() is failing because of the new structure of scene.notes
+                - if Foundryv8 check scene.notes map
 */
 
 
@@ -928,10 +929,16 @@ export class QuickEncounter {
         //if sceneNote is available, then we're in the Note Scene already
         if (journalEntry.sceneNote) {return game.scenes.viewed;}
         else {
+            const isFoundryV8 = game.data.version.startsWith("0.8");
             //Now we need to search through the available scenes to find a note with this Journal Entry
             for (const scene of game.scenes) {
                 const notes = scene.data.notes;
-                const foundNote = notes.find(note => note.entryId === journalEntry.id);
+                let foundNote;
+                if (isFoundryV8) {
+                    foundNote = Array.from(notes.values()).find(nd => nd.data.entryId === journalEntry.id);
+                } else {
+                    foundNote = notes.find(note => note.entryId === journalEntry.id);
+                }
                 if (foundNote) {
                     return scene;
                 }

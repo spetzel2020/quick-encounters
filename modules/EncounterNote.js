@@ -20,6 +20,7 @@ Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tra
 7-Dec-2020      v0.6.13: delete(): Delete ALL of the Notes (in this or other Scenes) associated with the delete journal Entry
                         EncounterNote.create() and .place() return newNote so that we can store that in the quickEncounter before serialization
                         Expand the available list of Note icons (perhaps would be good to have a Setting to allow/disallow this)
+8-Aug-2021      0.8.3a: If Foundryv8 don't do Note deletion in the current scene because new Journal._onDelete() method takes care of that                        
 */
 
 //Expand the available list of Note icons
@@ -100,15 +101,24 @@ export class EncounterNote {
     }
 
     static async delete(journalEntry) {
+        const isFoundryV8 = game.data.version.startsWith("0.8");
         if (!game.user.isGM) {return;}
         //Create filtered array of matching Notes for each scene
         let matchingNoteIds;
         let numNotesDeleted = 0;
         for (const scene of game.scenes) {
-            matchingNoteIds = scene.data.notes.filter(note => note.entryId === journalEntry.id).map(note => note._id);
+            const sceneNotes = scene.data.notes;
+            if (isFoundryV8) {
+                matchingNoteIds = Array.from(sceneNotes.values()).filter(nd => nd.data.entryId === journalEntry.id).map(note => note._id);
+            } else {
+                matchingNoteIds = sceneNotes.filter(note => note.entryId === journalEntry.id).map(note => note._id);
+            }
             if (!matchingNoteIds?.length) {continue;}
             //Deletion is triggered by Scene (because that's where the notes are stored)
-            scene.deleteEmbeddedEntity("Note", matchingNoteIds);
+            //v0.8.3a: If Foundry v0.8.x then don't delete the Note in the viewed Scene because the Journal._onDelete() trigger does that
+            if (!isFoundryV8 || (scene !== user.viewedScene)) {
+                scene.deleteEmbeddedEntity("Note", matchingNoteIds);
+            }
             numNotesDeleted += matchingNoteIds.length;
         }
 

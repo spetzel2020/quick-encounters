@@ -4,6 +4,8 @@
 - Updated Spanish translation
 - Compatible with Foundry 0.8
 
+##0.8.3
+- Fixed: Issue [#50](https://github.com/spetzel2020/quick-encounters/issues/50)
 ## 0.8.2
 - Fixed: Issue [#46](https://github.com/spetzel2020/quick-encounters/issues/46)
 - Updated Japanese translation
