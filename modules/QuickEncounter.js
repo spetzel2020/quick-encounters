@@ -154,6 +154,8 @@
                 - if Foundryv8 check scene.notes map
                 0.8.3b: #49: generateFullExtractedActorTokenData() was storing the full TokenData() object with prototypes (it used to be just a simple object of data)
                 Used Object.fromEntries(Object.entries(tokenData)) to strip off non own properties
+9-Aug-2021      0.8.3c: generateFullExtractedActorTokenData(), addTokens(), addTiles(): 
+                Use toObject() to recover just the object (ownProperties) before duplication                
 */
 
 
@@ -489,10 +491,10 @@ export class QuickEncounter {
         if (!controlledTokens) return;
         //Add the new tokens to the existing ones (or creates new ones)
         //Use tokenData because tokens is too deep to store in flags
-        let controlledTokensData = controlledTokens.map(ct => {return ct.data});
-    
+        //0.8.3c: Use the toObject() function to get a shallow copy (without prototypes) of controlledTokens.data
+        const controlledTokensData = controlledTokens.map(ct => {return ct.data.toObject()});
+        //TODO: Is this necessary, or could we just remove controlledTokensData?
         const newSavedTokensData = duplicate(controlledTokensData);
-
 
         //Find set of distinct actors - some/all of these may be new if the addTokens is being called from create
         let tokenActorIds = new Set();
@@ -570,7 +572,8 @@ export class QuickEncounter {
         //Use tilesData because tiles is too deep to store in flags
         //v0.8.2b: Store whether this tile is background (default) or foreground - for Foundry 0.7.x should set ctd.layer="background"    
         let controlledTilesData = controlledTiles.map(ct => {
-            let ctd = ct.data;
+            //0.8.3c: Use the toObject() function to get a shallow copy (without prototypes) of controlledTiles.data
+            let ctd = ct.data.toObject();
             ctd.layer = ct.document?.layer?.options?.name ?? "background";
             return ctd;
         });
@@ -1042,7 +1045,8 @@ export class QuickEncounter {
                     tempToken = await Token.fromActor(actor, tokenData);
                 }                 
                 //v0.8.3b: Use Object.entries copying to get only the ownProperties (otherwise duplicate() chokes in createTokens())
-                tokenData = Object.fromEntries(Object.entries(tempToken.data));
+                //0.8.3c: Switch to using toObject()
+                tokenData = tempToken.data.toObject();
                 //If from a Compendium, we remember that and the original Compendium actorID
                 if (eActor.dataPackName) {tokenData.compendiumActorId = eActor.actorID;}
                 //0.6.8: Put the generatedTokensData on the extractedActor, just like the savedTokensData
@@ -1073,7 +1077,7 @@ export class QuickEncounter {
         //v0.5.0 Clone the token data so if the token is "frozen" change from TokenMold (for example) can be recovered
         //Also, use the ability of Token.create to handle an array
         //Annoyingly, Token.create returns a single token if you passed in a single element array
-        //v0.8.2c: Pass options to force hidden/visible because setting it after seems to create a race condition
+        //v0.8.2c: Pass options to force hidden/visible
         //0.6.1: If you use Alt-Run then create all tokens hidden regardless of how they were saved; Ctrl-Run make them visible
         //(generated tokens are hidden by default; saved tokens retain their original visibility unless overridden)
         let isHidden = null;
@@ -1082,6 +1086,7 @@ export class QuickEncounter {
         if (isHidden !== null) {
             for (const ctd of allCombinedTokensData ) {ctd.hidden = isHidden;}
         }
+        //0.8.3c: Use duplicate here because allCombinatedTokensData is a simple Object
         const tempCreatedTokens = await Token.create(duplicate(allCombinedTokensData),{hidden: isHidden});
         let createdTokens = tempCreatedTokens.length ? tempCreatedTokens : [tempCreatedTokens];
         //v0.5.0: Now reset the token data in case it was adjusted (e.g. by Token Mold), just for those that are frozen

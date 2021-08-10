@@ -20,7 +20,8 @@ Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tra
 7-Dec-2020      v0.6.13: delete(): Delete ALL of the Notes (in this or other Scenes) associated with the delete journal Entry
                         EncounterNote.create() and .place() return newNote so that we can store that in the quickEncounter before serialization
                         Expand the available list of Note icons (perhaps would be good to have a Setting to allow/disallow this)
-8-Aug-2021      0.8.3a: If Foundryv8 don't do Note deletion in the current scene because new Journal._onDelete() method takes care of that                        
+8-Aug-2021      0.8.3a: If Foundryv8 then don't do Note deletion in the current scene because new Journal._onDelete() method takes care of that  
+                        (although because of https://gitlab.com/foundrynet/foundryvtt/-/issues/5700 this won't work at all currently)                      
 */
 
 //Expand the available list of Note icons
