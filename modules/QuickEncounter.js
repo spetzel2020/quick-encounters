@@ -155,7 +155,8 @@
                 0.8.3b: #49: generateFullExtractedActorTokenData() was storing the full TokenData() object with prototypes (it used to be just a simple object of data)
                 Used Object.fromEntries(Object.entries(tokenData)) to strip off non own properties
 9-Aug-2021      0.8.3c: generateFullExtractedActorTokenData(), addTokens(), addTiles(): 
-                Use toObject() to recover just the object (ownProperties) before duplication                
+                Use toObject() to recover just the object (ownProperties) before duplication   
+10-Aug-2021     0.8.3d: Hooks.on('closeJournalSheet'): Switch to JournalEntry.deleteDocuments(ids) to delete Tutorial JE on close                             
 */
 
 
@@ -164,7 +165,7 @@ import {QESheet} from './QESheet.js';
 
 export const QE = {
     MODULE_NAME : "quick-encounters",
-    MODULE_VERSION : "0.8.2",
+    MODULE_VERSION : "0.8.3",
     TOKENS_FLAG_KEY : "tokens",
     QE_JSON_FLAG_KEY : "quickEncounter"
 }
@@ -334,18 +335,7 @@ export class QuickEncounter {
                 button: true,
                 visible: game.user.isGM,
                 onClick: event => QuickEncounter.runAddOrCreate(event)
-            });
-/*DEPRECATED            
-            notesButton.tools.push({
-                name: "deleteEncounters",
-                title: "Delete all Quick Encounter Map Notes",
-                icon: "fas fa-trash",
-                toggle: false,
-                button: true,
-                visible: false, //game.user.isGM,
-                onClick: () => QuickEncounter.deleteAllEQMapNotes("Unknown")
-            });
-*/            
+            });          
         }
 
         const tileControlsButton = buttons.find(b => b.name === "tiles");
@@ -364,18 +354,7 @@ export class QuickEncounter {
 
 
     }
-/*DEPRECATED
-    static async deleteAllEQMapNotes(text) {
-        let notes = canvas.notes.placeables;
-        for (let iNote = 0; iNote < notes.length; iNote++) {
-            if (notes[iNote].text === text) {
-                canvas.notes.placeables.splice(iNote,1);
-                notes[iNote].delete();
-                iNote--;
-            }
-        }
-    }
-*/
+
     static runAddOrCreate(event) {
         const isFoundryV8 = game.data.version.startsWith("0.8");
         let FRIENDLY_TOKEN_DISPOSITIONS;
@@ -1417,13 +1396,21 @@ Hooks.on(`renderJournalSheet`,  QuickEncounter.onRenderJournalSheet);
 Hooks.on('closeJournalSheet', async (journalSheet, html) => {
     if (!game.user.isGM) {return;}
     const journalEntry = journalSheet.object;
+    const isFoundryV8 = game.data.version.startsWith("0.8");
 
     //0.5.3: BUG: If you had the Tutorial JE open it would delete another Journal Entry when you closed it
     //This was happening because $("QuickEncountersTutorial") by itself was searching the whole DOM
     if (journalSheet.element.find("#QuickEncountersTutorial").length) {
         //This is the tutorial Journal Entry
         //v0.4.0 Check that we haven't already deleted this (because onDelete -> close)
-        if (game.journal.get(journalEntry.id)) {await JournalEntry.delete(journalEntry.id);}
+        if (game.journal.get(journalEntry.id)) {
+            //v0.8.3: Switch to use JournalEntry.deleteDocuments(ids)
+            if (isFoundryV8) {
+                await JournalEntry.deleteDocuments([journalEntry.id]);
+            } else {//Foundry v0.7
+                await JournalEntry.delete(journalEntry.id);
+            }
+        }
     }
 
     //v0.6.1: If there's a QE dialog open, close that too

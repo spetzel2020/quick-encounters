@@ -4,9 +4,9 @@
 - Clean up/prioritize Features list
 - Look at Scene Packer and see what QE improvements would help
 
-
-
 ## BUGS with Foundry 0.8.x
+v0.8.3  Compendium support: When you Run Quick Encounter, QE generates a new Actor for the Compendium entry even if it one exists
+v0.8.3  Compendium support: If you add generated Actors from a QE Compendium, a separate entry is added
 
 
 ## BUGS with Foundry 0.7.x
