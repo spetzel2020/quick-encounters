@@ -5,16 +5,16 @@
 - Compatible with Foundry 0.8.x
 - Bug fixes
 
-## 0.8.3
+### 0.8.3
 - Fixed: Issue [#48](https://github.com/spetzel2020/quick-encounters/issues/48), [#50](https://github.com/spetzel2020/quick-encounters/issues/50), [#51](https://github.com/spetzel2020/quick-encounters/issues/51)
 - Compatible with Foundry 0.8.8
-## 0.8.2
+### 0.8.2
 - Fixed: Issue [#46](https://github.com/spetzel2020/quick-encounters/issues/46), [#47](https://github.com/spetzel2020/quick-encounters/issues/47)
 - Updated Japanese translation
-## 0.8.1
+### 0.8.1
 - Updated Spanish translation
 - Compatible with Foundry 0.8.6
-## 0.8.0
+### 0.8.0
 - Updates to support Foundry 0.8.x
 - Make QE dialog read-only if from QE is in Compendium Journal
 - Support League standard for module.json format (switch to implicit Github latest link)
