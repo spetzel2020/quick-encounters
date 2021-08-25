@@ -574,7 +574,6 @@ export class QuickEncounter {
 
         //Delete the existing tokens (because they will be replaced)
         const controlledTilesIds = controlledTiles.map(ct => {return ct.id});
-        const isFoundryV8 = game.data.version.startsWith("0.8");
         if (isFoundryV8) {//Foundry 0.8.x
             canvas.scene.deleteEmbeddedDocuments("Tile", controlledTilesIds);
         } else {//Foundry 0.7.x
