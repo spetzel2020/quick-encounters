@@ -158,6 +158,7 @@
                 Use toObject() to recover just the object (ownProperties) before duplication   
 10-Aug-2021     0.8.3d: Hooks.on('closeJournalSheet'): Switch to JournalEntry.deleteDocuments(ids) to delete Tutorial JE on close   
 25-Aug-2021     0.8.4: Issue #52: generateFullExtractedActorTokenData(): Don't use toObject() if Foundry 0.7.x                          
+26-Aug-2021     0.8.4b: Fix for other problems with reference to toObject() in Foundry 0.7.x
 */
 
 
@@ -166,7 +167,7 @@ import {QESheet} from './QESheet.js';
 
 export const QE = {
     MODULE_NAME : "quick-encounters",
-    MODULE_VERSION : "0.8.3",
+    MODULE_VERSION : "0.8.4",
     TOKENS_FLAG_KEY : "tokens",
     QE_JSON_FLAG_KEY : "quickEncounter"
 }
@@ -469,10 +470,17 @@ export class QuickEncounter {
 
     addTokens(controlledTokens) {
         if (!controlledTokens) return;
+        const isFoundryV8 = game.data.version.startsWith("0.8");
+
         //Add the new tokens to the existing ones (or creates new ones)
         //Use tokenData because tokens is too deep to store in flags
-        //0.8.3c: Use the toObject() function to get a shallow copy (without prototypes) of controlledTokens.data
-        const controlledTokensData = controlledTokens.map(ct => {return ct.data.toObject()});
+        let controlledTokensData;
+        if(isFoundryV8) {
+            //0.8.3c: Use the toObject() function to get a shallow copy (without prototypes) of controlledTokens.data
+            controlledTokensData = controlledTokens.map(ct => {return ct.data.toObject()});
+        } else { //Foundry 0.6.x or 0.7.x
+            controlledTokensData = controlledTokens.map(ct => { return ct.data});
+        }
         //TODO: Is this necessary, or could we just remove controlledTokensData?
         const newSavedTokensData = duplicate(controlledTokensData);
 
@@ -546,6 +554,7 @@ export class QuickEncounter {
 
     addTiles(controlledTiles) {
         if (!controlledTiles) return;
+        const isFoundryV8 = game.data.version.startsWith("0.8");
         //Modelled after addTokens
 
         //Add the new tiles to the existing ones (or creates new ones)
@@ -553,7 +562,10 @@ export class QuickEncounter {
         //v0.8.2b: Store whether this tile is background (default) or foreground - for Foundry 0.7.x should set ctd.layer="background"    
         let controlledTilesData = controlledTiles.map(ct => {
             //0.8.3c: Use the toObject() function to get a shallow copy (without prototypes) of controlledTiles.data
-            let ctd = ct.data.toObject();
+            let ctd = ct.data;
+            if (isFoundryV8) {
+                ctd = ct.data.toObject();
+            }
             ctd.layer = ct.document?.layer?.options?.name ?? "background";
             return ctd;
         });
