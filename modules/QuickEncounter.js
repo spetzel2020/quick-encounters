@@ -156,7 +156,8 @@
                 Used Object.fromEntries(Object.entries(tokenData)) to strip off non own properties
 9-Aug-2021      0.8.3c: generateFullExtractedActorTokenData(), addTokens(), addTiles(): 
                 Use toObject() to recover just the object (ownProperties) before duplication   
-10-Aug-2021     0.8.3d: Hooks.on('closeJournalSheet'): Switch to JournalEntry.deleteDocuments(ids) to delete Tutorial JE on close                             
+10-Aug-2021     0.8.3d: Hooks.on('closeJournalSheet'): Switch to JournalEntry.deleteDocuments(ids) to delete Tutorial JE on close   
+25-Aug-2021     0.8.4: Issue #52: generateFullExtractedActorTokenData(): Don't use toObject() if Foundry 0.7.x                          
 */
 
 
@@ -1019,13 +1020,16 @@ export class QuickEncounter {
                     //0.8.2a: Per foundry.js#40276 use Actor.getTokenData (does handle token wildcarding)
                     const tempTokenData = await actor.getTokenData(tokenData);
                     tempToken = new TokenDocument(tempTokenData, {actor: actor});
+                    //v0.8.3b: Use Object.entries copying to get only the ownProperties (otherwise duplicate() chokes in createTokens())
+                    //0.8.3c: Switch to using toObject()
+                    tokenData = tempToken.data.toObject();
                 } else {//Foundry 0.7.x
                     //v0.6.7: Call Token.fromActor() which does the merge but also handles wildcard token images
                     tempToken = await Token.fromActor(actor, tokenData);
+                    //v0.8.4 toObject() not available in Foundry 0.7.x
+                    tokenData = tempToken.data;
                 }                 
-                //v0.8.3b: Use Object.entries copying to get only the ownProperties (otherwise duplicate() chokes in createTokens())
-                //0.8.3c: Switch to using toObject()
-                tokenData = tempToken.data.toObject();
+
                 //If from a Compendium, we remember that and the original Compendium actorID
                 if (eActor.dataPackName) {tokenData.compendiumActorId = eActor.actorID;}
                 //0.6.8: Put the generatedTokensData on the extractedActor, just like the savedTokensData
