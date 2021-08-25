@@ -5,6 +5,8 @@
 - Compatible with Foundry 0.8.x
 - Bug fixes
 
+### 0.8.4
+- Fixed: Issue [#52](https://github.com/spetzel2020/quick-encounters/issues/52)    
 ### 0.8.3
 - Fixed: Issue [#48](https://github.com/spetzel2020/quick-encounters/issues/48), [#50](https://github.com/spetzel2020/quick-encounters/issues/50), [#51](https://github.com/spetzel2020/quick-encounters/issues/51)
 - Compatible with Foundry 0.8.8
