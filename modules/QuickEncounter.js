@@ -475,7 +475,7 @@ export class QuickEncounter {
         //Add the new tokens to the existing ones (or creates new ones)
         //Use tokenData because tokens is too deep to store in flags
         let controlledTokensData;
-        if(isFoundryV8) {
+        if (isFoundryV8) {
             //0.8.3c: Use the toObject() function to get a shallow copy (without prototypes) of controlledTokens.data
             controlledTokensData = controlledTokens.map(ct => {return ct.data.toObject()});
         } else { //Foundry 0.6.x or 0.7.x
@@ -543,7 +543,6 @@ export class QuickEncounter {
 
         //Delete the existing tokens (because they will be replaced)
         const controlledTokensIds = controlledTokens.map(ct => {return ct.id});
-        const isFoundryV8 = game.data.version.startsWith("0.8");
         if (isFoundryV8) {//Foundry 0.8.x
             canvas.scene.deleteEmbeddedDocuments("Token", controlledTokensIds);
         } else {//Foundry 0.7.x
