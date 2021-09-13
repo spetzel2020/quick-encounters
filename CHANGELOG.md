@@ -1,4 +1,6 @@
 # RELEASE NOTES
+## 0.9
+- Supports Foundry 0.8.x only
 ## 0.8
 - Make QE dialog read-only if from QE is in Compendium Journal
 - Updated Spanish & Japanese translation
