@@ -6,6 +6,9 @@
 - Updated Spanish & Japanese translation
 - Compatible with Foundry 0.8.x
 - Bug fixes
+
+### 0.8.6
+- Support Enhanced Journals (thanks ironmonk88!)
 ### 0.8.5
 - Fixed: Issue [#49](https://github.com/spetzel2020/quick-encounters/issues/49) (again)
 ### 0.8.4

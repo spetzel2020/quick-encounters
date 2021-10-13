@@ -2,12 +2,12 @@
 ![Forge Installs](https://img.shields.io/badge/dynamic/json?label=Forge%20Installs&query=package.installs&suffix=%25&url=https%3A%2F%2Fforge-vtt.com%2Fapi%2Fbazaar%2Fpackage%2Fquick-encounters&colorB=4aa94a)
 
 # Quick Encounters
-NEW in v0.8! Better Compendium support, updated Spanish, and Foundry 0.8.x compatibility
+NEW in v0.8! Better Compendium support, updated Spanish, and Foundry 0.8.x compatibility; plays better with Enhanced Journal
 Bugs fixed! See [Release Notes](https://github.com/spetzel2020/quick-encounters/blob/master/CHANGELOG.md)
 
 * **Author**: Spetzel#0103
-* **Version**: 0.8.4
-* **Foundry VTT Compatibility**: 0.6.5-0.8.8
+* **Version**: 0.8.6
+* **Foundry VTT Compatibility**: 0.6.5-0.8.9
 * **System Compatibility (If applicable)**: All; additional features for dnd5e
 * **Translation Support**: en, es (thanks [lozalojo!](https://github.com/lozalojo)), ja (thanks "touge"!), de (thanks @Fallayn#6414), it (thanks [riccisi](https://github.com/riccisi))
 
