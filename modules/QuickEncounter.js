@@ -159,6 +159,7 @@
 10-Aug-2021     0.8.3d: Hooks.on('closeJournalSheet'): Switch to JournalEntry.deleteDocuments(ids) to delete Tutorial JE on close   
 25-Aug-2021     0.8.4: Issue #52: generateFullExtractedActorTokenData(): Don't use toObject() if Foundry 0.7.x                          
 26-Aug-2021     0.8.4b: Fix for other problems with reference to toObject() in Foundry 0.7.x
+13-Sep-2021     0.8.6: Support Enhanced Journals (thanks ironmonk88!)
 */
 
 
@@ -167,7 +168,7 @@ import {QESheet} from './QESheet.js';
 
 export const QE = {
     MODULE_NAME : "quick-encounters",
-    MODULE_VERSION : "0.8.5",
+    MODULE_VERSION : "0.8.6",
     TOKENS_FLAG_KEY : "tokens",
     QE_JSON_FLAG_KEY : "quickEncounter"
 }
@@ -376,7 +377,7 @@ export class QuickEncounter {
         //0.7.0b: Capture controlled tiles (will be one or the other
         const controlledTiles = Array.from(Tile.layer.controlled);
 
-        const candidateJournalEntry = QuickEncounter.findCandidateJournalEntry();
+        const candidateJournalEntry = (this instanceof JournalEntry ? this : QuickEncounter.findCandidateJournalEntry()); //Allow runAddOrCreate to be passed a Journal Entry to use instead of searching for one.
         const quickEncounter = (candidateJournalEntry instanceof QuickEncounter ) ? candidateJournalEntry : null;
 
         //v0.6.1 If you have both controlledNonFriendly tokens AND an open Quick Encounter, ask if you want to add to it
@@ -666,6 +667,9 @@ export class QuickEncounter {
         else {
             let openJournalSheet = null;
             for (let w of Object.values(ui.windows)) {
+				//Check to see if this is an Enhanced Journal window and get the subsheet
+				if(w.subsheet)
+					w = w.subsheet;
                 //Check open windows for a Journal Sheet with a Map Note and embedded Actors
                 if (w instanceof JournalSheet) {
                     openJournalSheet = w;
@@ -709,7 +713,19 @@ export class QuickEncounter {
         if (!quickEncounter) {
             //Extract it the old (v0.5) way - this also still applies if you create a Journal Entry with Actor or Compendium links
             //0.6 this now potentially includes Compendium links
-            const extractedActors = QuickEncounter.extractActors(journalSheet.element);
+			let extractedActors = [];
+			if (game.modules.get("monks-enhanced-journal")?.active && journalEntry.data.flags['monks-enhanced-journal']?.type == 'encounter') {
+				//If this is an Enhanced Journal entry then extract the actors from the data
+				extractedActors = journalEntry.data.flags['monks-enhanced-journal']?.actors.map(a => {
+					return {
+						numActors : a.qty,
+						dataPackName : a.pack,                    //if non-null then this is a Compendium reference
+						actorID : a.id,           //If Compendium sometimes this is the reference
+						name : a.name
+					};
+                });
+			}else
+				extractedActors = QuickEncounter.extractActors(journalSheet.element);
             const savedTokensData =  journalEntry.getFlag(QE.MODULE_NAME, QE.TOKENS_FLAG_KEY);
             //v0.6.1: Backwards compatibility - set the isSavedToken flga
             savedTokensData?.forEach(td => {td.isSavedToken = true;});
@@ -1277,6 +1293,9 @@ export class QuickEncounter {
     /* Hook on renderJournalSheet */
     static async onRenderJournalSheet(journalSheet, html) {
         if (!game.user.isGM) {return;}
+		
+		if(journalSheet.cellId) { return; } //ignore GM Screen renders
+		if(journalSheet.enhancedjournal) { return; } //ignore Enhanced Journal renders
 
         //v0.5.0 If this could be a Quick Encounter, add the button at the top and the total XP
         //v0.5.3 Remove any existing versions of this first before recomputing it - limit to 5 checks just in case
@@ -1440,4 +1459,8 @@ Hooks.on("init", QuickEncounter.init);
 Hooks.on('getSceneControlButtons', QuickEncounter.getSceneControlButtons);
 Hooks.on("deleteCombat", (combat, options, userId) => {
     QuickEncounter.onDeleteCombat(combat, options, userId);
+});
+
+Hooks.on("activateControls", (journal, controls) => {
+	controls.push({ id: 'quickencounter', text: "Quick Encounter", icon: 'fa-fist-raised', conditional: game.user.isGM, callback: QuickEncounter.runAddOrCreate.bind(journal?.object) });
 });
