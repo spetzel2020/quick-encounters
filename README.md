@@ -3,6 +3,7 @@
 
 # Quick Encounters
 NEW in v0.8! Better Compendium support, updated Spanish, and Foundry 0.8.x compatibility; plays better with Enhanced Journal
+
 Bugs fixed! See [Release Notes](https://github.com/spetzel2020/quick-encounters/blob/master/CHANGELOG.md)
 
 * **Author**: Spetzel#0103
