@@ -159,7 +159,7 @@
 10-Aug-2021     0.8.3d: Hooks.on('closeJournalSheet'): Switch to JournalEntry.deleteDocuments(ids) to delete Tutorial JE on close   
 25-Aug-2021     0.8.4: Issue #52: generateFullExtractedActorTokenData(): Don't use toObject() if Foundry 0.7.x                          
 26-Aug-2021     0.8.4b: Fix for other problems with reference to toObject() in Foundry 0.7.x
-13-Sep-2021     0.9.0: Support Foundry 0.8+ only; new features
+13-Sep-2021     0.8.6: Support Enhanced Journals (thanks ironmonk88!)
 */
 
 
@@ -168,7 +168,7 @@ import {QESheet} from './QESheet.js';
 
 export const QE = {
     MODULE_NAME : "quick-encounters",
-    MODULE_VERSION : "0.9.0",
+    MODULE_VERSION : "0.8.6",
     TOKENS_FLAG_KEY : "tokens",
     QE_JSON_FLAG_KEY : "quickEncounter"
 }
