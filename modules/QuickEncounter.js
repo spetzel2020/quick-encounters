@@ -161,6 +161,7 @@
 26-Aug-2021     0.8.4b: Fix for other problems with reference to toObject() in Foundry 0.7.x
 13-Sep-2021     0.9.0: Support Foundry 0.8+ only; new features
 26-Oct-2021     0.9.0b: Issue #53 (Add option to delete added tokens after the Combat Encounter)
+                0.9.0c: Rename nonFriendlyNPCTokens to hostileNPCCombatants for accuracy
 */
 
 
@@ -1176,12 +1177,16 @@ export class QuickEncounter {
 
         const isFoundryV8 = game.data.version.startsWith("0.8");
 
-        //Get list of non-friendly NPCs
-        let nonFriendlyNPCTokens;
+        //v0.9.0c: This has always been hostile NPCs
+        //Get list of hostile NPCs
+        let hostileNPCCombatants;
+        let defeatedHostileNPCCombatants; 
         if (isFoundryV8) {//Foundry 0.8.x
-            nonFriendlyNPCTokens = combat.turns?.filter(t => ((t.token?.data?.disposition === CONST.TOKEN_DISPOSITIONS.HOSTILE) && (!t.actor || !t.players?.length)));
+            hostileNPCCombatants = combat.turns?.filter(t => ((t.token?.data?.disposition === CONST.TOKEN_DISPOSITIONS.HOSTILE) && (!t.actor || !t.players?.length)));
+            defeatedHostileNPCCombatants = combat.turns?.filter(t => (t.data.defeated &&
+                                                            (t.token?.data?.disposition === CONST.TOKEN_DISPOSITIONS.HOSTILE) && (!t.actor || !t.players?.length)));
         } else {//Foundry 0.7.x
-            nonFriendlyNPCTokens = combat.turns?.filter(t => ((t.token?.disposition === CONST.TOKEN_DISPOSITIONS.HOSTILE) && (!t.actor || !t.players?.length)));
+            hostileNPCCombatants = combat.turns?.filter(t => ((t.token?.disposition === CONST.TOKEN_DISPOSITIONS.HOSTILE) && (!t.actor || !t.players?.length)));
         }
 
         //And of player-owned tokens
@@ -1191,18 +1196,18 @@ export class QuickEncounter {
         //v0.9.0: Moved to displayXP
         //Only works with 5e - the setting is only displayed if that's true
         const shouldDisplayXPAfterCombat = game.settings.get(QE.MODULE_NAME, "displayXPAfterCombat");
-        if (shouldDisplayXPAfterCombat) {await QuickEncounter.displayXP(nonFriendlyNPCTokens, pcTokens);}
+        if (shouldDisplayXPAfterCombat) {await QuickEncounter.displayXP(hostileNPCCombatants, pcTokens);}
 
         //If the "Delete Tokens after Combat" option is set, ask with a two option dialog
         const deleteTokensAfterCombat = game.settings.get(QE.MODULE_NAME, "deleteTokensAfterCombat");
-        if (deleteTokensAfterCombat) {await QuickEncounter.deleteTokensDialog(nonFriendlyNPCTokens);}
+        if (deleteTokensAfterCombat) {await QuickEncounter.deleteTokensDialog(hostileNPCCombatants, defeatedHostileNPCCombatants);}
 
     }
 
-    static async displayXP(nonFriendlyNPCTokens, pcTokens) {
+    static async displayXP(hostileNPCCombatants, pcTokens) {
         //Now compute total XP and XP per player
-        if (!nonFriendlyNPCTokens || !nonFriendlyNPCTokens.length || !pcTokens) {return;}
-        const totalXP = QuickEncounter.computeTotalXPFromTokens(nonFriendlyNPCTokens);
+        if (!hostileNPCCombatants || !hostileNPCCombatants.length || !pcTokens) {return;}
+        const totalXP = QuickEncounter.computeTotalXPFromTokens(hostileNPCCombatants);
         if (!totalXP) {return;}
         const xpPerPlayer = pcTokens.length ? Math.round(totalXP/pcTokens.length) : null;
         let content = game.i18n.localize("QE.XPtoAward.TOTAL") + totalXP;
@@ -1222,19 +1227,19 @@ export class QuickEncounter {
         });
     }
 
-    static async deleteTokensDialog(nonFriendlyNPCTokens) {
+    static async deleteTokensDialog(hostileNPCCombatants, defeatedHostileNPCCombatants) {
         Dialog3.buttons3({
             title: game.i18n.localize("QE.DeleteTokensAfterCombat.TITLE"),
             content: game.i18n.localize("QE.DeleteTokensAfterCombat.CONTENT"),
             button1cb: () => {//All
                 //in QE v0.9.x we're only supporting Foundry 0.8.+
-                const tokensToDeleteIds = nonFriendlyNPCTokens.map(ct => {return ct.id});
+                const tokensToDeleteIds = hostileNPCCombatants.map(ct => {return ct.token.id});
                 canvas.scene.deleteEmbeddedDocuments("Token", tokensToDeleteIds);
             },
             button2cb: () => {//Defeated Only
                 //in QE v0.9.x we're only supporting Foundry 0.8.+
                 //FIX: Add Defeated only
-                const tokensToDeleteIds = nonFriendlyNPCTokens.map(ct => {return ct.id});
+                const tokensToDeleteIds = defeatedHostileNPCCombatants.map(ct => {return ct.token.id});
                 canvas.scene.deleteEmbeddedDocuments("Token", tokensToDeleteIds);
             },
             button3cb: null,
