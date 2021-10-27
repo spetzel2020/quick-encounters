@@ -58,5 +58,11 @@
   "QE.QuickEncounterDialog.Save.BUTTON" : "Save",
    "QE.QuickEncounterDialog.PS" : "<p><i>This is the new Quick Encounters dialog. Uncheck </i><strong>Use new Quick Encounter dialog</strong><i> in Settings if you want to switch back.</i></p>",
    "QE.QuickEncounterDialog.InvalidNumActors.WARNING" : "Enter blank, a positive integer, or a die roll (for example, 2d6+5); you entered an invalid number: ",
-   "QE.QuickEncounterDialog.Remove" : "Remove {name}"
+   "QE.QuickEncounterDialog.Remove" : "Remove {name}",
+   "QE.Setting.DeleteTokensAfterCombat.NAME" : "Delete tokens after Combat",
+   "QE.Setting.DeleteTokensAfterCombat.HINT" : "When you press End Combat or delete Combat Tracker, display a dialog with options to delete hostile tokens from the Scene",
+   "QE.DeleteTokensAfterCombat.TITLE" : "Delete hostile tokens?",
+   "QE.DeleteTokensAfterCombat.CONTENT" : "Delete all or just defeated hostile tokens from the Scene",
+   "QE.DeleteTokensAfterCombat.DELETEALL" : "All",
+   "QE.DeleteTokensAfterCombat.DELETEDEFEATED" : "Defeated"
 }

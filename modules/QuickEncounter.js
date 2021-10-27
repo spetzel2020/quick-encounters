@@ -160,6 +160,7 @@
 25-Aug-2021     0.8.4: Issue #52: generateFullExtractedActorTokenData(): Don't use toObject() if Foundry 0.7.x                          
 26-Aug-2021     0.8.4b: Fix for other problems with reference to toObject() in Foundry 0.7.x
 13-Sep-2021     0.9.0: Support Foundry 0.8+ only; new features
+26-Oct-2021     0.9.0b: Issue #53 (Add option to delete added tokens after the Combat Encounter)
 */
 
 
@@ -316,6 +317,15 @@ export class QuickEncounter {
             scope: "world",
             config: true,
             visible: game.system.id === "dnd5e",
+            default: true,
+            type: Boolean
+        });
+        //v0.9.0 Delete Hostile Tokens after combat
+        game.settings.register(QE.MODULE_NAME, "deleteTokensAfterCombat", {
+            name: "QE.Setting.DeleteTokensAfterCombat.NAME",
+            hint: "QE.Setting.DeleteTokensAfterCombat.HINT",
+            scope: "world",
+            config: true,
             default: true,
             type: Boolean
         });
@@ -1162,12 +1172,9 @@ export class QuickEncounter {
     }
 
     static async onDeleteCombat(combat, options, userId) {
-        const isFoundryV8 = game.data.version.startsWith("0.8");
+        if (!combat || !game.user.isGM) {return;}
 
-        //Only works with 5e
-        //If the display XP option is set, work out how many defeated foes and how many Player tokens
-        const shouldDisplayXPAfterCombat = game.settings.get(QE.MODULE_NAME, "displayXPAfterCombat");
-        if (!shouldDisplayXPAfterCombat || !combat || !game.user.isGM) {return;}
+        const isFoundryV8 = game.data.version.startsWith("0.8");
 
         //Get list of non-friendly NPCs
         let nonFriendlyNPCTokens;
@@ -1180,6 +1187,19 @@ export class QuickEncounter {
         //And of player-owned tokens
         const pcTokens = combat.turns?.filter(t => (t.actor && t.players?.length));
 
+        //If the "Display XP" option is set, work out how many defeated foes and how many Player tokens
+        //v0.9.0: Moved to displayXP
+        //Only works with 5e - the setting is only displayed if that's true
+        const shouldDisplayXPAfterCombat = game.settings.get(QE.MODULE_NAME, "displayXPAfterCombat");
+        if (shouldDisplayXPAfterCombat) {await QuickEncounter.displayXP(nonFriendlyNPCTokens, pcTokens);}
+
+        //If the "Delete Tokens after Combat" option is set, ask with a two option dialog
+        const deleteTokensAfterCombat = game.settings.get(QE.MODULE_NAME, "deleteTokensAfterCombat");
+        if (deleteTokensAfterCombat) {await QuickEncounter.deleteTokensDialog(nonFriendlyNPCTokens);}
+
+    }
+
+    static async displayXP(nonFriendlyNPCTokens, pcTokens) {
         //Now compute total XP and XP per player
         if (!nonFriendlyNPCTokens || !nonFriendlyNPCTokens.length || !pcTokens) {return;}
         const totalXP = QuickEncounter.computeTotalXPFromTokens(nonFriendlyNPCTokens);
@@ -1199,6 +1219,26 @@ export class QuickEncounter {
                 width: 400,
                 jQuery: false
             }
+        });
+    }
+
+    static async deleteTokensDialog(nonFriendlyNPCTokens) {
+        Dialog3.buttons3({
+            title: game.i18n.localize("QE.DeleteTokensAfterCombat.TITLE"),
+            content: game.i18n.localize("QE.DeleteTokensAfterCombat.CONTENT"),
+            button1cb: () => {//All
+                //in QE v0.9.x we're only supporting Foundry 0.8.+
+                const tokensToDeleteIds = nonFriendlyNPCTokens.map(ct => {return ct.id});
+                canvas.scene.deleteEmbeddedDocuments("Token", tokensToDeleteIds);
+            },
+            button2cb: () => {//Defeated Only
+                //in QE v0.9.x we're only supporting Foundry 0.8.+
+                //FIX: Add Defeated only
+                const tokensToDeleteIds = nonFriendlyNPCTokens.map(ct => {return ct.id});
+                canvas.scene.deleteEmbeddedDocuments("Token", tokensToDeleteIds);
+            },
+            button3cb: null,
+            buttonLabels : ["QE.DeleteTokensAfterCombat.DELETEALL",  "QE.DeleteTokensAfterCombat.DELETEDEFEATED"]
         });
     }
 
@@ -1346,7 +1386,7 @@ export class QuickEncounter {
 export class Dialog3 extends Dialog {
     static async buttons3({title, content, button1cb, button2cb, button3cb, buttonLabels, options={}}) {
         //Also can function as a generic 2-button dialog by passing button3b=null
-            return new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
         const dialog = new this({
             title: title,
             content: content,

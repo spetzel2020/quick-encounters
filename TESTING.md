@@ -1,4 +1,4 @@
-# TESTING v0.8.3 WITH FOUNDRY 0.8.8
+# TESTING v0.9.0 WITH FOUNDRY 0.8.9
 
 ## BUG FIXES
 1. Create 10 saved tokens - check that QE positions saved tokens correctly                                  OK in 0.8.3
