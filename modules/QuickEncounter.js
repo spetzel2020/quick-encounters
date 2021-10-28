@@ -327,8 +327,8 @@ export class QuickEncounter {
         });
         //v0.9.0 Show Delete/Leave Dialog after the Add/Link
         game.settings.register(QE.MODULE_NAME, "showDeleteTokensDialogAfterAdd", {
-            name: "QE.Setting.DeleteOrLeaveTokensAfterAdd.NAME",
-            hint: "QE.Setting.DeleteOrLeaveTokensAfterAdd.HINT",
+            name: "QE.Setting.ShowDeleteTokensDialogAfterAdd.NAME",
+            hint: "QE.Setting.ShowDeleteTokensDialogAfterAdd.HINT",
             scope: "world",
             config: true,
             default: true,
