@@ -162,6 +162,10 @@
 13-Sep-2021     0.9.0: Support Foundry 0.8+ only; new features
 26-Oct-2021     0.9.0b: Issue #53 (Add option to delete added tokens after the Combat Encounter)
                 0.9.0c: Rename nonFriendlyNPCTokens to hostileNPCCombatants for accuracy
+28-Oct-2021     0.9.0d: Issue #54 (Option to "record" the tokens but leave them on the map and then just add them to the CT)
+                Issue #34 (Feature request: Add option to not add the combatants to the tracker #34)
+                - Multiple options: Leave/Delete + Add/Don't Add to CT
+                See https://github.com/spetzel2020/quick-encounters/issues/55#issuecomment-954239542 for thoughts
 */
 
 
@@ -321,10 +325,19 @@ export class QuickEncounter {
             default: true,
             type: Boolean
         });
-        //v0.9.0 Delete Hostile Tokens after combat
-        game.settings.register(QE.MODULE_NAME, "deleteTokensAfterCombat", {
-            name: "QE.Setting.DeleteTokensAfterCombat.NAME",
-            hint: "QE.Setting.DeleteTokensAfterCombat.HINT",
+        //v0.9.0 Show Delete/Leave Dialog after the Add/Link
+        game.settings.register(QE.MODULE_NAME, "showDeleteTokensDialogAfterAdd", {
+            name: "QE.Setting.DeleteOrLeaveTokensAfterAdd.NAME",
+            hint: "QE.Setting.DeleteOrLeaveTokensAfterAdd.HINT",
+            scope: "world",
+            config: true,
+            default: true,
+            type: Boolean
+        });
+        //v0.9.0 Show Delete Hostile Tokens Dialog after Combat
+        game.settings.register(QE.MODULE_NAME, "showDeleteTokensDialogAfterCombat", {
+            name: "QE.Setting.ShowDeleteTokensDialogAfterCombat.NAME",
+            hint: "QE.Setting.ShowDeleteTokensDialogAfterCombat.HINT",
             scope: "world",
             config: true,
             default: true,
@@ -556,7 +569,25 @@ export class QuickEncounter {
         //Delete the existing tokens (because they will be replaced)
         const controlledTokensIds = controlledTokens.map(ct => {return ct.id});
         if (isFoundryV8) {//Foundry 0.8.x
-            canvas.scene.deleteEmbeddedDocuments("Token", controlledTokensIds);
+            //QE v0.9 - if set , show a dialog asking if tokens should be deleted after being added
+            const showDeleteTokensDialogAfterAdd = game.settings.get(QE.MODULE_NAME, "showDeleteTokensDialogAfterAdd");
+            if (showDeleteTokensDialogAfterAdd) {
+                Dialog3.buttons3({
+                    title: game.i18n.localize("QE.DeleteTokensAfterAdd.TITLE"),
+                    content: game.i18n.localize("QE.DeleteTokensAfterAdd.CONTENT"),
+                    button1cb: () => {//Delete
+                        //in QE v0.9.x we're only supporting Foundry 0.8.+
+                        canvas.scene.deleteEmbeddedDocuments("Token", controlledTokensIds);
+                    },
+                    button2cb: () => {//Leave
+                        //in QE v0.9.x we're only supporting Foundry 0.8.+
+                    },
+                    button3cb: null,
+                    buttonLabels : ["QE.DeleteTokensAfterAdd.DELETE",  "QE.DeleteTokensAfterAdd.LEAVE"]
+                });
+            } else {
+                canvas.scene.deleteEmbeddedDocuments("Token", controlledTokensIds);
+            }
         } else {//Foundry 0.7.x
             canvas.tokens.deleteMany(controlledTokensIds);
         }
@@ -1199,8 +1230,8 @@ export class QuickEncounter {
         if (shouldDisplayXPAfterCombat) {await QuickEncounter.displayXP(hostileNPCCombatants, pcTokens);}
 
         //If the "Delete Tokens after Combat" option is set, ask with a two option dialog
-        const deleteTokensAfterCombat = game.settings.get(QE.MODULE_NAME, "deleteTokensAfterCombat");
-        if (deleteTokensAfterCombat) {await QuickEncounter.deleteTokensDialog(hostileNPCCombatants, defeatedHostileNPCCombatants);}
+        const showDeleteTokensDialogAfterCombat = game.settings.get(QE.MODULE_NAME, "showDeleteTokensDialogAfterCombat");
+        if (showDeleteTokensDialogAfterCombat) {await QuickEncounter.deleteTokensAfterCombatDialog(hostileNPCCombatants, defeatedHostileNPCCombatants);}
 
     }
 
@@ -1227,7 +1258,7 @@ export class QuickEncounter {
         });
     }
 
-    static async deleteTokensDialog(hostileNPCCombatants, defeatedHostileNPCCombatants) {
+    static async deleteTokensAfterCombatDialog(hostileNPCCombatants, defeatedHostileNPCCombatants) {
         Dialog3.buttons3({
             title: game.i18n.localize("QE.DeleteTokensAfterCombat.TITLE"),
             content: game.i18n.localize("QE.DeleteTokensAfterCombat.CONTENT"),
@@ -1238,7 +1269,6 @@ export class QuickEncounter {
             },
             button2cb: () => {//Defeated Only
                 //in QE v0.9.x we're only supporting Foundry 0.8.+
-                //FIX: Add Defeated only
                 const tokensToDeleteIds = defeatedHostileNPCCombatants.map(ct => {return ct.token.id});
                 canvas.scene.deleteEmbeddedDocuments("Token", tokensToDeleteIds);
             },

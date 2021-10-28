@@ -59,10 +59,16 @@
    "QE.QuickEncounterDialog.PS" : "<p><i>This is the new Quick Encounters dialog. Uncheck </i><strong>Use new Quick Encounter dialog</strong><i> in Settings if you want to switch back.</i></p>",
    "QE.QuickEncounterDialog.InvalidNumActors.WARNING" : "Enter blank, a positive integer, or a die roll (for example, 2d6+5); you entered an invalid number: ",
    "QE.QuickEncounterDialog.Remove" : "Remove {name}",
-   "QE.Setting.DeleteTokensAfterCombat.NAME" : "Delete tokens after Combat",
-   "QE.Setting.DeleteTokensAfterCombat.HINT" : "When you press End Combat or delete Combat Tracker, display a dialog with options to delete hostile tokens from the Scene",
+   "QE.Setting.ShowDeleteTokensDialogAfterCombat.NAME" : "Show Delete dialog after Combat",
+   "QE.Setting.ShowDeleteTokensDialogAfterCombat.HINT" : "After you press End Combat or delete Combat Tracker, display a dialog with options to delete hostile tokens from the Scene. Clear this setting for the pre-0.9 behavior.",
    "QE.DeleteTokensAfterCombat.TITLE" : "Delete hostile tokens?",
    "QE.DeleteTokensAfterCombat.CONTENT" : "Delete all or just defeated hostile tokens from the Scene",
    "QE.DeleteTokensAfterCombat.DELETEALL" : "All",
-   "QE.DeleteTokensAfterCombat.DELETEDEFEATED" : "Defeated"
-}
+   "QE.DeleteTokensAfterCombat.DELETEDEFEATED" : "Defeated",
+   "QE.Setting.ShowDeleteTokensDialogAfterAdd.NAME" : "Show Delete dialog after Add/Link",
+   "QE.Setting.ShowDeleteTokensDialogAfterAdd.HINT": "After you create/add/link tokens to a Quick Encounter, display a dialog with options to leave the selected tokens or delete them from the Scene (in which case Quick Encounters regenerates them when you Run the Quick Encounter). Clear this setting for the pre-0.9 behavior.",
+   "QE.DeleteTokensAfterAdd.TITLE" : "Delete added tokens?",
+   "QE.DeleteTokensAfterAdd.CONTENT" : "Delete selected tokens from the Scene (in which case they will be regenerated when you run the Quick Encounter) or Leave them (in which case they will be used in place)",
+    "QE.DeleteTokensAfterAdd.DELETE": "Delete",
+    "QE.DeleteTokensAfterAdd.LEAVE": "Leave"
+  }
