@@ -166,7 +166,11 @@
                 Issue #34 (Feature request: Add option to not add the combatants to the tracker #34)
                 - Multiple options: Leave/Delete + Add/Don't Add to CT
                 See https://github.com/spetzel2020/quick-encounters/issues/55#issuecomment-954239542 for thoughts
-*/
+1-Nov-2021      0.9.0e Visual representation of tokens that are part of the Quick Encounter but are still on the Scene
+                (and therefore shouldn't be regenerated)
+                Also, CURRENT approach generates tokens if they don't already exist - ALTERNATIVE would be to record the tokens you Deleted
+                and only regenerate those
+                */
 
 
 import {EncounterNote} from './EncounterNote.js';
@@ -1100,10 +1104,6 @@ export class QuickEncounter {
         2. Positioning the token relative to the drop point (whereas we do it relative to a Map Note or previous position)
         3. Randomizing the token image if that is provided in the Prototype Token
         */
-        //v0.6.1d: If it's a savedToken (one that was "captured" then check if it should be frozen as is or regenerated for example by Token Mold)
-        //Actor-generated tokens are always generated
-        //v0.5.3d: Check the value of setting "freezeCapturedTokens"
-        const freezeCapturedTokens = game.settings.get(QE.MODULE_NAME, "freezeCapturedTokens");
 
         let allCombinedTokensData = [];
         for (const ea of this.extractedActors) {
@@ -1122,19 +1122,52 @@ export class QuickEncounter {
         if (isHidden !== null) {
             for (const ctd of allCombinedTokensData ) {ctd.hidden = isHidden;}
         }
-        //0.8.3c: Use duplicate here because allCombinatedTokensData is a simple Object
-        const tempCreatedTokens = await Token.create(duplicate(allCombinedTokensData),{hidden: isHidden});
-        let createdTokens = tempCreatedTokens.length ? tempCreatedTokens : [tempCreatedTokens];
-        //v0.5.0: Now reset the token data in case it was adjusted (e.g. by Token Mold), just for those that are frozen
-        //v0.6.1d: If freezeCapturedTokens = true, then reset the savedTokens
-        for (let i=0; i<allCombinedTokensData.length; i++) {
-            if (freezeCapturedTokens && allCombinedTokensData[i].isSavedToken) {
-                //Ignore errors that happen during this update
-                try {
-                    createdTokens[i] = await createdTokens[i].update(allCombinedTokensData[i]);
-                } catch {}
+        //0.8.3c: Use duplicate here because allCombinedTokensData is a simple Object
+        //0.9.0e: If the exact token is already on the scene (because we used the Leave option) then don't regenerate it
+        //but in that case add the existing token to the tempCreatedTokens list
+        let toCreateCombinedTokensData = [];
+        let existingTokens = [];
+        for (const ctd of allCombinedTokensData) {
+            //if the exact-match token (by token._id) already exists on the Scene then don't recreate it
+            const matchingToken = game.scenes.viewed.tokens.get(ctd._id);
+            if (matchingToken) {
+                existingTokens.push(matchingToken);
+            } else {
+                toCreateCombinedTokensData.push(duplicate(ctd));
             }
+        }
 
+        //0.9.0e: Not necessary to duplicate the whole array (since we duplicated elements above)
+        //We do need to check that toCreateCombinedTokensData is not empty (if everything is already on the Scene)
+        const tempCreatedTokens = toCreateCombinedTokensData.length ? await Token.create(toCreateCombinedTokensData,{hidden: isHidden}) : [];
+        //And Token.create unfortunately returns an element, not an array if you pass a length=1 array
+        let createdTokens;
+        if (tempCreatedTokens.length === 0) {
+            createdTokens = [];
+        } else {
+            createdTokens = Array.isArray(tempCreatedTokens) ? tempCreatedTokens : [tempCreatedTokens];
+        }
+        //0.9.0e: Add back the QE tokens already on the scene
+        createdTokens = createdTokens.concat(existingTokens);
+//FIXME: This is now a TokenDocuments5e array???        
+
+        //0.9.0 Move if (freezeCapturedTokens) outside the loop
+        //v0.6.1d: If it's a savedToken (one that was "captured" then check if it should be frozen as is or regenerated for example by Token Mold)
+        //Actor-generated tokens are always generated
+        //v0.5.3d: Check the value of setting "freezeCapturedTokens"
+        const freezeCapturedTokens = game.settings.get(QE.MODULE_NAME, "freezeCapturedTokens");
+        if (freezeCapturedTokens) {
+            //v0.5.0: Now reset the token data in case it was adjusted (e.g. by Token Mold), just for those that are frozen
+            //v0.6.1d: If freezeCapturedTokens = true, then reset the savedTokens
+            for (let i=0; i<toCreateCombinedTokensData.length; i++) {
+                if (toCreateCombinedTokensData[i].isSavedToken) {
+                    //Ignore errors that happen during this update
+                    try {
+    //FIXME: This is throwing errors (Issue #58); In Foundry v0.8 we have to update the TokenDocument not the TokenData
+                        createdTokens[i] = await createdTokens[i].update(toCreateCombinedTokensData[i]);
+                    } catch {}
+                }
+            }
         }
         return createdTokens;
     }
