@@ -947,6 +947,8 @@ export class QuickEncounter {
                     let shiftedTokensData = ea.savedTokensData.map(std => {
                         std.x += shift.x;
                         std.y += shift.y;
+                        const matchingToken = game.scenes.viewed.tokens.get(std._id); // returns undefined if not found
+                        std.tokenExistsOnScene = (matchingToken !== undefined);
                         return std;
                     });
                     const numExcessActors = ea.generatedTokensData.length -  shiftedTokensData.length;
@@ -1143,7 +1145,7 @@ export class QuickEncounter {
         //And Token.create unfortunately returns an element, not an array if you pass a length=1 array
         let createdTokens;
         if (tempCreatedTokens.length === 0) {
-            createdTokens = [];
+            createdTokens = []; //No tokens were created (perhaps because they all exist on the scene)
         } else {
             createdTokens = Array.isArray(tempCreatedTokens) ? tempCreatedTokens : [tempCreatedTokens];
         }
