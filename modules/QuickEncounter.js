@@ -170,7 +170,9 @@
                 (and therefore shouldn't be regenerated)
                 Also, CURRENT approach generates tokens if they don't already exist - ALTERNATIVE would be to record the tokens you Deleted
                 and only regenerate those
-                */
+9-Nov-2021      0.9.0g: Change the Show Delete Tokens after Add setting to be a simple "Delete the Tokens on the Scene" - if cleared you have to delete them manually
+
+*/
 
 
 import {EncounterNote} from './EncounterNote.js';
@@ -329,10 +331,10 @@ export class QuickEncounter {
             default: true,
             type: Boolean
         });
-        //v0.9.0 Show Delete/Leave Dialog after the Add/Link
-        game.settings.register(QE.MODULE_NAME, "showDeleteTokensDialogAfterAdd", {
-            name: "QE.Setting.ShowDeleteTokensDialogAfterAdd.NAME",
-            hint: "QE.Setting.ShowDeleteTokensDialogAfterAdd.HINT",
+        //v0.9.0 Delete tokens by default after the Add/Link
+        game.settings.register(QE.MODULE_NAME, "deleteTokensAfterAdd", {
+            name: "QE.Setting.DeleteTokensAfterAdd.NAME",
+            hint: "QE.Setting.DeleteTokensAfterAdd.HINT",
             scope: "world",
             config: true,
             default: true,
@@ -458,6 +460,52 @@ export class QuickEncounter {
         }
     }
 
+    /* Method 1: createFromTokens
+    * Delete the controlled (selected) tokens and record their tokenData in a created Journal Entry
+    * Also embed Actors they represent (for clarity)
+    **/
+    static async createFrom(controlledAssets) {
+        //Seems inelegant - especially since we'd like to update the journalEntry        
+        let quickEncounter = QuickEncounter.createQuickEncounterAndAdd(controlledAssets);
+
+        //Create a new JournalEntry - the corresponding map note gets automatically created too
+//FIXME: Replace all this with a renderTemplate section using handlebars
+        let content = game.i18n.localize("QE.Instructions.CONTENT");
+        //0.7.0 extractedActors could be null if we have just tiles or other (non-Actor/token assets)
+        if (quickEncounter.extractedActors) {
+            for (const eActor of quickEncounter.extractedActors) {
+                const actor = await QuickEncounter.getActor(eActor);
+                const xp = QuickEncounter.getActorXP(actor);
+                const xpString = xp ? `(${xp}XP each)`: "";
+                content += `<li>${eActor.numActors}@Actor[${actor.id}]{${actor.name}} ${xpString}</li>`;
+            }
+        }
+
+        const journalData = {
+            folder: null,
+            name:  `Quick Encounter: ${game.scenes?.viewed?.name}`,
+            content: content,
+            type: "encounter",
+            types: "base"
+        }
+        let journalEntry = await JournalEntry.create(journalData);
+        const ejSheet = new JournalSheet(journalEntry);
+
+//REFACTOR: Individual property setting and order is fragile        
+        quickEncounter.serializeIntoJournalEntry(journalEntry.id);
+        //And create the Map Note - needs journalEntry.id to be set already
+        const newNote = await EncounterNote.place(quickEncounter);
+        //0.6.13: Record the Map Note data because we will use it to distinguish between the original and copied Scene Notes
+        quickEncounter.originalNoteData = newNote?.data;
+        
+        //v0.6.1k Update the created/changed QuickEncounter into the Journal Entry
+        quickEncounter.serializeIntoJournalEntry(journalEntry.id);
+
+        //v0.6.3: Show the Journal Sheet last so it can see the Map Note
+        ejSheet.render(true);   //0.6.1: This will also pop-open a QE dialog if you have that setting
+    }
+
+
     static createQuickEncounterAndAdd(controlledAssets) {
         let quickEncounter = new QuickEncounter();    //empty QuickEncounter   
         quickEncounter.add(controlledAssets);     //This will also update extractedActors etc.
@@ -467,8 +515,10 @@ export class QuickEncounter {
     static link(openJournalSheet, controlledAssets) {
         let quickEncounter = QuickEncounter.createQuickEncounterAndAdd(controlledAssets);
         const journalEntry = openJournalSheet?.object;
+        //FIXME: add() already calls serializeIntoJournalEntry(), but here we are updating with the source journalEntry
         quickEncounter.serializeIntoJournalEntry(journalEntry.id);
         //Force a re-render which should pop up the QE dialog
+        //FIXME: Is this necessary? I thought setFlag() would already force a re-render of the JE
         openJournalSheet?.render(true);
     }
 
@@ -570,26 +620,15 @@ export class QuickEncounter {
             }
         }//end for tokenActorIds
 
-        //Delete the existing tokens (because they will be replaced)
+        
+        //0.9.0g: By default, delete the existing tokens (because they will be replaced) 
+        // - but as an option (setting) you can leave the tokens on the map and they will be used instead of being generated
+        // (You can still selectively delete them)
         const controlledTokensIds = controlledTokens.map(ct => {return ct.id});
         if (isFoundryV8) {//Foundry 0.8.x
-            //QE v0.9 - if set , show a dialog asking if tokens should be deleted after being added
-            const showDeleteTokensDialogAfterAdd = game.settings.get(QE.MODULE_NAME, "showDeleteTokensDialogAfterAdd");
-            if (showDeleteTokensDialogAfterAdd) {
-                Dialog3.buttons3({
-                    title: game.i18n.localize("QE.DeleteTokensAfterAdd.TITLE"),
-                    content: game.i18n.localize("QE.DeleteTokensAfterAdd.CONTENT"),
-                    button1cb: () => {//Delete
-                        //in QE v0.9.x we're only supporting Foundry 0.8.+
-                        canvas.scene.deleteEmbeddedDocuments("Token", controlledTokensIds);
-                    },
-                    button2cb: () => {//Leave
-                        //in QE v0.9.x we're only supporting Foundry 0.8.+
-                    },
-                    button3cb: null,
-                    buttonLabels : ["QE.DeleteTokensAfterAdd.DELETE",  "QE.DeleteTokensAfterAdd.LEAVE"]
-                });
-            } else {
+            //QE v0.9 - if set (the default) , delete the added tokens
+            const deleteTokensAfterAdd = game.settings.get(QE.MODULE_NAME, "deleteTokensAfterAdd");
+            if (deleteTokensAfterAdd) {
                 canvas.scene.deleteEmbeddedDocuments("Token", controlledTokensIds);
             }
         } else {//Foundry 0.7.x
@@ -627,52 +666,6 @@ export class QuickEncounter {
             canvas.tiles.deleteMany(controlledTilesIds);
         }
     }
-
-    /* Method 1: createFromTokens
-    * Delete the controlled (selected) tokens and record their tokenData in a created Journal Entry
-    * Also embed Actors they represent (for clarity)
-    **/
-    static async createFrom(controlledAssets) {
-//Seems inelegant - especially since we'd like to update the journalEntry        
-        let quickEncounter = QuickEncounter.createQuickEncounterAndAdd(controlledAssets);
-
-        //Create a new JournalEntry - the corresponding map note gets automatically created too
-//FIXME: Replace all this with a renderTemplate section using handlebars
-        let content = game.i18n.localize("QE.Instructions.CONTENT");
-        //0.7.0 extractedActors could be null if we have just tiles or other (non-Actor/token assets)
-        if (quickEncounter.extractedActors) {
-            for (const eActor of quickEncounter.extractedActors) {
-                const actor = await QuickEncounter.getActor(eActor);
-                const xp = QuickEncounter.getActorXP(actor);
-                const xpString = xp ? `(${xp}XP each)`: "";
-                content += `<li>${eActor.numActors}@Actor[${actor.id}]{${actor.name}} ${xpString}</li>`;
-            }
-        }
-
-        const journalData = {
-            folder: null,
-            name:  `Quick Encounter: ${game.scenes?.viewed?.name}`,
-            content: content,
-            type: "encounter",
-            types: "base"
-        }
-        let journalEntry = await JournalEntry.create(journalData);
-        const ejSheet = new JournalSheet(journalEntry);
-
-//REFACTOR: Individual property setting and order is fragile        
-        quickEncounter.serializeIntoJournalEntry(journalEntry.id);
-        //And create the Map Note - needs journalEntry.id to be set already
-        const newNote = await EncounterNote.place(quickEncounter);
-        //0.6.13: Record the Map Note data because we will use it to distinguish between the original and copied Scene Notes
-        quickEncounter.originalNoteData = newNote?.data;
-        
-        //v0.6.1k Update the created/changed QuickEncounter into the Journal Entry
-        quickEncounter.serializeIntoJournalEntry(journalEntry.id);
-
-        //v0.6.3: Show the Journal Sheet last so it can see the Map Note
-        ejSheet.render(true);   //0.6.1: This will also pop-open a QE dialog if you have that setting
-    }
-
 
 
 
@@ -1457,43 +1450,43 @@ export class Dialog3 extends Dialog {
     static async buttons3({title, content, button1cb, button2cb, button3cb, buttonLabels, options={}}) {
         //Also can function as a generic 2-button dialog by passing button3b=null
         return new Promise((resolve, reject) => {
-        const dialog = new this({
-            title: title,
-            content: content,
-            buttons: {
-                button1: {
-                    icon: null,
-                    label: game.i18n.localize(buttonLabels[0]),
-                    callback: html => {
-                    const result = button1cb ? button1cb(html) : true;
-                    resolve(result);
+            const dialog = new this({
+                title: title,
+                content: content,
+                buttons: {
+                    button1: {
+                        icon: null,
+                        label: game.i18n.localize(buttonLabels[0]),
+                        callback: html => {
+                            const result = button1cb ? button1cb(html) : true;
+                            resolve(result);
+                        }
+                    },
+                    button2: {
+                        icon: null,
+                        label: game.i18n.localize(buttonLabels[1]),
+                        callback: html => {
+                            const result = button2cb ? button2cb(html) : false;
+                            resolve(result);
+                        }
+                    },
+                    button3: {
+                        icon: null,
+                        label: game.i18n.localize(buttonLabels[2]),
+                        callback: html => {
+                            const result = button3cb ? button3cb(html) : false;
+                            resolve(result);
+                        }
                     }
                 },
-                button2: {
-                    icon: null,
-                    label: game.i18n.localize(buttonLabels[1]),
-                    callback: html => {
-                    const result = button2cb ? button2cb(html) : false;
-                    resolve(result);
-                    }
-                },
-                button3: {
-                    icon: null,
-                    label: game.i18n.localize(buttonLabels[2]),
-                    callback: html => {
-                    const result = button3cb ? button3cb(html) : false;
-                    resolve(result);
-                    }
-                }
-            },
-            default: "button1",
-            close: () => reject
-        }, options);
+                default: "button1",
+                close: () => reject
+            }, options);
 
-        if (!button3cb) {
-            delete dialog.data.buttons.button3;
-        }
-        dialog.render(true);
+            if (!button3cb) {
+                delete dialog.data.buttons.button3;
+            }
+            dialog.render(true);
         });
     }
 }
