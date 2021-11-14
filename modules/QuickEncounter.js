@@ -407,7 +407,7 @@ export class QuickEncounter {
         //0.7.0b: Capture controlled tiles (will be one or the other
         const controlledTiles = Array.from(Tile.layer.controlled);
 
-        const candidateJournalEntry = QuickEncounter.findCandidateJournalEntry();
+        const candidateJournalEntry = QuickEncounter.findCandidateJournalEntry.call(this); 
         const quickEncounter = (candidateJournalEntry instanceof QuickEncounter ) ? candidateJournalEntry : null;
 
         //v0.6.1 If you have both controlledNonFriendly tokens AND an open Quick Encounter, ask if you want to add to it
@@ -705,7 +705,10 @@ export class QuickEncounter {
         if (Object.keys(ui.windows).length === 0) {return null;}
         else {
             let openJournalSheet = null;
-            for (let w of Object.values(ui.windows)) {
+            for (let w of (this instanceof JournalSheet ? [this] : Object.values(ui.windows))) {
+				//Check to see if this is an Enhanced Journal window and get the subsheet
+				if(w.subsheet)
+					w = w.subsheet;
                 //Check open windows for a Journal Sheet with a Map Note and embedded Actors
                 if (w instanceof JournalSheet) {
                     openJournalSheet = w;
@@ -1545,3 +1548,7 @@ Hooks.on('getSceneControlButtons', QuickEncounter.getSceneControlButtons);
 Hooks.on("deleteCombat", (combat, options, userId) => {
     QuickEncounter.onDeleteCombat(combat, options, userId);
 });
+
+Hooks.on("activateControls", (journal, controls) => {
+	controls.push({ id: 'quickencounter', text: "Quick Encounter", icon: 'fa-fist-raised', conditional: game.user.isGM, callback: QuickEncounter.runAddOrCreate.bind(journal?.subsheet) });
+});												 
