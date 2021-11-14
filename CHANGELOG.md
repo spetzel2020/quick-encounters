@@ -1,6 +1,9 @@
 # RELEASE NOTES
-## 0.9
+## 0.9 
 - Supports Foundry 0.8.x only
+- Implemented Issue [#53](https://github.com/spetzel2020/quick-encounters/issues/53) ; new setting to delete All or Defeated hostile tokens after combat
+- Implemented Issue [#54](https://github.com/spetzel2020/quick-encounters/issues/54) ; new setting to Delete or Leave tokens after saving them
+    - Visual representation of left tokens is small token icon
 ## 0.8
 - Make QE dialog read-only if from QE is in Compendium Journal
 - Updated Spanish & Japanese translation
