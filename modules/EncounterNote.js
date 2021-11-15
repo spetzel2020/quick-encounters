@@ -21,7 +21,8 @@ Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tra
                         EncounterNote.create() and .place() return newNote so that we can store that in the quickEncounter before serialization
                         Expand the available list of Note icons (perhaps would be good to have a Setting to allow/disallow this)
 8-Aug-2021      0.8.3a: If Foundryv8 then don't do Note deletion in the current scene because new Journal._onDelete() method takes care of that  
-                        (although because of https://gitlab.com/foundrynet/foundryvtt/-/issues/5700 this won't work at all currently)                      
+                        (although because of https://gitlab.com/foundrynet/foundryvtt/-/issues/5700 this won't work at all currently)  
+15-Nov-2021     v0.9.1b: Issue #57 Reintroduce deleltion of notes; doesn't seem to be handled in Foundry 0.8.9                                            
 */
 
 //Expand the available list of Note icons
@@ -117,9 +118,8 @@ export class EncounterNote {
             if (!matchingNoteIds?.length) {continue;}
             //Deletion is triggered by Scene (because that's where the notes are stored)
             //v0.8.3a: If Foundry v0.8.x then don't delete the Note in the viewed Scene because the Journal._onDelete() trigger does that
-            if (!isFoundryV8 || (scene !== user.viewedScene)) {
-                scene.deleteEmbeddedEntity("Note", matchingNoteIds);
-            }
+            //v0.9.1b: Issue #57 Reintroduce deleltion of notes; doesn't seem to be handled in Foundry 0.8.9
+            scene.deleteEmbeddedEntity("Note", matchingNoteIds);
             numNotesDeleted += matchingNoteIds.length;
         }
 
