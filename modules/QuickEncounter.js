@@ -171,7 +171,7 @@
                 Also, CURRENT approach generates tokens if they don't already exist - ALTERNATIVE would be to record the tokens you Deleted
                 and only regenerate those
 9-Nov-2021      0.9.0g: Change the Show Delete Tokens after Add setting to be a simple "Delete the Tokens on the Scene" - if cleared you have to delete them manually
-
+15-Nov-2021     0.9.1a: Merged in https://github.com/spetzel2020/quick-encounters/pull/59 (ironmonk88, fixes to work with Monk's Enhanced Journal)
 */
 
 
@@ -180,7 +180,7 @@ import {QESheet} from './QESheet.js';
 
 export const QE = {
     MODULE_NAME : "quick-encounters",
-    MODULE_VERSION : "0.9.0",
+    MODULE_VERSION : "0.9.1",
     TOKENS_FLAG_KEY : "tokens",
     QE_JSON_FLAG_KEY : "quickEncounter"
 }
@@ -406,7 +406,7 @@ export class QuickEncounter {
         const controlledFriendlyTokens = controlledTokens?.filter(t => t.data?.disposition === FRIENDLY_TOKEN_DISPOSITIONS );
         //0.7.0b: Capture controlled tiles (will be one or the other
         const controlledTiles = Array.from(Tile.layer.controlled);
-
+        //0.9.1a: (from ironmonk88) Pass this so we can check for Monk's Enhanced Journal 
         const candidateJournalEntry = QuickEncounter.findCandidateJournalEntry.call(this); 
         const quickEncounter = (candidateJournalEntry instanceof QuickEncounter ) ? candidateJournalEntry : null;
 
@@ -706,9 +706,8 @@ export class QuickEncounter {
         else {
             let openJournalSheet = null;
             for (let w of (this instanceof JournalSheet ? [this] : Object.values(ui.windows))) {
-				//Check to see if this is an Enhanced Journal window and get the subsheet
-				if(w.subsheet)
-					w = w.subsheet;
+				////0.9.1a: (from ironmonk88) Check to see if this is an Enhanced Journal window and get the subsheet
+				if (w.subsheet) {w = w.subsheet;}
                 //Check open windows for a Journal Sheet with a Map Note and embedded Actors
                 if (w instanceof JournalSheet) {
                     openJournalSheet = w;
@@ -1549,6 +1548,7 @@ Hooks.on("deleteCombat", (combat, options, userId) => {
     QuickEncounter.onDeleteCombat(combat, options, userId);
 });
 
+//0.9.1a: (from ironmonk88) Add a QE (fist) control to the command palette for Monk's Enhanced Journal
 Hooks.on("activateControls", (journal, controls) => {
 	controls.push({ id: 'quickencounter', text: "Quick Encounter", icon: 'fa-fist-raised', conditional: game.user.isGM, callback: QuickEncounter.runAddOrCreate.bind(journal?.subsheet) });
 });												 
