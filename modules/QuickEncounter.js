@@ -173,7 +173,7 @@
 9-Nov-2021      0.9.0g: Change the Show Delete Tokens after Add setting to be a simple "Delete the Tokens on the Scene" - if cleared you have to delete them manually
 15-Nov-2021     0.9.1a: Merged in https://github.com/spetzel2020/quick-encounters/pull/59 (ironmonk88, fixes to work with Monk's Enhanced Journal)
                 0.9.1b: Fix Issue #63 (wasn't freezing a captured token from further change)
-                0.9.1d: Fix Issue #61: Move the Encounter oppnents to the top of the JE (so in PinCushion the preview will show them)
+                0.9.1d: Fix Issue #61: Move the Encounter opponents to the top of the JE (so in PinCushion the preview will show them)
 */
 
 

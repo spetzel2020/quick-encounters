@@ -6,6 +6,7 @@
 - Fixed [#57](https://github.com/spetzel2020/quick-encounters/issues/57)
 - Fixed [#63](https://github.com/spetzel2020/quick-encounters/issues/63)
 - Closed [#58](https://github.com/spetzel2020/quick-encounters/issues/58) (not a bug)
+- Fixed [#61](https://github.com/spetzel2020/quick-encounters/issues/61)
 - Planned: #34,  
 ### 0.9.0
 - Implemented Issue [#53](https://github.com/spetzel2020/quick-encounters/issues/53) ; new setting to delete All or Defeated hostile tokens after combat
