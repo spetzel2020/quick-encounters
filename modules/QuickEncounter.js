@@ -172,6 +172,7 @@
                 and only regenerate those
 9-Nov-2021      0.9.0g: Change the Show Delete Tokens after Add setting to be a simple "Delete the Tokens on the Scene" - if cleared you have to delete them manually
 15-Nov-2021     0.9.1a: Merged in https://github.com/spetzel2020/quick-encounters/pull/59 (ironmonk88, fixes to work with Monk's Enhanced Journal)
+                0.9.1b: Fix Issue #63 (wasn't freezing a captured token from further change)
 */
 
 
@@ -1134,8 +1135,8 @@ export class QuickEncounter {
             }
         }
 
-        //0.9.0e: Not necessary to duplicate the whole array (since we duplicated elements above)
         //We do need to check that toCreateCombinedTokensData is not empty (if everything is already on the Scene)
+        const origCombinedTokensData = duplicate(toCreateCombinedTokensData);
         const tempCreatedTokens = toCreateCombinedTokensData.length ? await Token.create(toCreateCombinedTokensData,{hidden: isHidden}) : [];
         //And Token.create unfortunately returns an element, not an array if you pass a length=1 array
         let createdTokens;
@@ -1160,8 +1161,8 @@ export class QuickEncounter {
                 if (toCreateCombinedTokensData[i].isSavedToken) {
                     //Ignore errors that happen during this update
                     try {
-    //FIXME: This is throwing errors (Issue #58); In Foundry v0.8 we have to update the TokenDocument not the TokenData
-                        createdTokens[i] = await createdTokens[i].update(toCreateCombinedTokensData[i]);
+                        //0.9.1b: Update back to the original data (in case it was changed by TokenMold or other)
+                        createdTokens[i] = await createdTokens[i].update(origCombinedTokensData[i]);
                     } catch {}
                 }
             }
