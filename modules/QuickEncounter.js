@@ -173,6 +173,7 @@
 9-Nov-2021      0.9.0g: Change the Show Delete Tokens after Add setting to be a simple "Delete the Tokens on the Scene" - if cleared you have to delete them manually
 15-Nov-2021     0.9.1a: Merged in https://github.com/spetzel2020/quick-encounters/pull/59 (ironmonk88, fixes to work with Monk's Enhanced Journal)
                 0.9.1b: Fix Issue #63 (wasn't freezing a captured token from further change)
+                0.9.1d: Fix Issue #61: Move the Encounter oppnents to the top of the JE (so in PinCushion the preview will show them)
 */
 
 
@@ -470,8 +471,8 @@ export class QuickEncounter {
         let quickEncounter = QuickEncounter.createQuickEncounterAndAdd(controlledAssets);
 
         //Create a new JournalEntry - the corresponding map note gets automatically created too
-//FIXME: Replace all this with a renderTemplate section using handlebars
-        let content = game.i18n.localize("QE.Instructions.CONTENT");
+        //0.9.1d Issue #61: Move the Encounter oppnents to the top of the JE
+        let content = game.i18n.localize("QE.Instructions.CONTENT1");
         //0.7.0 extractedActors could be null if we have just tiles or other (non-Actor/token assets)
         if (quickEncounter.extractedActors) {
             for (const eActor of quickEncounter.extractedActors) {
@@ -481,7 +482,7 @@ export class QuickEncounter {
                 content += `<li>${eActor.numActors}@Actor[${actor.id}]{${actor.name}} ${xpString}</li>`;
             }
         }
-
+        content += game.i18n.localize("QE.Instructions.CONTENT2");
         const journalData = {
             folder: null,
             name:  `Quick Encounter: ${game.scenes?.viewed?.name}`,
