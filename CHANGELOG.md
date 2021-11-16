@@ -3,7 +3,10 @@
 - Supports Foundry 0.8.x only
 ### 0.9.1
 - Merged PR#59 from ironmonk88 to work with Enhanced Journals
-- Planned: #34, [#58](https://github.com/spetzel2020/quick-encounters/issues/58), [#57](https://github.com/spetzel2020/quick-encounters/issues/57)
+- Fixed [#57](https://github.com/spetzel2020/quick-encounters/issues/57)
+- Fixed [#63](https://github.com/spetzel2020/quick-encounters/issues/63)
+- Closed [#58](https://github.com/spetzel2020/quick-encounters/issues/58) (not a bug)
+- Planned: #34,  
 ### 0.9.0
 - Implemented Issue [#53](https://github.com/spetzel2020/quick-encounters/issues/53) ; new setting to delete All or Defeated hostile tokens after combat
 - Implemented Issue [#54](https://github.com/spetzel2020/quick-encounters/issues/54) ; new setting to Delete or Leave tokens after saving them
