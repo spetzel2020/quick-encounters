@@ -174,6 +174,7 @@
 15-Nov-2021     0.9.1a: Merged in https://github.com/spetzel2020/quick-encounters/pull/59 (ironmonk88, fixes to work with Monk's Enhanced Journal)
                 0.9.1b: Fix Issue #63 (wasn't freezing a captured token from further change)
                 0.9.1d: Fix Issue #61: Move the Encounter opponents to the top of the JE (so in PinCushion the preview will show them)
+16-Nov-2021     0.9.2a: "Fix" Issue #62: Suppress MEJ popping up JE so it will happen on the explicit JE render (except now you just get the orphan Journal Sheet without MEJ)                
 */
 
 
@@ -490,8 +491,8 @@ export class QuickEncounter {
             type: "encounter",
             types: "base"
         }
-        let journalEntry = await JournalEntry.create(journalData);
-        const ejSheet = new JournalSheet(journalEntry);
+        //0.9.2a: Per ironmonk88, activate:false tells Enhanced Journals to not pop up the new JE yet (because there's a sheet render below)
+        let journalEntry = await JournalEntry.create(journalData, {activate: false});
 
 //REFACTOR: Individual property setting and order is fragile        
         quickEncounter.serializeIntoJournalEntry(journalEntry.id);
@@ -504,6 +505,7 @@ export class QuickEncounter {
         quickEncounter.serializeIntoJournalEntry(journalEntry.id);
 
         //v0.6.3: Show the Journal Sheet last so it can see the Map Note
+        const ejSheet = new JournalSheet(journalEntry);
         ejSheet.render(true);   //0.6.1: This will also pop-open a QE dialog if you have that setting
     }
 
