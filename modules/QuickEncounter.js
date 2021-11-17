@@ -174,7 +174,7 @@
 15-Nov-2021     0.9.1a: Merged in https://github.com/spetzel2020/quick-encounters/pull/59 (ironmonk88, fixes to work with Monk's Enhanced Journal)
                 0.9.1b: Fix Issue #63 (wasn't freezing a captured token from further change)
                 0.9.1d: Fix Issue #61: Move the Encounter opponents to the top of the JE (so in PinCushion the preview will show them)
-16-Nov-2021     0.9.2a: "Fix" Issue #62: Suppress MEJ popping up JE so it will happen on the explicit JE render (except now you just get the orphan Journal Sheet without MEJ)                
+16-Nov-2021     0.9.2a: "Fix" Issue #62: Suppress MEJ popping up JE so it will happen on the explicit JE render (except now you just get the orphan Journal Sheet without MEJ)   
 */
 
 
@@ -946,8 +946,6 @@ export class QuickEncounter {
                     let shiftedTokensData = ea.savedTokensData.map(std => {
                         std.x += shift.x;
                         std.y += shift.y;
-                        const matchingToken = game.scenes.viewed.tokens.get(std._id); // returns undefined if not found
-                        std.tokenExistsOnScene = (matchingToken !== undefined);
                         return std;
                     });
                     const numExcessActors = ea.generatedTokensData.length -  shiftedTokensData.length;
@@ -1060,7 +1058,7 @@ export class QuickEncounter {
             this.extractedActors[iExtractedActor].generatedTokensData = [];  //clear this every time
             const actor = await QuickEncounter.getActor(eActor);
             if (!actor) {continue;}     //possibly will happen with Compendium
-//FIXME: May have to update extractedActor with the imported actorId and then hopefully it won't re-import
+//FIXME: May have to update extractedActor with the imported actorId and then hopefully it won't re-import - see Issue #66
             const numActors = QuickEncounter.getNumActors(eActor, {rollType : "full"});
 
              for (let iToken=0; iToken < numActors; iToken++) {
