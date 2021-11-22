@@ -23,7 +23,11 @@
                         {{#unless @root/isFromCompendium}}
                         <div class="flexrow">
                             {{#each this.tokens}}
-                                <input type="checkbox" {{#if this.isSavedToken}}{{checked}}{{/if}} disabled>
+                                {{#if this.tokenExistsOnScene}}
+                                    <img class="token-portrait" src="{{../img}}" title="{{localize 'QE.QuickEncounterDialog.SCENE_TOKEN'}}" />
+                                {{else}}
+                                    <input type="checkbox" {{#if this.isSavedToken}}{{checked}}{{/if}} disabled>
+                                {{/if}}
                             {{/each}}
                         </div>
                         {{/unless}}

@@ -1,4 +1,42 @@
 # RELEASE NOTES
+## 0.9 
+- Supports Foundry 0.8.x only
+### 0.9.2
+- Fixed: [#62](https://github.com/spetzel2020/quick-encounters/issues/62) (more improvements planned)
+- Planned: #34, [#53](https://github.com/spetzel2020/quick-encounters/issues/53),
+### 0.9.1
+- Merged PR#59 from ironmonk88 to work with Enhanced Journals
+- Fixed [#57](https://github.com/spetzel2020/quick-encounters/issues/57)
+- Fixed [#63](https://github.com/spetzel2020/quick-encounters/issues/63)
+- Closed [#58](https://github.com/spetzel2020/quick-encounters/issues/58) (not a bug)
+- Fixed [#61](https://github.com/spetzel2020/quick-encounters/issues/61) 
+### 0.9.0
+- Implemented Issue [#53](https://github.com/spetzel2020/quick-encounters/issues/53) ; new setting to delete All or Defeated hostile tokens after combat
+- Implemented Issue [#54](https://github.com/spetzel2020/quick-encounters/issues/54) ; new setting to Delete or Leave tokens after saving them
+    - Visual representation of left tokens is small token icon
+## 0.8
+- Make QE dialog read-only if from QE is in Compendium Journal
+- Updated Spanish & Japanese translation
+- Compatible with Foundry 0.8.x
+- Bug fixes
+### 0.8.5
+### 0.8.4
+- Fixed: Issue [#49](https://github.com/spetzel2020/quick-encounters/issues/49) (again)
+### 0.8.4
+- Fixed: Issue [#52](https://github.com/spetzel2020/quick-encounters/issues/52)    
+### 0.8.3
+- Fixed: Issue [#48](https://github.com/spetzel2020/quick-encounters/issues/48), [#50](https://github.com/spetzel2020/quick-encounters/issues/50), [#51](https://github.com/spetzel2020/quick-encounters/issues/51)
+- Compatible with Foundry 0.8.8
+### 0.8.2
+- Fixed: Issue [#46](https://github.com/spetzel2020/quick-encounters/issues/46), [#47](https://github.com/spetzel2020/quick-encounters/issues/47)
+- Updated Japanese translation
+### 0.8.1
+- Updated Spanish translation
+- Compatible with Foundry 0.8.6
+### 0.8.0
+- Updates to support Foundry 0.8.x
+- Make QE dialog read-only if from QE is in Compendium Journal
+- Support League standard for module.json format (switch to implicit Github latest link)
 
 ## 0.7
 - Save tiles as well as tokens!
