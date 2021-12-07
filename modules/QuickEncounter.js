@@ -177,6 +177,7 @@
 16-Nov-2021     0.9.2a: "Fix" Issue #62: Suppress MEJ popping up JE so it will happen on the explicit JE render (except now you just get the orphan Journal Sheet without MEJ)   
 6-Dec-2021      0.9.3a: Merged Spanish translation
                         Expand Foundryv8 checks for both 0.8 and 0.9
+                0.9.3b: New setting for "Show Add to CT checkbox"  (showAddToCombatTrackerCheckbox); added English tags                      
 */
 
 
@@ -352,6 +353,15 @@ export class QuickEncounter {
             scope: "world",
             config: true,
             default: true,
+            type: Boolean
+        });
+        //v0.9.3 Show Add to Combat Tracker checkboxes in QE dialog
+        game.settings.register(QE.MODULE_NAME, "showAddToCombatTrackerCheckbox", {
+            name: "QE.Setting.ShowAddToCombatTrackerCheckbox.NAME",
+            hint: "QE.Setting.ShowAddToCombatTrackerCheckbox.HINT",
+            scope: "world",
+            config: true,
+            default: false,
             type: Boolean
         });
         //0.6.13 Initialize which Note you are hovering over

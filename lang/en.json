@@ -75,5 +75,7 @@
    "QE.DeleteTokensAfterAdd.TITLE" : "Delete added tokens?",
    "QE.DeleteTokensAfterAdd.CONTENT" : "Delete selected tokens from the Scene (in which case they will be regenerated when you run the Quick Encounter) or Leave them (in which case they will be used in place)",
     "QE.DeleteTokensAfterAdd.DELETE": "Delete",
-    "QE.DeleteTokensAfterAdd.LEAVE": "Leave"
+    "QE.DeleteTokensAfterAdd.LEAVE": "Leave",
+    "QE.Setting.ShowAddToCombatTrackerCheckbox.NAME" : "Show Add to CT",
+    "QE.Setting.ShowAddToCombatTrackerCheckbox.HINT" : "Show an Add to Combat Tracker option for each combatant in the QE dialog (defaults to false, and all combatants are added to the Combat Tracker)"
   }
