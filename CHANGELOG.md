@@ -1,9 +1,12 @@
 # RELEASE NOTES
 ## 0.9 
-- Supports Foundry 0.8.x only
+- Supports Foundry 0.8+ only
+### 0.9.3
+- Updated Spanish translation
+- Check behavior for Foundry 0.9
 ### 0.9.2
 - Fixed: [#62](https://github.com/spetzel2020/quick-encounters/issues/62) (more improvements planned)
-- Planned: #34, [#53](https://github.com/spetzel2020/quick-encounters/issues/53),
+- Closed: [#53](https://github.com/spetzel2020/quick-encounters/issues/53)
 ### 0.9.1
 - Merged PR#59 from ironmonk88 to work with Enhanced Journals
 - Fixed [#57](https://github.com/spetzel2020/quick-encounters/issues/57)

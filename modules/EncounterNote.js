@@ -22,7 +22,8 @@ Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tra
                         Expand the available list of Note icons (perhaps would be good to have a Setting to allow/disallow this)
 8-Aug-2021      0.8.3a: If Foundryv8 then don't do Note deletion in the current scene because new Journal._onDelete() method takes care of that  
                         (although because of https://gitlab.com/foundrynet/foundryvtt/-/issues/5700 this won't work at all currently)  
-15-Nov-2021     v0.9.1b: Issue #57 Reintroduce deleltion of notes; doesn't seem to be handled in Foundry 0.8.9                                            
+15-Nov-2021     v0.9.1b: Issue #57 Reintroduce deleltion of notes; doesn't seem to be handled in Foundry 0.8.9     
+6-Dec-2021      0.9.3a: Check for Foundry 0.9 OR 0.8                                       
 */
 
 //Expand the available list of Note icons
@@ -104,13 +105,15 @@ export class EncounterNote {
 
     static async delete(journalEntry) {
         const isFoundryV8 = game.data.version.startsWith("0.8");
+        const isFoundryV9 = game.data.version.startsWith("0.9");
+
         if (!game.user.isGM) {return;}
         //Create filtered array of matching Notes for each scene
         let matchingNoteIds;
         let numNotesDeleted = 0;
         for (const scene of game.scenes) {
             const sceneNotes = scene.data.notes;
-            if (isFoundryV8) {
+            if (isFoundryV8 || isFoundryV9) {
                 matchingNoteIds = Array.from(sceneNotes.values()).filter(nd => nd.data.entryId === journalEntry.id).map(note => note._id);
             } else {
                 matchingNoteIds = sceneNotes.filter(note => note.entryId === journalEntry.id).map(note => note._id);
