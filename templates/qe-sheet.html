@@ -17,8 +17,12 @@
                     </div>
                     <div class="flexcol">
                         <div class="flexrow">
-                            <input type="String" name="{{this.rowNum}}" class="num-actors" id="{{this.actorId}}" value={{this.numActors}} {{#if @root/isFromCompendium}}disabled{{/if}}>
+                            <input type="text" name="{{this.rowNum}}.numActors" class="num-actors" id="{{this.actorId}}" value={{this.numActors}} {{#if @root/isFromCompendium}}disabled{{/if}}>
                             x {{this.actorName}} {{this.xp}}
+                            {{#if @root/showAddToCombatTrackerCheckbox}}
+                                &nbsp;&nbsp;<input type="checkbox" name="{{this.rowNum}}.addToCombatTracker" id="{{this.rowNum}}.addToCombatTracker" checked>
+                                <label for="{{this.rowNum}}.addToCombatTracker">{{localize 'QE.AddToCombatTracker.TITLE'}}</label>
+                            {{/if}}
                         </div>
                         {{#unless @root/isFromCompendium}}
                         <div class="flexrow">

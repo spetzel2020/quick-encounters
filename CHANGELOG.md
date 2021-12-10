@@ -1,9 +1,10 @@
 # RELEASE NOTES
 ## 0.9 
-- Supports Foundry 0.8+ only
+- Supports Foundry 0.8+ and 0.9 only
 ### 0.9.3
 - Updated Spanish translation
 - Check behavior for Foundry 0.9
+- Add "Show Add to Combat Tracker" setting
 ### 0.9.2
 - Fixed: [#62](https://github.com/spetzel2020/quick-encounters/issues/62) (more improvements planned)
 - Closed: [#53](https://github.com/spetzel2020/quick-encounters/issues/53)

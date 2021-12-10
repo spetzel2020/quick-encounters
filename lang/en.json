@@ -77,5 +77,6 @@
     "QE.DeleteTokensAfterAdd.DELETE": "Delete",
     "QE.DeleteTokensAfterAdd.LEAVE": "Leave",
     "QE.Setting.ShowAddToCombatTrackerCheckbox.NAME" : "Show Add to CT",
-    "QE.Setting.ShowAddToCombatTrackerCheckbox.HINT" : "Show an Add to Combat Tracker option for each combatant in the QE dialog (defaults to false, and all combatants are added to the Combat Tracker)"
+    "QE.Setting.ShowAddToCombatTrackerCheckbox.HINT" : "Show an Add to Combat Tracker option for each combatant in the QE dialog (default: not shown, and all combatants are added to the Combat Tracker)",
+    "QE.AddToCombatTracker.TITLE" : "Add to CT"
   }

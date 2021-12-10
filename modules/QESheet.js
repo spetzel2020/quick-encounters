@@ -29,7 +29,9 @@ Reused as EncounterCompanionSheet
 31-Mar-2021     0.8.0b: If you're looking at a Compendium, pop a read-only QESheet    
 5-Jun-2021      0.8.1a: Fixed: Issue #42: _getHeaderButtons() was incorrectly checking closeButtonIndex to indicate it was found   
                 0.8.1b: _getHeaderButtons() was incorrectly comparing/replacing translated button labels, but apparently they are still in base language at this point                 
-        
+9-Dec-2021      0.9.3c: Add checkbox to QE dialog if showAddToCombatTrackerCheckbox is set (and check it by default)  
+                _updateObject(): Changed format of formData names to rowNum.fieldName to accomodate the possible checkbox
+                TODO: Not currently saving it, even locally - will need to save and then persist      
 */
 
 
@@ -130,7 +132,9 @@ export class QESheet extends FormApplication {
            combatants: this.combatants,
            tilesData: this.quickEncounter?.savedTilesData,
            totalXPLine : this.totalXPLine,
-           isFromCompendium : this.object?.isFromCompendium
+           isFromCompendium : this.object?.isFromCompendium,    //FIX: This setting should be on a combatant basis, not one
+           //0.9.3 Setting to show this checkbox (checked by default)
+           showAddToCombatTrackerCheckbox : game.settings.get(QE.MODULE_NAME, "showAddToCombatTrackerCheckbox")
         };
     }
 
@@ -184,36 +188,40 @@ export class QESheet extends FormApplication {
         const checkIntReg = /^[0-9]*$/;   
         //Capture changes in the number of Actors or new Actors added (currently not possible through this dialog)
         let wasChanged = false;
-        for (let [rowNum, numActors] of Object.entries(formData)) {
+        //0.9.3: Changed format of formData names to rowNum.fieldName
+        for (let [rowFieldName, fieldValue] of Object.entries(formData)) {
             let combatantWasChanged = false;
-            const iCombatant = rowNum;
-            if (iCombatant >= this.combatants.length) {
-                //New combatant
+            const elements = rowFieldName.split(".");
+            if ((elements.length ?? 0) < 2) {continue;}   //ignore if the split doesn't work
+            const rowNum = elements[0];
+            const fieldName = elements[1];
+            if (rowNum >= this.combatants.length) {
+                //New combatant - not possible in the dialog yet, but will be with drag-and-drop
                 combatantWasChanged = true;
-                
-            } else {
-                numActors = numActors.trim();   //trim off whitespace
-                combatantWasChanged = (this.combatants[iCombatant].numActors !== numActors);
+            } else if (fieldName === "numActors") {
+                const numActors = fieldValue.trim();   //trim off whitespace
+                combatantWasChanged = (this.combatants[rowNum].numActors !== numActors);
                 if (combatantWasChanged) {
                     //Validate that the change is ok
                     //Option 1: You cleared the field or spaced it out
                     if ((numActors === null) || (numActors === "")) {
-                        this.combatants[iCombatant].numActors = 0;
+                        this.combatants[rowNum].numActors = 0;
                     } else if (dieRollReg.test(numActors)) {
                         //Option 2: This is a dice roll (not guaranteed because it could just contain a dieRoll)
-                        this.combatants[iCombatant].numActors = numActors;
+                        this.combatants[rowNum].numActors = numActors;
                     } else if (checkIntReg.test(numActors)) {
                         const multiplier = parseInt(numActors,10);
                         if (!Number.isNaN(multiplier)) {
-                             this.combatants[iCombatant].numActors = multiplier;
+                             this.combatants[rowNum].numActors = multiplier;
                         }
-                       
                     } else {
                         //otherwise leave unchanged - should pop up a dialog or highlight the field in red
                         const warning = game.i18n.localize("QE.QuickEncounterDialog.InvalidNumActors.WARNING") + " " + numActors;
                         ui.notifications.warn(warning);
                     }
                 }
+            } else if (fieldName === "addToCombatTracker") {
+                combatantWasChanged = (this.combatants[rowNum].checkbox !== fieldValue);
             }
             wasChanged = wasChanged || combatantWasChanged;
         }
