@@ -177,7 +177,10 @@
 16-Nov-2021     0.9.2a: "Fix" Issue #62: Suppress MEJ popping up JE so it will happen on the explicit JE render (except now you just get the orphan Journal Sheet without MEJ)   
 6-Dec-2021      0.9.3a: Merged Spanish translation
                         Expand Foundryv8 checks for both 0.8 and 0.9
-                0.9.3b: New setting for "Show Add to CT checkbox"  (showAddToCombatTrackerCheckbox); added English tags                      
+                0.9.3b: New setting for "Show Add to CT checkbox"  (showAddToCombatTrackerCheckbox); added English tags    
+14-Dec-2021     0.9.3d: Plumb "Add to CT" checkbox - persist in QE structure (as part of extractedActors) and use in:
+                createTokens(): spread either true or the extractedActor setting to the token data and then we have to copy to all the tokens
+                createCombat(): add token to the Combat Tracker if addToCombatTracker set (the default)
 */
 
 
@@ -909,11 +912,12 @@ export class QuickEncounter {
             alt : event?.altKey, 
             ctrl: event?.ctrlKey
         }
-        const createdTokens = await this.createTokens(options);
+        //0.9.3d: encounterTokens is both created tokens and existing tokens left and not deleted
+        const encounterTokens = await this.createTokens(options);
 
         //And add them to the Combat Tracker (wait 200ms for drawing to finish)
         setTimeout(() => {
-            QuickEncounter.createCombat(createdTokens);
+            QuickEncounter.createCombat(encounterTokens);
         },200);
 
         if (savedTilesData) {
@@ -1123,7 +1127,15 @@ export class QuickEncounter {
         */
 
         let allCombinedTokensData = [];
+        const showAddToCombatTrackerCheckbox = game.settings.get(QE.MODULE_NAME, "showAddToCombatTrackerCheckbox");
         for (const ea of this.extractedActors) {
+            //0.9.3: FIX: Better way would be to keep the ExtractedActor structure all the way through to token creation and add to CT
+            //but that would require a lot of changes
+            //If showAddToCombatTrackerCheckbox === FALSE, then default addToCombatTracker to TRUE
+            const addTokenToCombatTracker = showAddToCombatTrackerCheckbox ? ea.addToCombatTracker : true;
+            for (const ctd of ea.combinedTokensData) {
+                ctd.addToCombatTracker = addTokenToCombatTracker;
+            }
             allCombinedTokensData = allCombinedTokensData.concat(ea.combinedTokensData);
         }
 
@@ -1141,13 +1153,15 @@ export class QuickEncounter {
         }
         //0.8.3c: Use duplicate here because allCombinedTokensData is a simple Object
         //0.9.0e: If the exact token is already on the scene (because we used the Leave option) then don't regenerate it
-        //but in that case add the existing token to the tempCreatedTokens list
+        //but in that case add the existing token to the existingTokens list
         let toCreateCombinedTokensData = [];
         let existingTokens = [];
         for (const ctd of allCombinedTokensData) {
             //if the exact-match token (by token._id) already exists on the Scene then don't recreate it
             const matchingToken = game.scenes.viewed.tokens.get(ctd._id);
             if (matchingToken) {
+                //0.9.3d Remember if we should/shouldn't add to Combat Tracker
+                matchingToken.addToCombatTracker = ctd.addToCombatTracker;
                 existingTokens.push(matchingToken);
             } else {
                 toCreateCombinedTokensData.push(duplicate(ctd));
@@ -1164,28 +1178,34 @@ export class QuickEncounter {
         } else {
             createdTokens = Array.isArray(tempCreatedTokens) ? tempCreatedTokens : [tempCreatedTokens];
         }
-        //0.9.0e: Add back the QE tokens already on the scene
-        createdTokens = createdTokens.concat(existingTokens);
-//FIXME: This is now a TokenDocuments5e array???        
+
+
 
         //0.9.0 Move if (freezeCapturedTokens) outside the loop
+        //0.9.3 Move it back in because we're using the loop to remember addToCombatTracker also
         //v0.6.1d: If it's a savedToken (one that was "captured" then check if it should be frozen as is or regenerated for example by Token Mold)
         //Actor-generated tokens are always generated
         //v0.5.3d: Check the value of setting "freezeCapturedTokens"
         const freezeCapturedTokens = game.settings.get(QE.MODULE_NAME, "freezeCapturedTokens");
-        if (freezeCapturedTokens) {
+        for (let i=0; i<toCreateCombinedTokensData.length; i++) {
             //v0.5.0: Now reset the token data in case it was adjusted (e.g. by Token Mold), just for those that are frozen
             //v0.6.1d: If freezeCapturedTokens = true, then reset the savedTokens
-            for (let i=0; i<toCreateCombinedTokensData.length; i++) {
-                if (toCreateCombinedTokensData[i].isSavedToken) {
-                    //Ignore errors that happen during this update
-                    try {
-                        //0.9.1b: Update back to the original data (in case it was changed by TokenMold or other)
-                        createdTokens[i] = await createdTokens[i].update(origCombinedTokensData[i]);
-                    } catch {}
-                }
+            if (freezeCapturedTokens && toCreateCombinedTokensData[i].isSavedToken) {
+                //Ignore errors that happen during this update
+                try {
+                    //0.9.1b: Update back to the original data (in case it was changed by TokenMold or other)
+                    createdTokens[i] = await createdTokens[i].update(origCombinedTokensData[i]);
+                } catch {}
             }
+            //0.9.3d Remember if we should/shouldn't add to Combat Tracker
+            //FIX: This doesn't handle if any of the token creations fail - to do that we would have to handle token creation individually
+            createdTokens[i].addToCombatTracker = origCombinedTokensData[i].addToCombatTracker;
         }
+
+        //0.9.3d Fixed: We can't add the existing tokens until we've taken care of the reset against origCombinedTokensData[] (=toCreateCombinedTokensData[])
+        //0.9.0e: Add back the QE tokens already on the scene
+        createdTokens = createdTokens.concat(existingTokens);
+
         return createdTokens;
     }
 
@@ -1208,34 +1228,39 @@ export class QuickEncounter {
         return createdTiles;
     }
 
-    static async createCombat(createdTokens) {
-        if (!createdTokens || !createdTokens.length) {return;}
+    static async createCombat(encounterTokens) {
+        if (!encounterTokens || !encounterTokens.length) {return;}
 
-        //Control the tokens (because that is checked in adding them to the Combat Tracker)
-        //But release any others first (so that we don't inadvertently add them to combat)
-        let createdToken0;
         const isFoundryV8 = game.data.version.startsWith("0.8");
-        const isFoundryV9 = game.data.version.startsWith("0.9");        
-        if (isFoundryV8 || isFoundryV9) {//Foundry 0.8.x
-            createdToken0 = createdTokens[0].object;
-        } else {//Foundry 0.7.x
-            createdToken0 = createdTokens[0];
-        }
-        createdToken0.control({releaseOthers : true, updateSight : false, pan : true});
+        const isFoundryV9 = game.data.version.startsWith("0.9"); 
+        
+        //FIX: Refactor: Should refactor into two large paths for Foundry 0.7 VS. 0.8 & 0.9
+
+        //0.9.3d Find the first token to be added to the Combat Tracker and work around that
+        let firstAddedToCT = null; 
 
         let tokenObject;
-        for (const token of createdTokens) {
+        for (const token of encounterTokens) {
             if (isFoundryV8 || isFoundryV9) {//0.8.0e: 
                 tokenObject = token.object;
             } else {//Foundry 0.7.x
                 tokenObject = token;
-            }            
-            tokenObject.control({releaseOthers : false, updateSight : false});
+            }      
+            //0.9.3d: Only add to Combat Tracker if addToCombatTracker set (the default)      
+            //Control the tokens (because that is checked in adding them to the Combat Tracker)
+            if (token.addToCombatTracker) {
+                if (!firstAddedToCT) {
+                    //But release any others first (so that we don't inadvertently add them to combat) using the "first" one arbitrarily
+                    firstAddedToCT = tokenObject;
+                    firstAddedToCT.control({releaseOthers : true, updateSight : false, pan : true});
+                }
+                tokenObject.control({releaseOthers : false, updateSight : false});
+            }
         }
 
         //Load the recovered tokens into the combat Tracker
         //Only have to toggle one of them to add all the controlled tokens
-        await createdToken0.toggleCombat();
+        if (firstAddedToCT) await firstAddedToCT.toggleCombat();
 
         //0.6: Moved after toggling combat in case that actually creates the combat entity
         const tabApp = ui.combat;
@@ -1243,7 +1268,7 @@ export class QuickEncounter {
         //If the tokens are not on the Scene then add them
 
         //Now release control of them as a group, because otherwise the stack is hard to see             
-        for (const token of createdTokens) {
+        for (const token of encounterTokens) {
             if (isFoundryV8 || isFoundryV9) {//0.8.0e: 
                 tokenObject = token.object;
             } else {//Foundry 0.7.x

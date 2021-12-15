@@ -31,7 +31,8 @@ Reused as EncounterCompanionSheet
                 0.8.1b: _getHeaderButtons() was incorrectly comparing/replacing translated button labels, but apparently they are still in base language at this point                 
 9-Dec-2021      0.9.3c: Add checkbox to QE dialog if showAddToCombatTrackerCheckbox is set (and check it by default)  
                 _updateObject(): Changed format of formData names to rowNum.fieldName to accomodate the possible checkbox
-                TODO: Not currently saving it, even locally - will need to save and then persist      
+                TODO: Not currently saving it, even locally - will need to save and then persist  
+14-Dec-2021     0.9.3d: Add addToCombatTracker to combatant data model and persist                    
 */
 
 
@@ -151,6 +152,8 @@ export class QESheet extends FormApplication {
                     numActors : eActor.numActors,
                     actorName: eActor.name,             //default
                     actorId: eActor.actorID,
+                    //0.9.3d Add addToCombatTracker to structure (defaults to true and may not be shown)
+                    addToCombatTracker: eActor.addToCombatTracker ?? true,
                     dataPackName : eActor.dataPackName, //non-null if a Compendium entry
                     tokens: eActor.combinedTokensData,
                     numType : typeof eActor.numActors
@@ -221,7 +224,8 @@ export class QESheet extends FormApplication {
                     }
                 }
             } else if (fieldName === "addToCombatTracker") {
-                combatantWasChanged = (this.combatants[rowNum].checkbox !== fieldValue);
+                combatantWasChanged = (this.combatants[rowNum].addToCombatTracker !== fieldValue);
+                this.combatants[rowNum].addToCombatTracker = fieldValue;
             }
             wasChanged = wasChanged || combatantWasChanged;
         }
@@ -243,6 +247,7 @@ export class QESheet extends FormApplication {
                 dataPackName : c.dataPackName, //if non-null then this is a Compendium reference
                 actorID : c.actorId,           //If Compendium sometimes this is the reference
                 name : c.actorName,
+                addToCombatTracker : c.addToCombatTracker,  //remembered checked/cleared setting (will only display if overall setting shows the dialog box)
                 savedTokensData : c.tokens.filter(td => td.isSavedToken)
             }
         });
