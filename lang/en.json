@@ -67,7 +67,7 @@
    "QE.Setting.ShowDeleteTokensDialogAfterCombat.NAME" : "Show Delete dialog after Combat",
    "QE.Setting.ShowDeleteTokensDialogAfterCombat.HINT" : "After you press End Combat or delete Combat Tracker, display a dialog with options to delete hostile tokens from the Scene. Clear this setting for the pre-0.9 behavior.",
    "QE.DeleteTokensAfterCombat.TITLE" : "Delete hostile tokens?",
-   "QE.DeleteTokensAfterCombat.CONTENT" : "Delete all or just defeated hostile tokens from the Scene",
+   "QE.DeleteTokensAfterCombat.CONTENT" : "Delete all or just defeated hostile tokens from the Scene (only deletes tokens added to the Combat Tracker)",
    "QE.DeleteTokensAfterCombat.DELETEALL" : "All",
    "QE.DeleteTokensAfterCombat.DELETEDEFEATED" : "Defeated",
    "QE.Setting.DeleteTokensAfterAdd.NAME" : "Delete tokens after Add/Link",
