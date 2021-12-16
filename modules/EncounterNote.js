@@ -23,7 +23,8 @@ Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tra
 8-Aug-2021      0.8.3a: If Foundryv8 then don't do Note deletion in the current scene because new Journal._onDelete() method takes care of that  
                         (although because of https://gitlab.com/foundrynet/foundryvtt/-/issues/5700 this won't work at all currently)  
 15-Nov-2021     v0.9.1b: Issue #57 Reintroduce deleltion of notes; doesn't seem to be handled in Foundry 0.8.9     
-6-Dec-2021      0.9.3a: Check for Foundry 0.9 OR 0.8                                       
+6-Dec-2021      0.9.3a: Check for Foundry 0.9 OR 0.8   
+15-Dec-2021     0.9.3f: EncounterNote.create(): Check/fix deprecation warning by using canvas.scene.embeddedDocuments()                                    
 */
 
 //Expand the available list of Note icons
@@ -83,6 +84,10 @@ export class EncounterNoteConfig extends NoteConfig {
 export class EncounterNote {
     static async create(quickEncounter, noteAnchor) {
         if (!quickEncounter) {return;}
+
+        const isFoundryV8 = game.data.version.startsWith("0.8");
+        const isFoundryV9 = game.data.version.startsWith("0.9");
+
         // Create Note data
         const noteData = {
               entryId: quickEncounter.journalEntryId,
@@ -96,9 +101,10 @@ export class EncounterNote {
               fontSize: 24
         };
 
-        //v0.5.0: Switch to Note.create() to bypass the NOte dialog
+        //v0.5.0: Switch to Note.create() to bypass the Note dialog
         //This is different from the JournalEntry._onDropData approach
-        let newNote = await Note.create(noteData);
+        //0.9.3f: Remove deprecation warning by using createEmbeddedDocuments()
+        let newNote = (isFoundryV8 || isFoundryV9) ? await canvas.scene.createEmbeddedDocuments("Note",[noteData]) : await Note.create(noteData);
         newNote._sheet = new EncounterNoteConfig(newNote);
         return newNote;
     }

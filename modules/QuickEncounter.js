@@ -181,6 +181,7 @@
 14-Dec-2021     0.9.3d: Plumb "Add to CT" checkbox - persist in QE structure (as part of extractedActors) and use in:
                 createTokens(): spread either true or the extractedActor setting to the token data and then we have to copy to all the tokens
                 createCombat(): add token to the Combat Tracker if addToCombatTracker set (the default)
+15-Dec-2021     0.9.3f: Fix this deprecation error  at QuickEncounters#1173 You are calling PlaceableObject.create which has been deprecated in favor of Document.create or Scene#createEmbeddedDocuments.
 */
 
 
@@ -1119,6 +1120,10 @@ export class QuickEncounter {
 
     async createTokens(options) {
         if (!this.extractedActors?.length) {return;}
+
+        const isFoundryV8 = game.data.version.startsWith("0.8");
+        const isFoundryV9 = game.data.version.startsWith("0.9");
+
         //Have to also control tokens in order to add them to the combat tracker
         /* The normal token workflow (see TokenLayer._onDropActorData) includes:
         1. Get actor data from Compendium if that's what you used (this is probably worth doing)
@@ -1170,7 +1175,15 @@ export class QuickEncounter {
 
         //We do need to check that toCreateCombinedTokensData is not empty (if everything is already on the Scene)
         const origCombinedTokensData = duplicate(toCreateCombinedTokensData);
-        const tempCreatedTokens = toCreateCombinedTokensData.length ? await Token.create(toCreateCombinedTokensData,{hidden: isHidden}) : [];
+        let tempCreatedTokens;
+
+        //0.9.3f: Fix 0.8.0 deprecation warning: call canvas.scene.createEmbeddedDocuments() instead of Token.create()
+        if (isFoundryV8 || isFoundryV9) {
+            tempCreatedTokens = toCreateCombinedTokensData.length ? await canvas.scene.createEmbeddedDocuments("Token",toCreateCombinedTokensData) : [];
+        } else {
+            tempCreatedTokens = toCreateCombinedTokensData.length ? await Token.create(toCreateCombinedTokensData,{hidden: isHidden}) : [];
+        }
+
         //And Token.create unfortunately returns an element, not an array if you pass a length=1 array
         let createdTokens;
         if (tempCreatedTokens.length === 0) {
@@ -1598,5 +1611,5 @@ Hooks.on("deleteCombat", (combat, options, userId) => {
 
 //0.9.1a: (from ironmonk88) Add a QE (fist) control to the command palette for Monk's Enhanced Journal
 Hooks.on("activateControls", (journal, controls) => {
-	controls.push({ id: 'quickencounter', text: "Quick Encounter", icon: 'fa-fist-raised', conditional: game.user.isGM, callback: QuickEncounter.runAddOrCreate.bind(journal?.subsheet) });
+	controls.push({id: 'quickencounter', text: "Quick Encounter", icon: 'fa-fist-raised', conditional: game.user.isGM, callback: QuickEncounter.runAddOrCreate.bind(journal?.subsheet)});
 });												 
