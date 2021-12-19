@@ -1,5 +1,7 @@
 # TO DO
 ## QE 0.9 bugs/refactor/features:
+- If you turn on Show Add to CT option for an old QE, then press Run QE immediately, it will get undefined for addToCT
+-- Solution would be to Update (do a Submit) when you press the Run QE button to save the state properly
 - Review/verify bugs below
 - Clean up/prioritize Features list
 - Look at Scene Packer and see what QE improvements would help
@@ -24,8 +26,6 @@ v0.7.3: QE Dialog should show Tokens not Actor image
 ## FEATURES
 ### v0.9.0
 - Issue [#55](https://github.com/spetzel2020/quick-encounters/issues/55):
->>> Option to delete tokens from map when CT done (the ones you added)
-        - Dialog to delete added/hostile tokens
 
 ### Support Compendium lifecycle for Instant Encounter (no Scene)
 - Fix the links in imported Compendia?? as part of importing or prior?

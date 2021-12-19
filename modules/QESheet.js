@@ -32,7 +32,8 @@ Reused as EncounterCompanionSheet
 9-Dec-2021      0.9.3c: Add checkbox to QE dialog if showAddToCombatTrackerCheckbox is set (and check it by default)  
                 _updateObject(): Changed format of formData names to rowNum.fieldName to accomodate the possible checkbox
                 TODO: Not currently saving it, even locally - will need to save and then persist  
-14-Dec-2021     0.9.3d: Add addToCombatTracker to combatant data model and persist                    
+14-Dec-2021     0.9.3d: Add addToCombatTracker to combatant data model and persist       
+18-Dec-2021     0.9.3h: When you press "Run Quick Encounter" then submit form first before Running the QE (to capture the Add To CT status)
 */
 
 
@@ -104,7 +105,8 @@ export class QESheet extends FormApplication {
         super.activateListeners(html);
         if (!this.object?.isFromCompendium) {
             html.find('button[name="addToCombatTracker"]').click(event => {
-                this.quickEncounter?.run(event);
+                // FIX: Need to submit the form first and then run; await this.submit({preventClose: true})
+                this.submit({preventClose: true}).then(this.quickEncounter?.run(event));
             });
             //0.7.0: Listeners for when you click - in actor or tile
             html.find("#QEContainers .actor-container").each((i, thumbnail) => {
