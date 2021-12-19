@@ -33,7 +33,7 @@ Reused as EncounterCompanionSheet
                 _updateObject(): Changed format of formData names to rowNum.fieldName to accomodate the possible checkbox
                 TODO: Not currently saving it, even locally - will need to save and then persist  
 14-Dec-2021     0.9.3d: Add addToCombatTracker to combatant data model and persist       
-18-Dec-2021     0.9.3h: When you press "Run Quick Encounter" then submit form first before Running the QE (to capture the Add To CT status)
+18-Dec-2021     0.9.4a: When you press "Run Quick Encounter" then submit form first before Running the QE (to capture the Add To CT status)
 */
 
 

@@ -1,6 +1,8 @@
 # RELEASE NOTES
 ## 0.9 
 - Supports Foundry 0.8+ and 0.9 only
+### 0.9.4
+- Submit/save QE when you press Run Quick Encounter (to capture Add to CT status)
 ### 0.9.3
 - Updated Spanish translation
 - Check behavior for Foundry 0.9 - fix critical deprecation warnings
