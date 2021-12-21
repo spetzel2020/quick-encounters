@@ -1,6 +1,6 @@
 # TO DO
 ## QE 0.9 bugs/refactor/features:
->>> The "small icon" to show a "left" token is not showing
+
 
 ## BUGS with Foundry 0.8.x
 v0.8.3  Compendium support: When you Run Quick Encounter, QE generates a new Actor for the Compendium entry even if it one exists
@@ -201,6 +201,7 @@ FIXED: v0.8.0: CONST.TOKEN_DISPOSITIONS will not be defined - need to test/chang
 FIXED in 0.8.1: v0.8.0 Issue #43: Display XP after Combat was not working
 FIXED in 0.8.1: v0.8.0 Issue #42: QE Dialog doesn't open if you install Core French (or probably any other language)
 FIXED in 0.8.2: Issue #46: : Reducing and then increasing the number of placed tokens creates ghost tokens
+FIXED in 0.9.4: The "small icon" to show a "left" token is not showing
 
 
 ## COMPLETED FEATURES

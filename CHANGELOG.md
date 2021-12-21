@@ -1,6 +1,8 @@
 # RELEASE NOTES
 ## 0.9 
 - Supports Foundry 0.8+ and 0.9 only
+### 0.9.5
+- Fixed: Really work with Foundry 0.9; was choking on deprecated .entity references
 ### 0.9.4
 - Submit/save QE when you press Run Quick Encounter (to capture Add to CT status)
 ### 0.9.3
