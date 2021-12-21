@@ -1,3 +1,4 @@
+import {QuickEncounter} from './QuickEncounter.js';
 /*
 Extend the placeable Map Note - select the desired tokens and then tap the Quick Encounters button
 Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tracker when you open the note?
@@ -24,7 +25,8 @@ Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tra
                         (although because of https://gitlab.com/foundrynet/foundryvtt/-/issues/5700 this won't work at all currently)  
 15-Nov-2021     v0.9.1b: Issue #57 Reintroduce deleltion of notes; doesn't seem to be handled in Foundry 0.8.9     
 6-Dec-2021      0.9.3a: Check for Foundry 0.9 OR 0.8   
-15-Dec-2021     0.9.3f: EncounterNote.create(): Check/fix deprecation warning by using canvas.scene.embeddedDocuments()                                    
+15-Dec-2021     0.9.3f: EncounterNote.create(): Check/fix deprecation warning by using canvas.scene.embeddedDocuments()      
+21-Dec-2021     0.9.5a: Use QuickEncounter.isFoundryV8Plus test                          
 */
 
 //Expand the available list of Note icons
@@ -85,9 +87,6 @@ export class EncounterNote {
     static async create(quickEncounter, noteAnchor) {
         if (!quickEncounter) {return;}
 
-        const isFoundryV8 = game.data.version.startsWith("0.8");
-        const isFoundryV9 = game.data.version.startsWith("0.9");
-
         // Create Note data
         const noteData = {
               entryId: quickEncounter.journalEntryId,
@@ -104,14 +103,12 @@ export class EncounterNote {
         //v0.5.0: Switch to Note.create() to bypass the Note dialog
         //This is different from the JournalEntry._onDropData approach
         //0.9.3f: Remove deprecation warning by using createEmbeddedDocuments()
-        let newNote = (isFoundryV8 || isFoundryV9) ? await canvas.scene.createEmbeddedDocuments("Note",[noteData]) : await Note.create(noteData);
+        let newNote = QuickEncounter.isFoundryV8Plus ? await canvas.scene.createEmbeddedDocuments("Note",[noteData]) : await Note.create(noteData);
         newNote._sheet = new EncounterNoteConfig(newNote);
         return newNote;
     }
 
     static async delete(journalEntry) {
-        const isFoundryV8 = game.data.version.startsWith("0.8");
-        const isFoundryV9 = game.data.version.startsWith("0.9");
 
         if (!game.user.isGM) {return;}
         //Create filtered array of matching Notes for each scene
@@ -119,7 +116,7 @@ export class EncounterNote {
         let numNotesDeleted = 0;
         for (const scene of game.scenes) {
             const sceneNotes = scene.data.notes;
-            if (isFoundryV8 || isFoundryV9) {
+            if (QuickEncounter.isFoundryV8Plus) {
                 matchingNoteIds = Array.from(sceneNotes.values()).filter(nd => nd.data.entryId === journalEntry.id).map(note => note._id);
             } else {
                 matchingNoteIds = sceneNotes.filter(note => note.entryId === journalEntry.id).map(note => note._id);

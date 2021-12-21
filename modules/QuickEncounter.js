@@ -182,6 +182,7 @@
                 createTokens(): spread either true or the extractedActor setting to the token data and then we have to copy to all the tokens
                 createCombat(): add token to the Combat Tracker if addToCombatTracker set (the default)
 15-Dec-2021     0.9.3f: Fix this deprecation error  at QuickEncounters#1173 You are calling PlaceableObject.create which has been deprecated in favor of Document.create or Scene#createEmbeddedDocuments.
+21-Dec-2021     0.9.5a: In init, set the QuickEncounter.isFoundryV8Plus variable for choosing different code-paths/data models
 */
 
 
@@ -190,7 +191,7 @@ import {QESheet} from './QESheet.js';
 
 export const QE = {
     MODULE_NAME : "quick-encounters",
-    MODULE_VERSION : "0.9.4",
+    MODULE_VERSION : "0.9.5",
     TOKENS_FLAG_KEY : "tokens",
     QE_JSON_FLAG_KEY : "quickEncounter"
 }
@@ -368,8 +369,14 @@ export class QuickEncounter {
             default: false,
             type: Boolean
         });
+
         //0.6.13 Initialize which Note you are hovering over
         QuickEncounter.hoveredNote = null;
+
+        //0.9.5 Set the QuickEncounter.isFoundryV8Plus variable for different code-paths
+        //If v9, then game.data.version will throw a deprecation warning so test for v9 first
+        QuickEncounter.isFoundryV8Plus = (game.data.release?.generation >= 9) || (game.data.version?.startsWith("0.8"));
+
     }
 
 
@@ -408,10 +415,8 @@ export class QuickEncounter {
     }
 
     static runAddOrCreate(event) {
-        const isFoundryV8 = game.data.version.startsWith("0.8");
-        const isFoundryV9 = game.data.version.startsWith("0.9");
         let FRIENDLY_TOKEN_DISPOSITIONS;
-        if (isFoundryV8 || isFoundryV9) {
+        if (QuickEncounter.isFoundryV8Plus) {
             FRIENDLY_TOKEN_DISPOSITIONS = CONST.TOKEN_DISPOSITIONS.FRIENDLY;
         } else {//0.7.x
             FRIENDLY_TOKEN_DISPOSITIONS = TOKEN_DISPOSITIONS.FRIENDLY;
@@ -570,13 +575,11 @@ export class QuickEncounter {
 
     addTokens(controlledTokens) {
         if (!controlledTokens) return;
-        const isFoundryV8 = game.data.version.startsWith("0.8");
-        const isFoundryV9 = game.data.version.startsWith("0.9");
 
         //Add the new tokens to the existing ones (or creates new ones)
         //Use tokenData because tokens is too deep to store in flags
         let controlledTokensData;
-        if (isFoundryV8 || isFoundryV9) {
+        if (QuickEncounter.isFoundryV8Plus) {
             //0.8.3c: Use the toObject() function to get a shallow copy (without prototypes) of controlledTokens.data
             controlledTokensData = controlledTokens.map(ct => {return ct.data.toObject()});
         } else { //Foundry 0.6.x or 0.7.x
@@ -647,7 +650,7 @@ export class QuickEncounter {
         // - but as an option (setting) you can leave the tokens on the map and they will be used instead of being generated
         // (You can still selectively delete them)
         const controlledTokensIds = controlledTokens.map(ct => {return ct.id});
-        if (isFoundryV8 || isFoundryV9) {//Foundry 0.8.x
+        if (QuickEncounter.isFoundryV8Plus) {//Foundry 0.8.x or 0.9
             //QE v0.9 - if set (the default) , delete the added tokens
             const deleteTokensAfterAdd = game.settings.get(QE.MODULE_NAME, "deleteTokensAfterAdd");
             if (deleteTokensAfterAdd) {
@@ -661,8 +664,6 @@ export class QuickEncounter {
 
     addTiles(controlledTiles) {
         if (!controlledTiles) return;
-        const isFoundryV8 = game.data.version.startsWith("0.8");
-        const isFoundryV9 = game.data.version.startsWith("0.9");
         //Modelled after addTokens
 
         //Add the new tiles to the existing ones (or creates new ones)
@@ -671,7 +672,7 @@ export class QuickEncounter {
         let controlledTilesData = controlledTiles.map(ct => {
             //0.8.3c: Use the toObject() function to get a shallow copy (without prototypes) of controlledTiles.data
             let ctd = ct.data;
-            if (isFoundryV8 || isFoundryV9) {
+            if (QuickEncounter.isFoundryV8Plus) {
                 ctd = ct.data.toObject();
             }
             ctd.layer = ct.document?.layer?.options?.name ?? "background";
@@ -683,7 +684,7 @@ export class QuickEncounter {
 
         //Delete the existing tokens (because they will be replaced)
         const controlledTilesIds = controlledTiles.map(ct => {return ct.id});
-        if (isFoundryV8 || isFoundryV9) {//Foundry 0.8.x
+        if (QuickEncounter.isFoundryV8Plus) {//Foundry 0.8.x
             canvas.scene.deleteEmbeddedDocuments("Tile", controlledTilesIds);
         } else {//Foundry 0.7.x
             canvas.tiles.deleteMany(controlledTilesIds);
@@ -750,7 +751,7 @@ export class QuickEncounter {
             for (let w of Object.values(ui.windows)) {
                 //Check open windows for the tutorial Journal Entry
                 if (w instanceof JournalSheet) {
-                    const journalEntry = w.entity;
+                    const journalEntry = w.object;
                     if (journalEntry && (journalEntry.name === game.i18n.localize("QE.HowToUse.TITLE"))) {
                         qeTutorial = w;
                         break;
@@ -764,7 +765,7 @@ export class QuickEncounter {
 
 
     static extractQuickEncounter(journalSheet) {
-        const journalEntry = journalSheet?.entity;
+        const journalEntry = journalSheet?.object;
         if (!journalEntry) {return;}
 
         //0.6.1k: If quickEncounter is stored, extract that - but you can't store the actual object
@@ -922,9 +923,7 @@ export class QuickEncounter {
         },200);
 
         if (savedTilesData) {
-            const isFoundryV8 = game.data.version.startsWith("0.8");
-            const isFoundryV9 = game.data.version.startsWith("0.9");
-            if (isFoundryV8 || isFoundryV9) {
+            if (QuickEncounter.isFoundryV8Plus) {   
                 //0.8.2b: Activate foreground/background
                 const savedBackgroundTilesData = savedTilesData.filter(std => std.layer === "background");
                 if (savedBackgroundTilesData.length) {
@@ -992,14 +991,12 @@ export class QuickEncounter {
     static getEncounterScene(journalEntry) {
         //if sceneNote is available, then we're in the Note Scene already
         if (journalEntry.sceneNote) {return game.scenes.viewed;}
-        else {
-            const isFoundryV8 = game.data.version.startsWith("0.8");
-            const isFoundryV9 = game.data.version.startsWith("0.9");            
+        else {          
             //Now we need to search through the available scenes to find a note with this Journal Entry
             for (const scene of game.scenes) {
                 const notes = scene.data.notes;
                 let foundNote;
-                if (isFoundryV8 || isFoundryV9) {
+                if (QuickEncounter.isFoundryV8Plus) {
                     foundNote = Array.from(notes.values()).find(nd => nd.data.entryId === journalEntry.id);
                 } else {
                     foundNote = notes.find(note => note.entryId === journalEntry.id);
@@ -1075,9 +1072,7 @@ export class QuickEncounter {
         const coords = {x: this.sourceNoteData?.x, y: this.sourceNoteData?.y}
 
         if (!this.extractedActors?.length || !coords) {return;}
-        const gridSize = canvas.dimensions.size;
-        const isFoundryV8 = game.data.version.startsWith("0.8");
-        const isFoundryV9 = game.data.version.startsWith("0.9");        
+        const gridSize = canvas.dimensions.size;     
 
         for (let [iExtractedActor, eActor] of this.extractedActors.entries()) {
             this.extractedActors[iExtractedActor].generatedTokensData = [];  //clear this every time
@@ -1096,7 +1091,7 @@ export class QuickEncounter {
                 }
                 //Use the prototype token from the Actors
                 let tempToken;
-                if (isFoundryV8 || isFoundryV9) {//Foundry 0.8.x
+                if (QuickEncounter.isFoundryV8Plus) {//Foundry 0.8.x
                     //0.8.0d: Use new TokenDocument constructor; does it handle token wildcarding? [probably didn't]
                     //0.8.2a: Per foundry.js#40276 use Actor.getTokenData (does handle token wildcarding)
                     const tempTokenData = await actor.getTokenData(tokenData);
@@ -1122,9 +1117,6 @@ export class QuickEncounter {
 
     async createTokens(options) {
         if (!this.extractedActors?.length) {return;}
-
-        const isFoundryV8 = game.data.version.startsWith("0.8");
-        const isFoundryV9 = game.data.version.startsWith("0.9");
 
         //Have to also control tokens in order to add them to the combat tracker
         /* The normal token workflow (see TokenLayer._onDropActorData) includes:
@@ -1180,7 +1172,7 @@ export class QuickEncounter {
         let tempCreatedTokens;
 
         //0.9.3f: Fix 0.8.0 deprecation warning: call canvas.scene.createEmbeddedDocuments() instead of Token.create()
-        if (isFoundryV8 || isFoundryV9) {
+        if (QuickEncounter.isFoundryV8Plus) {
             tempCreatedTokens = toCreateCombinedTokensData.length ? await canvas.scene.createEmbeddedDocuments("Token",toCreateCombinedTokensData) : [];
         } else {
             tempCreatedTokens = toCreateCombinedTokensData.length ? await Token.create(toCreateCombinedTokensData,{hidden: isHidden}) : [];
@@ -1246,8 +1238,6 @@ export class QuickEncounter {
     static async createCombat(encounterTokens) {
         if (!encounterTokens || !encounterTokens.length) {return;}
 
-        const isFoundryV8 = game.data.version.startsWith("0.8");
-        const isFoundryV9 = game.data.version.startsWith("0.9"); 
         
         //FIX: Refactor: Should refactor into two large paths for Foundry 0.7 VS. 0.8 & 0.9
 
@@ -1256,7 +1246,7 @@ export class QuickEncounter {
 
         let tokenObject;
         for (const token of encounterTokens) {
-            if (isFoundryV8 || isFoundryV9) {//0.8.0e: 
+            if (QuickEncounter.isFoundryV8Plus) {//0.8.0e: 
                 tokenObject = token.object;
             } else {//Foundry 0.7.x
                 tokenObject = token;
@@ -1284,7 +1274,7 @@ export class QuickEncounter {
 
         //Now release control of them as a group, because otherwise the stack is hard to see             
         for (const token of encounterTokens) {
-            if (isFoundryV8 || isFoundryV9) {//0.8.0e: 
+            if (QuickEncounter.isFoundryV8Plus) {//0.8.0e: 
                 tokenObject = token.object;
             } else {//Foundry 0.7.x
                 tokenObject = token;
@@ -1295,16 +1285,13 @@ export class QuickEncounter {
     }
 
     static async onDeleteCombat(combat, options, userId) {
-        if (!combat || !game.user.isGM) {return;}
-
-        const isFoundryV8 = game.data.version.startsWith("0.8");
-        const isFoundryV9 = game.data.version.startsWith("0.9");        
+        if (!combat || !game.user.isGM) {return;}    
 
         //v0.9.0c: This has always been hostile NPCs
         //Get list of hostile NPCs
         let hostileNPCCombatants;
         let defeatedHostileNPCCombatants; 
-        if (isFoundryV8 || isFoundryV9) {//Foundry 0.8.x
+        if (QuickEncounter.isFoundryV8Plus) {//Foundry 0.8.x
             hostileNPCCombatants = combat.turns?.filter(t => ((t.token?.data?.disposition === CONST.TOKEN_DISPOSITIONS.HOSTILE) && (!t.actor || !t.players?.length)));
             defeatedHostileNPCCombatants = combat.turns?.filter(t => (t.data.defeated &&
                                                             (t.token?.data?.disposition === CONST.TOKEN_DISPOSITIONS.HOSTILE) && (!t.actor || !t.players?.length)));
@@ -1556,7 +1543,6 @@ export class Dialog3 extends Dialog {
 }
 
 
-
 /** HOOKS */
 //0.6.13: Can't hook on actually clicking on the Note, so on hoverIn/hoverOut we record which Note we're on
 //and then set qeJournalEntry.clickedNote in the renderJournalEntry Hook
@@ -1577,9 +1563,7 @@ Hooks.on(`renderJournalSheet`,  QuickEncounter.onRenderJournalSheet);
 //Placing a map Note is moved to when you actually run the Encounter
 Hooks.on('closeJournalSheet', async (journalSheet, html) => {
     if (!game.user.isGM) {return;}
-    const journalEntry = journalSheet.object;
-    const isFoundryV8 = game.data.version.startsWith("0.8");
-    const isFoundryV9 = game.data.version.startsWith("0.9");    
+    const journalEntry = journalSheet.object; 
 
     //0.5.3: BUG: If you had the Tutorial JE open it would delete another Journal Entry when you closed it
     //This was happening because $("QuickEncountersTutorial") by itself was searching the whole DOM
@@ -1588,7 +1572,7 @@ Hooks.on('closeJournalSheet', async (journalSheet, html) => {
         //v0.4.0 Check that we haven't already deleted this (because onDelete -> close)
         if (game.journal.get(journalEntry.id)) {
             //v0.8.3: Switch to use JournalEntry.deleteDocuments(ids)
-            if (isFoundryV8 || isFoundryV9) {
+            if (QuickEncounter.isFoundryV8Plus) {
                 await JournalEntry.deleteDocuments([journalEntry.id]);
             } else {//Foundry v0.7
                 await JournalEntry.delete(journalEntry.id);

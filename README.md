@@ -9,8 +9,8 @@ Bugs fixed! [#57](https://github.com/spetzel2020/quick-encounters/issues/57), [#
 (See [Release Notes](https://github.com/spetzel2020/quick-encounters/blob/master/CHANGELOG.md))
 
 * **Author**: Spetzel#0103
-* **Version**: 0.9.4
-* **Foundry VTT Compatibility**: 0.8.6-0.9.1
+* **Version**: 0.9.5
+* **Foundry VTT Compatibility**: 0.8.6-0.9.238
 * **System Compatibility (If applicable)**: All; additional features for dnd5e
 * **Translation Support**: en, es (thanks [lozalojo!](https://github.com/lozalojo)), ja (thanks "touge"!), de (thanks @Fallayn#6414), it (thanks [riccisi](https://github.com/riccisi))
 
