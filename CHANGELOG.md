@@ -1,6 +1,8 @@
 # RELEASE NOTES
 ## 0.9 
-- Supports Foundry 0.8+ and 0.9 only
+- Supports Foundry 0.8+ and 9.x only
+### 0.9.6
+- Fixed: compatibleCoreVersion format now 9.x not 0.9.x
 ### 0.9.5
 - Fixed: Really work with Foundry 0.9; was choking on deprecated .entity references
 ### 0.9.4
