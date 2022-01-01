@@ -16,14 +16,22 @@
                         </div>                            
                     </div>
                     <div class="flexcol">
-                        <div class="flexrow">
-                            <input type="String" name="{{this.rowNum}}" class="num-actors" id="{{this.actorId}}" value={{this.numActors}} {{#if @root/isFromCompendium}}disabled{{/if}}>
+                        <div class="flexrow vertical-centered">
+                            <input type="text" name="{{this.rowNum}}.numActors" class="num-actors" id="{{this.actorId}}" value={{this.numActors}} {{#if @root/isFromCompendium}}disabled{{/if}}>
                             x {{this.actorName}} {{this.xp}}
+                            {{#if @root/showAddToCombatTrackerCheckbox}}
+                                &nbsp;&nbsp;<input type="checkbox" name="{{this.rowNum}}.addToCombatTracker" id="{{this.rowNum}}.addToCombatTracker" {{#if this.addToCombatTracker}}checked{{/if}}>
+                                <label for="{{this.rowNum}}.addToCombatTracker">{{localize 'QE.AddToCombatTracker.TITLE'}}</label>
+                            {{/if}}
                         </div>
                         {{#unless @root/isFromCompendium}}
                         <div class="flexrow">
                             {{#each this.tokens}}
-                                <input type="checkbox" {{#if this.isSavedToken}}{{checked}}{{/if}} disabled>
+                                {{#if this.tokenExistsOnScene}}
+                                    <img class="token-portrait" src="{{../img}}" title="{{localize 'QE.QuickEncounterDialog.SCENE_TOKEN'}}" />
+                                {{else}}
+                                    <input type="checkbox" {{#if this.isSavedToken}}{{checked}}{{/if}} disabled>
+                                {{/if}}
                             {{/each}}
                         </div>
                         {{/unless}}

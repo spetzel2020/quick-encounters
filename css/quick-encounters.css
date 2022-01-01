@@ -29,9 +29,17 @@
     margin: 0 auto;
     flex: none;
 }
+#QEContainers .vertical-centered {
+    align-items: center
+}
 #QEContainers .actor-portrait {
-    max-width: 50px;
+    width: 50px;
     height: 50px
+}
+#QEContainers .token-portrait {
+    max-width: 20px;
+    height: 20px;
+    margin-top: 5px;
 }
 #QEContainers .actor-subtract {
     opacity: 0;

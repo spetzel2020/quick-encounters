@@ -1,6 +1,10 @@
 # TO DO
-## BUGS with Foundry 0.8.x
+## QE 0.9 bugs/refactor/features:
 
+
+## BUGS with Foundry 0.8.x
+v0.8.3  Compendium support: When you Run Quick Encounter, QE generates a new Actor for the Compendium entry even if it one exists
+v0.8.3  Compendium support: If you add generated Actors from a QE Compendium, a separate entry is added
 
 ## BUGS with Foundry 0.7.x
 v0.7.0 Tiles with a webm video show broken link; show a video camera instead    
@@ -15,7 +19,11 @@ v0.7.3: QE Dialog should show Tokens not Actor image
 
 
 ## FEATURES
-### v0.8.0: Support Compendium lifecycle for Instant Encounter (no Scene)
+### v0.9.x
+
+- Look at Scene Packer and see what QE improvements would help
+
+### Support Compendium lifecycle for Instant Encounter (no Scene)
 - Fix the links in imported Compendia?? as part of importing or prior?
 
 - Convert a Quick Encounter Journal Entry into a QE Compendium
@@ -192,6 +200,8 @@ FIXED in 0.8.0: With Foundry 0.8.6: Change made to set QE dialog read-only is ha
 FIXED: v0.8.0: CONST.TOKEN_DISPOSITIONS will not be defined - need to test/change to internal constant
 FIXED in 0.8.1: v0.8.0 Issue #43: Display XP after Combat was not working
 FIXED in 0.8.1: v0.8.0 Issue #42: QE Dialog doesn't open if you install Core French (or probably any other language)
+FIXED in 0.8.2: Issue #46: : Reducing and then increasing the number of placed tokens creates ghost tokens
+FIXED in 0.9.4: The "small icon" to show a "left" token is not showing
 
 
 ## COMPLETED FEATURES

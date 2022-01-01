@@ -29,7 +29,11 @@ Reused as EncounterCompanionSheet
 31-Mar-2021     0.8.0b: If you're looking at a Compendium, pop a read-only QESheet    
 5-Jun-2021      0.8.1a: Fixed: Issue #42: _getHeaderButtons() was incorrectly checking closeButtonIndex to indicate it was found   
                 0.8.1b: _getHeaderButtons() was incorrectly comparing/replacing translated button labels, but apparently they are still in base language at this point                 
-        
+9-Dec-2021      0.9.3c: Add checkbox to QE dialog if showAddToCombatTrackerCheckbox is set (and check it by default)  
+                _updateObject(): Changed format of formData names to rowNum.fieldName to accomodate the possible checkbox
+                TODO: Not currently saving it, even locally - will need to save and then persist  
+14-Dec-2021     0.9.3d: Add addToCombatTracker to combatant data model and persist       
+18-Dec-2021     0.9.4a: When you press "Run Quick Encounter" then submit form first before Running the QE (to capture the Add To CT status)
 */
 
 
@@ -101,7 +105,8 @@ export class QESheet extends FormApplication {
         super.activateListeners(html);
         if (!this.object?.isFromCompendium) {
             html.find('button[name="addToCombatTracker"]').click(event => {
-                this.quickEncounter?.run(event);
+                // FIX: Need to submit the form first and then run; await this.submit({preventClose: true})
+                this.submit({preventClose: true}).then(this.quickEncounter?.run(event));
             });
             //0.7.0: Listeners for when you click - in actor or tile
             html.find("#QEContainers .actor-container").each((i, thumbnail) => {
@@ -130,7 +135,9 @@ export class QESheet extends FormApplication {
            combatants: this.combatants,
            tilesData: this.quickEncounter?.savedTilesData,
            totalXPLine : this.totalXPLine,
-           isFromCompendium : this.object?.isFromCompendium
+           isFromCompendium : this.object?.isFromCompendium,    //FIX: This setting should be on a combatant basis, not one
+           //0.9.3 Setting to show this checkbox (checked by default)
+           showAddToCombatTrackerCheckbox : game.settings.get(QE.MODULE_NAME, "showAddToCombatTrackerCheckbox")
         };
     }
 
@@ -147,6 +154,8 @@ export class QESheet extends FormApplication {
                     numActors : eActor.numActors,
                     actorName: eActor.name,             //default
                     actorId: eActor.actorID,
+                    //0.9.3d Add addToCombatTracker to structure (defaults to true and may not be shown)
+                    addToCombatTracker: eActor.addToCombatTracker ?? true,
                     dataPackName : eActor.dataPackName, //non-null if a Compendium entry
                     tokens: eActor.combinedTokensData,
                     numType : typeof eActor.numActors
@@ -184,36 +193,41 @@ export class QESheet extends FormApplication {
         const checkIntReg = /^[0-9]*$/;   
         //Capture changes in the number of Actors or new Actors added (currently not possible through this dialog)
         let wasChanged = false;
-        for (let [rowNum, numActors] of Object.entries(formData)) {
+        //0.9.3: Changed format of formData names to rowNum.fieldName
+        for (let [rowFieldName, fieldValue] of Object.entries(formData)) {
             let combatantWasChanged = false;
-            const iCombatant = rowNum;
-            if (iCombatant >= this.combatants.length) {
-                //New combatant
+            const elements = rowFieldName.split(".");
+            if ((elements.length ?? 0) < 2) {continue;}   //ignore if the split doesn't work
+            const rowNum = elements[0];
+            const fieldName = elements[1];
+            if (rowNum >= this.combatants.length) {
+                //New combatant - not possible in the dialog yet, but will be with drag-and-drop
                 combatantWasChanged = true;
-                
-            } else {
-                numActors = numActors.trim();   //trim off whitespace
-                combatantWasChanged = (this.combatants[iCombatant].numActors !== numActors);
+            } else if (fieldName === "numActors") {
+                const numActors = fieldValue.trim();   //trim off whitespace
+                combatantWasChanged = (this.combatants[rowNum].numActors !== numActors);
                 if (combatantWasChanged) {
                     //Validate that the change is ok
                     //Option 1: You cleared the field or spaced it out
                     if ((numActors === null) || (numActors === "")) {
-                        this.combatants[iCombatant].numActors = 0;
+                        this.combatants[rowNum].numActors = 0;
                     } else if (dieRollReg.test(numActors)) {
                         //Option 2: This is a dice roll (not guaranteed because it could just contain a dieRoll)
-                        this.combatants[iCombatant].numActors = numActors;
+                        this.combatants[rowNum].numActors = numActors;
                     } else if (checkIntReg.test(numActors)) {
                         const multiplier = parseInt(numActors,10);
                         if (!Number.isNaN(multiplier)) {
-                             this.combatants[iCombatant].numActors = multiplier;
+                             this.combatants[rowNum].numActors = multiplier;
                         }
-                       
                     } else {
                         //otherwise leave unchanged - should pop up a dialog or highlight the field in red
                         const warning = game.i18n.localize("QE.QuickEncounterDialog.InvalidNumActors.WARNING") + " " + numActors;
                         ui.notifications.warn(warning);
                     }
                 }
+            } else if (fieldName === "addToCombatTracker") {
+                combatantWasChanged = (this.combatants[rowNum].addToCombatTracker !== fieldValue);
+                this.combatants[rowNum].addToCombatTracker = fieldValue;
             }
             wasChanged = wasChanged || combatantWasChanged;
         }
@@ -235,6 +249,7 @@ export class QESheet extends FormApplication {
                 dataPackName : c.dataPackName, //if non-null then this is a Compendium reference
                 actorID : c.actorId,           //If Compendium sometimes this is the reference
                 name : c.actorName,
+                addToCombatTracker : c.addToCombatTracker,  //remembered checked/cleared setting (will only display if overall setting shows the dialog box)
                 savedTokensData : c.tokens.filter(td => td.isSavedToken)
             }
         });

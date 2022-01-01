@@ -144,7 +144,45 @@
 27-May-2021     0.8.0e: Test for 0.8.x vs 0.7.x and use new methods accordingly                
                 - constructor(): Check this.extractedActors (was failing on iteration is extractedActors was null because of old QE method)
 28-May-2021     0.8.0f: Use TOKEN_DISPOSITIONS or CONST.TOKEN_DISPOSITIONS as appropriate     
-5-Jun-2021      0.8.1a: Fixed: Issue #43: onDeleteCombat() was not correctly computing nonFriendlyNPCTokens using t.token.data          
+5-Jun-2021      0.8.1a: Fixed: Issue #43: onDeleteCombat() was not correctly computing nonFriendlyNPCTokens using t.token.data    
+2-Aug-2021      0.8.2a: Fixed: Issue #46: : Reducing and then increasing the number of placed tokens creates ghost tokens
+                - generateExpandedTokenData() - needed to call actor.getTokenData() to correctly set token info      
+                0.8.2b: run(): Switch background/foreground and create relevant tiles
+                addTiles(): Store .layer ("background" or "foreground" or undefined)
+3-Aug-2021      0.8.2c: createTokens()  - set hidden flag before creating tokens; this seems to correctly override saved tokens but still not the generated ones
+8-Aug-2021      0.8.3a: #50 v0.8.2: getEncounterScene() is failing because of the new structure of scene.notes
+                - if Foundryv8 check scene.notes map
+                0.8.3b: #49: generateFullExtractedActorTokenData() was storing the full TokenData() object with prototypes (it used to be just a simple object of data)
+                Used Object.fromEntries(Object.entries(tokenData)) to strip off non own properties
+9-Aug-2021      0.8.3c: generateFullExtractedActorTokenData(), addTokens(), addTiles(): 
+                Use toObject() to recover just the object (ownProperties) before duplication   
+10-Aug-2021     0.8.3d: Hooks.on('closeJournalSheet'): Switch to JournalEntry.deleteDocuments(ids) to delete Tutorial JE on close   
+25-Aug-2021     0.8.4: Issue #52: generateFullExtractedActorTokenData(): Don't use toObject() if Foundry 0.7.x                          
+26-Aug-2021     0.8.4b: Fix for other problems with reference to toObject() in Foundry 0.7.x
+13-Sep-2021     0.9.0: Support Foundry 0.8+ only; new features
+26-Oct-2021     0.9.0b: Issue #53 (Add option to delete added tokens after the Combat Encounter)
+                0.9.0c: Rename nonFriendlyNPCTokens to hostileNPCCombatants for accuracy
+28-Oct-2021     0.9.0d: Issue #54 (Option to "record" the tokens but leave them on the map and then just add them to the CT)
+                Issue #34 (Feature request: Add option to not add the combatants to the tracker #34)
+                - Multiple options: Leave/Delete + Add/Don't Add to CT
+                See https://github.com/spetzel2020/quick-encounters/issues/55#issuecomment-954239542 for thoughts
+1-Nov-2021      0.9.0e Visual representation of tokens that are part of the Quick Encounter but are still on the Scene
+                (and therefore shouldn't be regenerated)
+                Also, CURRENT approach generates tokens if they don't already exist - ALTERNATIVE would be to record the tokens you Deleted
+                and only regenerate those
+9-Nov-2021      0.9.0g: Change the Show Delete Tokens after Add setting to be a simple "Delete the Tokens on the Scene" - if cleared you have to delete them manually
+15-Nov-2021     0.9.1a: Merged in https://github.com/spetzel2020/quick-encounters/pull/59 (ironmonk88, fixes to work with Monk's Enhanced Journal)
+                0.9.1b: Fix Issue #63 (wasn't freezing a captured token from further change)
+                0.9.1d: Fix Issue #61: Move the Encounter opponents to the top of the JE (so in PinCushion the preview will show them)
+16-Nov-2021     0.9.2a: "Fix" Issue #62: Suppress MEJ popping up JE so it will happen on the explicit JE render (except now you just get the orphan Journal Sheet without MEJ)   
+6-Dec-2021      0.9.3a: Merged Spanish translation
+                        Expand Foundryv8 checks for both 0.8 and 0.9
+                0.9.3b: New setting for "Show Add to CT checkbox"  (showAddToCombatTrackerCheckbox); added English tags    
+14-Dec-2021     0.9.3d: Plumb "Add to CT" checkbox - persist in QE structure (as part of extractedActors) and use in:
+                createTokens(): spread either true or the extractedActor setting to the token data and then we have to copy to all the tokens
+                createCombat(): add token to the Combat Tracker if addToCombatTracker set (the default)
+15-Dec-2021     0.9.3f: Fix this deprecation error  at QuickEncounters#1173 You are calling PlaceableObject.create which has been deprecated in favor of Document.create or Scene#createEmbeddedDocuments.
+21-Dec-2021     0.9.5a: In init, set the QuickEncounter.isFoundryV8Plus variable for choosing different code-paths/data models
 */
 
 
@@ -153,7 +191,7 @@ import {QESheet} from './QESheet.js';
 
 export const QE = {
     MODULE_NAME : "quick-encounters",
-    MODULE_VERSION : "0.8.1",
+    MODULE_VERSION : "0.9.6",
     TOKENS_FLAG_KEY : "tokens",
     QE_JSON_FLAG_KEY : "quickEncounter"
 }
@@ -304,8 +342,41 @@ export class QuickEncounter {
             default: true,
             type: Boolean
         });
+        //v0.9.0 Delete tokens by default after the Add/Link
+        game.settings.register(QE.MODULE_NAME, "deleteTokensAfterAdd", {
+            name: "QE.Setting.DeleteTokensAfterAdd.NAME",
+            hint: "QE.Setting.DeleteTokensAfterAdd.HINT",
+            scope: "world",
+            config: true,
+            default: true,
+            type: Boolean
+        });
+        //v0.9.0 Show Delete Hostile Tokens Dialog after Combat
+        game.settings.register(QE.MODULE_NAME, "showDeleteTokensDialogAfterCombat", {
+            name: "QE.Setting.ShowDeleteTokensDialogAfterCombat.NAME",
+            hint: "QE.Setting.ShowDeleteTokensDialogAfterCombat.HINT",
+            scope: "world",
+            config: true,
+            default: true,
+            type: Boolean
+        });
+        //v0.9.3 Show Add to Combat Tracker checkboxes in QE dialog
+        game.settings.register(QE.MODULE_NAME, "showAddToCombatTrackerCheckbox", {
+            name: "QE.Setting.ShowAddToCombatTrackerCheckbox.NAME",
+            hint: "QE.Setting.ShowAddToCombatTrackerCheckbox.HINT",
+            scope: "world",
+            config: true,
+            default: false,
+            type: Boolean
+        });
+
         //0.6.13 Initialize which Note you are hovering over
         QuickEncounter.hoveredNote = null;
+
+        //0.9.5 Set the QuickEncounter.isFoundryV8Plus variable for different code-paths
+        //If v9, then game.data.version will throw a deprecation warning so test for v9 first
+        QuickEncounter.isFoundryV8Plus = (game.data.release?.generation >= 9) || (game.data.version?.startsWith("0.8"));
+
     }
 
 
@@ -323,18 +394,7 @@ export class QuickEncounter {
                 button: true,
                 visible: game.user.isGM,
                 onClick: event => QuickEncounter.runAddOrCreate(event)
-            });
-/*DEPRECATED            
-            notesButton.tools.push({
-                name: "deleteEncounters",
-                title: "Delete all Quick Encounter Map Notes",
-                icon: "fas fa-trash",
-                toggle: false,
-                button: true,
-                visible: false, //game.user.isGM,
-                onClick: () => QuickEncounter.deleteAllEQMapNotes("Unknown")
-            });
-*/            
+            });          
         }
 
         const tileControlsButton = buttons.find(b => b.name === "tiles");
@@ -353,22 +413,10 @@ export class QuickEncounter {
 
 
     }
-/*DEPRECATED
-    static async deleteAllEQMapNotes(text) {
-        let notes = canvas.notes.placeables;
-        for (let iNote = 0; iNote < notes.length; iNote++) {
-            if (notes[iNote].text === text) {
-                canvas.notes.placeables.splice(iNote,1);
-                notes[iNote].delete();
-                iNote--;
-            }
-        }
-    }
-*/
+
     static runAddOrCreate(event) {
-        const isFoundryV8 = game.data.version.startsWith("0.8");
         let FRIENDLY_TOKEN_DISPOSITIONS;
-        if (isFoundryV8) {
+        if (QuickEncounter.isFoundryV8Plus) {
             FRIENDLY_TOKEN_DISPOSITIONS = CONST.TOKEN_DISPOSITIONS.FRIENDLY;
         } else {//0.7.x
             FRIENDLY_TOKEN_DISPOSITIONS = TOKEN_DISPOSITIONS.FRIENDLY;
@@ -383,8 +431,8 @@ export class QuickEncounter {
         const controlledFriendlyTokens = controlledTokens?.filter(t => t.data?.disposition === FRIENDLY_TOKEN_DISPOSITIONS );
         //0.7.0b: Capture controlled tiles (will be one or the other
         const controlledTiles = Array.from(Tile.layer.controlled);
-
-        const candidateJournalEntry = QuickEncounter.findCandidateJournalEntry();
+        //0.9.1a: (from ironmonk88) Pass this so we can check for Monk's Enhanced Journal 
+        const candidateJournalEntry = QuickEncounter.findCandidateJournalEntry.call(this); 
         const quickEncounter = (candidateJournalEntry instanceof QuickEncounter ) ? candidateJournalEntry : null;
 
         //v0.6.1 If you have both controlledNonFriendly tokens AND an open Quick Encounter, ask if you want to add to it
@@ -437,6 +485,53 @@ export class QuickEncounter {
         }
     }
 
+    /* Method 1: createFromTokens
+    * Delete the controlled (selected) tokens and record their tokenData in a created Journal Entry
+    * Also embed Actors they represent (for clarity)
+    **/
+    static async createFrom(controlledAssets) {
+        //Seems inelegant - especially since we'd like to update the journalEntry        
+        let quickEncounter = QuickEncounter.createQuickEncounterAndAdd(controlledAssets);
+
+        //Create a new JournalEntry - the corresponding map note gets automatically created too
+        //0.9.1d Issue #61: Move the Encounter oppnents to the top of the JE
+        let content = game.i18n.localize("QE.Instructions.CONTENT1");
+        //0.7.0 extractedActors could be null if we have just tiles or other (non-Actor/token assets)
+        if (quickEncounter.extractedActors) {
+            for (const eActor of quickEncounter.extractedActors) {
+                const actor = await QuickEncounter.getActor(eActor);
+                const xp = QuickEncounter.getActorXP(actor);
+                const xpString = xp ? `(${xp}XP each)`: "";
+                content += `<li>${eActor.numActors}@Actor[${actor.id}]{${actor.name}} ${xpString}</li>`;
+            }
+        }
+        content += game.i18n.localize("QE.Instructions.CONTENT2");
+        const journalData = {
+            folder: null,
+            name:  `Quick Encounter: ${game.scenes?.viewed?.name}`,
+            content: content,
+            type: "encounter",
+            types: "base"
+        }
+        //0.9.2a: Per ironmonk88, activate:false tells Enhanced Journals to not pop up the new JE yet (because there's a sheet render below)
+        let journalEntry = await JournalEntry.create(journalData, {activate: false});
+
+//REFACTOR: Individual property setting and order is fragile        
+        quickEncounter.serializeIntoJournalEntry(journalEntry.id);
+        //And create the Map Note - needs journalEntry.id to be set already
+        const newNote = await EncounterNote.place(quickEncounter);
+        //0.6.13: Record the Map Note data because we will use it to distinguish between the original and copied Scene Notes
+        quickEncounter.originalNoteData = newNote?.data;
+        
+        //v0.6.1k Update the created/changed QuickEncounter into the Journal Entry
+        quickEncounter.serializeIntoJournalEntry(journalEntry.id);
+
+        //v0.6.3: Show the Journal Sheet last so it can see the Map Note
+        const ejSheet = new JournalSheet(journalEntry);
+        ejSheet.render(true);   //0.6.1: This will also pop-open a QE dialog if you have that setting
+    }
+
+
     static createQuickEncounterAndAdd(controlledAssets) {
         let quickEncounter = new QuickEncounter();    //empty QuickEncounter   
         quickEncounter.add(controlledAssets);     //This will also update extractedActors etc.
@@ -446,8 +541,10 @@ export class QuickEncounter {
     static link(openJournalSheet, controlledAssets) {
         let quickEncounter = QuickEncounter.createQuickEncounterAndAdd(controlledAssets);
         const journalEntry = openJournalSheet?.object;
+        //FIXME: add() already calls serializeIntoJournalEntry(), but here we are updating with the source journalEntry
         quickEncounter.serializeIntoJournalEntry(journalEntry.id);
         //Force a re-render which should pop up the QE dialog
+        //FIXME: Is this necessary? I thought setFlag() would already force a re-render of the JE
         openJournalSheet?.render(true);
     }
 
@@ -478,12 +575,18 @@ export class QuickEncounter {
 
     addTokens(controlledTokens) {
         if (!controlledTokens) return;
+
         //Add the new tokens to the existing ones (or creates new ones)
         //Use tokenData because tokens is too deep to store in flags
-        let controlledTokensData = controlledTokens.map(ct => {return ct.data});
-    
+        let controlledTokensData;
+        if (QuickEncounter.isFoundryV8Plus) {
+            //0.8.3c: Use the toObject() function to get a shallow copy (without prototypes) of controlledTokens.data
+            controlledTokensData = controlledTokens.map(ct => {return ct.data.toObject()});
+        } else { //Foundry 0.6.x or 0.7.x
+            controlledTokensData = controlledTokens.map(ct => { return ct.data});
+        }
+        //TODO: Is this necessary, or could we just remove controlledTokensData?
         const newSavedTokensData = duplicate(controlledTokensData);
-
 
         //Find set of distinct actors - some/all of these may be new if the addTokens is being called from create
         let tokenActorIds = new Set();
@@ -542,11 +645,17 @@ export class QuickEncounter {
             }
         }//end for tokenActorIds
 
-        //Delete the existing tokens (because they will be replaced)
+        
+        //0.9.0g: By default, delete the existing tokens (because they will be replaced) 
+        // - but as an option (setting) you can leave the tokens on the map and they will be used instead of being generated
+        // (You can still selectively delete them)
         const controlledTokensIds = controlledTokens.map(ct => {return ct.id});
-        const isFoundryV8 = game.data.version.startsWith("0.8");
-        if (isFoundryV8) {//Foundry 0.8.x
-            canvas.scene.deleteEmbeddedDocuments("Token", controlledTokensIds);
+        if (QuickEncounter.isFoundryV8Plus) {//Foundry 0.8.x or 0.9
+            //QE v0.9 - if set (the default) , delete the added tokens
+            const deleteTokensAfterAdd = game.settings.get(QE.MODULE_NAME, "deleteTokensAfterAdd");
+            if (deleteTokensAfterAdd) {
+                canvas.scene.deleteEmbeddedDocuments("Token", controlledTokensIds);
+            }
         } else {//Foundry 0.7.x
             canvas.tokens.deleteMany(controlledTokensIds);
         }
@@ -559,66 +668,28 @@ export class QuickEncounter {
 
         //Add the new tiles to the existing ones (or creates new ones)
         //Use tilesData because tiles is too deep to store in flags
-        let controlledTilesData = controlledTiles.map(ct => {return ct.data});
+        //v0.8.2b: Store whether this tile is background (default) or foreground - for Foundry 0.7.x should set ctd.layer="background"    
+        let controlledTilesData = controlledTiles.map(ct => {
+            //0.8.3c: Use the toObject() function to get a shallow copy (without prototypes) of controlledTiles.data
+            let ctd = ct.data;
+            if (QuickEncounter.isFoundryV8Plus) {
+                ctd = ct.data.toObject();
+            }
+            ctd.layer = ct.document?.layer?.options?.name ?? "background";
+            return ctd;
+        });
 
         if (!this.savedTilesData) {this.savedTilesData = [];}
         this.savedTilesData = this.savedTilesData.concat(duplicate(controlledTilesData));
 
         //Delete the existing tokens (because they will be replaced)
         const controlledTilesIds = controlledTiles.map(ct => {return ct.id});
-        const isFoundryV8 = game.data.version.startsWith("0.8");
-        if (isFoundryV8) {//Foundry 0.8.x
+        if (QuickEncounter.isFoundryV8Plus) {//Foundry 0.8.x
             canvas.scene.deleteEmbeddedDocuments("Tile", controlledTilesIds);
         } else {//Foundry 0.7.x
             canvas.tiles.deleteMany(controlledTilesIds);
         }
     }
-
-    /* Method 1: createFromTokens
-    * Delete the controlled (selected) tokens and record their tokenData in a created Journal Entry
-    * Also embed Actors they represent (for clarity)
-    **/
-    static async createFrom(controlledAssets) {
-//Seems inelegant - especially since we'd like to update the journalEntry        
-        let quickEncounter = QuickEncounter.createQuickEncounterAndAdd(controlledAssets);
-
-        //Create a new JournalEntry - the corresponding map note gets automatically created too
-//FIXME: Replace all this with a renderTemplate section using handlebars
-        let content = game.i18n.localize("QE.Instructions.CONTENT");
-        //0.7.0 extractedActors could be null if we have just tiles or other (non-Actor/token assets)
-        if (quickEncounter.extractedActors) {
-            for (const eActor of quickEncounter.extractedActors) {
-                const actor = await QuickEncounter.getActor(eActor);
-                const xp = QuickEncounter.getActorXP(actor);
-                const xpString = xp ? `(${xp}XP each)`: "";
-                content += `<li>${eActor.numActors}@Actor[${actor.id}]{${actor.name}} ${xpString}</li>`;
-            }
-        }
-
-        const journalData = {
-            folder: null,
-            name:  `Quick Encounter: ${game.scenes?.viewed?.name}`,
-            content: content,
-            type: "encounter",
-            types: "base"
-        }
-        let journalEntry = await JournalEntry.create(journalData);
-        const ejSheet = new JournalSheet(journalEntry);
-
-//REFACTOR: Individual property setting and order is fragile        
-        quickEncounter.serializeIntoJournalEntry(journalEntry.id);
-        //And create the Map Note - needs journalEntry.id to be set already
-        const newNote = await EncounterNote.place(quickEncounter);
-        //0.6.13: Record the Map Note data because we will use it to distinguish between the original and copied Scene Notes
-        quickEncounter.originalNoteData = newNote?.data;
-        
-        //v0.6.1k Update the created/changed QuickEncounter into the Journal Entry
-        quickEncounter.serializeIntoJournalEntry(journalEntry.id);
-
-        //v0.6.3: Show the Journal Sheet last so it can see the Map Note
-        ejSheet.render(true);   //0.6.1: This will also pop-open a QE dialog if you have that setting
-    }
-
 
 
 
@@ -658,7 +729,9 @@ export class QuickEncounter {
         if (Object.keys(ui.windows).length === 0) {return null;}
         else {
             let openJournalSheet = null;
-            for (let w of Object.values(ui.windows)) {
+            for (let w of (this instanceof JournalSheet ? [this] : Object.values(ui.windows))) {
+				////0.9.1a: (from ironmonk88) Check to see if this is an Enhanced Journal window and get the subsheet
+				if (w.subsheet) {w = w.subsheet;}
                 //Check open windows for a Journal Sheet with a Map Note and embedded Actors
                 if (w instanceof JournalSheet) {
                     openJournalSheet = w;
@@ -678,7 +751,7 @@ export class QuickEncounter {
             for (let w of Object.values(ui.windows)) {
                 //Check open windows for the tutorial Journal Entry
                 if (w instanceof JournalSheet) {
-                    const journalEntry = w.entity;
+                    const journalEntry = w.object;
                     if (journalEntry && (journalEntry.name === game.i18n.localize("QE.HowToUse.TITLE"))) {
                         qeTutorial = w;
                         break;
@@ -692,7 +765,7 @@ export class QuickEncounter {
 
 
     static extractQuickEncounter(journalSheet) {
-        const journalEntry = journalSheet?.entity;
+        const journalEntry = journalSheet?.object;
         if (!journalEntry) {return;}
 
         //0.6.1k: If quickEncounter is stored, extract that - but you can't store the actual object
@@ -841,16 +914,31 @@ export class QuickEncounter {
             alt : event?.altKey, 
             ctrl: event?.ctrlKey
         }
-        const createdTokens = await this.createTokens(options);
+        //0.9.3d: encounterTokens is both created tokens and existing tokens left and not deleted
+        const encounterTokens = await this.createTokens(options);
 
         //And add them to the Combat Tracker (wait 200ms for drawing to finish)
         setTimeout(() => {
-            QuickEncounter.createCombat(createdTokens);
+            QuickEncounter.createCombat(encounterTokens);
         },200);
 
         if (savedTilesData) {
-            canvas.tiles.activate();
-            await this.createTiles(savedTilesData, shift, options);
+            if (QuickEncounter.isFoundryV8Plus) {   
+                //0.8.2b: Activate foreground/background
+                const savedBackgroundTilesData = savedTilesData.filter(std => std.layer === "background");
+                if (savedBackgroundTilesData.length) {
+                    canvas.background.activate();
+                    await this.createTiles(savedBackgroundTilesData, shift, options);
+                }
+                const savedForegroundTilesData = savedTilesData.filter(std => std.layer !== "background");
+                if (savedForegroundTilesData.length) {
+                    canvas.foreground.activate();
+                    await this.createTiles(savedForegroundTilesData, shift, options);
+                }
+            } else {//Foundry 0.7.x
+                canvas.tiles.activate();
+                await this.createTiles(savedTilesData, shift, options);
+            }
             //0.7.3 Switch back to Basic Controls
             canvas.tokens.activate();
         }
@@ -878,6 +966,8 @@ export class QuickEncounter {
                     let shiftedTokensData = ea.savedTokensData.map(std => {
                         std.x += shift.x;
                         std.y += shift.y;
+                        const matchingToken = game.scenes.viewed.tokens.get(std._id); // returns undefined if not found
+                        std.tokenExistsOnScene = (matchingToken !== undefined);
                         return std;
                     });
                     const numExcessActors = ea.generatedTokensData.length -  shiftedTokensData.length;
@@ -901,11 +991,16 @@ export class QuickEncounter {
     static getEncounterScene(journalEntry) {
         //if sceneNote is available, then we're in the Note Scene already
         if (journalEntry.sceneNote) {return game.scenes.viewed;}
-        else {
+        else {          
             //Now we need to search through the available scenes to find a note with this Journal Entry
             for (const scene of game.scenes) {
                 const notes = scene.data.notes;
-                const foundNote = notes.find(note => note.entryId === journalEntry.id);
+                let foundNote;
+                if (QuickEncounter.isFoundryV8Plus) {
+                    foundNote = Array.from(notes.values()).find(nd => nd.data.entryId === journalEntry.id);
+                } else {
+                    foundNote = notes.find(note => note.entryId === journalEntry.id);
+                }
                 if (foundNote) {
                     return scene;
                 }
@@ -977,12 +1072,13 @@ export class QuickEncounter {
         const coords = {x: this.sourceNoteData?.x, y: this.sourceNoteData?.y}
 
         if (!this.extractedActors?.length || !coords) {return;}
-        const gridSize = canvas.dimensions.size;
+        const gridSize = canvas.dimensions.size;     
+
         for (let [iExtractedActor, eActor] of this.extractedActors.entries()) {
             this.extractedActors[iExtractedActor].generatedTokensData = [];  //clear this every time
             const actor = await QuickEncounter.getActor(eActor);
             if (!actor) {continue;}     //possibly will happen with Compendium
-//FIXME: May have to update extractedActor with the imported actorId and then hopefully it won't re-import
+//FIXME: May have to update extractedActor with the imported actorId and then hopefully it won't re-import - see Issue #66
             const numActors = QuickEncounter.getNumActors(eActor, {rollType : "full"});
 
              for (let iToken=0; iToken < numActors; iToken++) {
@@ -991,24 +1087,29 @@ export class QuickEncounter {
                     name : eActor.name,
                     x: coords.x + (Math.random() * 2*gridSize) - gridSize, //adjust position within +/- full grid increment,
                     y: coords.y + (Math.random() * 2*gridSize) - gridSize, //adjust position within +/- full grid increment,
-                    hidden: true,
-                    isSavedToken : false
+                    hidden: true
                 }
                 //Use the prototype token from the Actors
-                const isFoundryV8 = game.data.version.startsWith("0.8");
                 let tempToken;
-                if (isFoundryV8) {//Foundry 0.8.x
-                    //0.8.0d: Use new TokenDocument constructor; does it handle token wildcarding?
-                    tempToken = new TokenDocument(tokenData, {actor: actor});
+                if (QuickEncounter.isFoundryV8Plus) {//Foundry 0.8.x
+                    //0.8.0d: Use new TokenDocument constructor; does it handle token wildcarding? [probably didn't]
+                    //0.8.2a: Per foundry.js#40276 use Actor.getTokenData (does handle token wildcarding)
+                    const tempTokenData = await actor.getTokenData(tokenData);
+                    tempToken = new TokenDocument(tempTokenData, {actor: actor});
+                    //v0.8.3b: Use Object.entries copying to get only the ownProperties (otherwise duplicate() chokes in createTokens())
+                    //0.8.3c: Switch to using toObject()
+                    tokenData = tempToken.data.toObject();
                 } else {//Foundry 0.7.x
                     //v0.6.7: Call Token.fromActor() which does the merge but also handles wildcard token images
                     tempToken = await Token.fromActor(actor, tokenData);
+                    //v0.8.4 toObject() not available in Foundry 0.7.x
+                    tokenData = tempToken.data;
                 }                 
 
-                tokenData = tempToken.data;
                 //If from a Compendium, we remember that and the original Compendium actorID
                 if (eActor.dataPackName) {tokenData.compendiumActorId = eActor.actorID;}
                 //0.6.8: Put the generatedTokensData on the extractedActor, just like the savedTokensData
+                tokenData.isSavedToken = false; //0.8.2a: Moved here
                 this.extractedActors[iExtractedActor].generatedTokensData.push(tokenData);
              }
         }
@@ -1016,41 +1117,102 @@ export class QuickEncounter {
 
     async createTokens(options) {
         if (!this.extractedActors?.length) {return;}
+
         //Have to also control tokens in order to add them to the combat tracker
         /* The normal token workflow (see TokenLayer._onDropActorData) includes:
         1. Get actor data from Compendium if that's what you used (this is probably worth doing)
         2. Positioning the token relative to the drop point (whereas we do it relative to a Map Note or previous position)
         3. Randomizing the token image if that is provided in the Prototype Token
         */
-        //v0.6.1d: If it's a savedToken (one that was "captured" then check if it should be frozen as is or regenerated for example by Token Mold)
-        //Actor-generated tokens are always generated
-        //v0.5.3d: Check the value of setting "freezeCapturedTokens"
-        const freezeCapturedTokens = game.settings.get(QE.MODULE_NAME, "freezeCapturedTokens");
 
         let allCombinedTokensData = [];
+        const showAddToCombatTrackerCheckbox = game.settings.get(QE.MODULE_NAME, "showAddToCombatTrackerCheckbox");
         for (const ea of this.extractedActors) {
+            //0.9.3: FIX: Better way would be to keep the ExtractedActor structure all the way through to token creation and add to CT
+            //but that would require a lot of changes
+            //If showAddToCombatTrackerCheckbox === FALSE, then default addToCombatTracker to TRUE
+            const addTokenToCombatTracker = showAddToCombatTrackerCheckbox ? ea.addToCombatTracker : true;
+            for (const ctd of ea.combinedTokensData) {
+                ctd.addToCombatTracker = addTokenToCombatTracker;
+            }
             allCombinedTokensData = allCombinedTokensData.concat(ea.combinedTokensData);
         }
 
         //v0.5.0 Clone the token data so if the token is "frozen" change from TokenMold (for example) can be recovered
         //Also, use the ability of Token.create to handle an array
         //Annoyingly, Token.create returns a single token if you passed in a single element array
-        const tempCreatedTokens = await Token.create(duplicate(allCombinedTokensData));
-        let createdTokens = tempCreatedTokens.length ? tempCreatedTokens : [tempCreatedTokens];
-        //v0.5.0: Now reset the token data in case it was adjusted (e.g. by Token Mold), just for those that are frozen
-        //v0.6.1d: If freezeCapturedTokens = true, then reset the savedTokens
-        for (let i=0; i<allCombinedTokensData.length; i++) {
-            if (freezeCapturedTokens && allCombinedTokensData[i].isSavedToken) {
+        //v0.8.2c: Pass options to force hidden/visible
+        //0.6.1: If you use Alt-Run then create all tokens hidden regardless of how they were saved; Ctrl-Run make them visible
+        //(generated tokens are hidden by default; saved tokens retain their original visibility unless overridden)
+        let isHidden = null;
+        if (options?.ctrl) {isHidden = false;}  
+        if (options?.alt) {isHidden = true;}
+        if (isHidden !== null) {
+            for (const ctd of allCombinedTokensData ) {ctd.hidden = isHidden;}
+        }
+        //0.8.3c: Use duplicate here because allCombinedTokensData is a simple Object
+        //0.9.0e: If the exact token is already on the scene (because we used the Leave option) then don't regenerate it
+        //but in that case add the existing token to the existingTokens list
+        let toCreateCombinedTokensData = [];
+        let existingTokens = [];
+        for (const ctd of allCombinedTokensData) {
+            //if the exact-match token (by token._id) already exists on the Scene then don't recreate it
+            const matchingToken = game.scenes.viewed.tokens.get(ctd._id);
+            if (matchingToken) {
+                //0.9.3d Remember if we should/shouldn't add to Combat Tracker
+                matchingToken.addToCombatTracker = ctd.addToCombatTracker;
+                existingTokens.push(matchingToken);
+            } else {
+                toCreateCombinedTokensData.push(duplicate(ctd));
+            }
+        }
+
+        //We do need to check that toCreateCombinedTokensData is not empty (if everything is already on the Scene)
+        const origCombinedTokensData = duplicate(toCreateCombinedTokensData);
+        let tempCreatedTokens;
+
+        //0.9.3f: Fix 0.8.0 deprecation warning: call canvas.scene.createEmbeddedDocuments() instead of Token.create()
+        if (QuickEncounter.isFoundryV8Plus) {
+            tempCreatedTokens = toCreateCombinedTokensData.length ? await canvas.scene.createEmbeddedDocuments("Token",toCreateCombinedTokensData) : [];
+        } else {
+            tempCreatedTokens = toCreateCombinedTokensData.length ? await Token.create(toCreateCombinedTokensData,{hidden: isHidden}) : [];
+        }
+
+        //And Token.create unfortunately returns an element, not an array if you pass a length=1 array
+        let createdTokens;
+        if (tempCreatedTokens.length === 0) {
+            createdTokens = []; //No tokens were created (perhaps because they all exist on the scene)
+        } else {
+            createdTokens = Array.isArray(tempCreatedTokens) ? tempCreatedTokens : [tempCreatedTokens];
+        }
+
+
+
+        //0.9.0 Move if (freezeCapturedTokens) outside the loop
+        //0.9.3 Move it back in because we're using the loop to remember addToCombatTracker also
+        //v0.6.1d: If it's a savedToken (one that was "captured" then check if it should be frozen as is or regenerated for example by Token Mold)
+        //Actor-generated tokens are always generated
+        //v0.5.3d: Check the value of setting "freezeCapturedTokens"
+        const freezeCapturedTokens = game.settings.get(QE.MODULE_NAME, "freezeCapturedTokens");
+        for (let i=0; i<toCreateCombinedTokensData.length; i++) {
+            //v0.5.0: Now reset the token data in case it was adjusted (e.g. by Token Mold), just for those that are frozen
+            //v0.6.1d: If freezeCapturedTokens = true, then reset the savedTokens
+            if (freezeCapturedTokens && toCreateCombinedTokensData[i].isSavedToken) {
                 //Ignore errors that happen during this update
                 try {
-                    createdTokens[i] = await createdTokens[i].update(allCombinedTokensData[i]);
+                    //0.9.1b: Update back to the original data (in case it was changed by TokenMold or other)
+                    createdTokens[i] = await createdTokens[i].update(origCombinedTokensData[i]);
                 } catch {}
             }
-            //0.6.1: If you use Alt-Run then create all tokens hidden regardless of how they were saved; Ctrl-Run make them visible
-            //(generated tokens are hidden by default; saved tokens retain their original visibility unless overridden)
-            if (options?.ctrl) {createdTokens[i].data.hidden = false;}  
-            if (options?.alt) {createdTokens[i].data.hidden = true;}
+            //0.9.3d Remember if we should/shouldn't add to Combat Tracker
+            //FIX: This doesn't handle if any of the token creations fail - to do that we would have to handle token creation individually
+            createdTokens[i].addToCombatTracker = origCombinedTokensData[i].addToCombatTracker;
         }
+
+        //0.9.3d Fixed: We can't add the existing tokens until we've taken care of the reset against origCombinedTokensData[] (=toCreateCombinedTokensData[])
+        //0.9.0e: Add back the QE tokens already on the scene
+        createdTokens = createdTokens.concat(existingTokens);
+
         return createdTokens;
     }
 
@@ -1073,33 +1235,37 @@ export class QuickEncounter {
         return createdTiles;
     }
 
-    static async createCombat(createdTokens) {
-        if (!createdTokens || !createdTokens.length) {return;}
+    static async createCombat(encounterTokens) {
+        if (!encounterTokens || !encounterTokens.length) {return;}
 
-        //Control the tokens (because that is checked in adding them to the Combat Tracker)
-        //But release any others first (so that we don't inadvertently add them to combat)
-        let createdToken0;
-        const isFoundryV8 = game.data.version.startsWith("0.8");
-        if (isFoundryV8) {//Foundry 0.8.x
-            createdToken0 = createdTokens[0].object;
-        } else {//Foundry 0.7.x
-            createdToken0 = createdTokens[0];
-        }
-        createdToken0.control({releaseOthers : true, updateSight : false, pan : true});
+        
+        //FIX: Refactor: Should refactor into two large paths for Foundry 0.7 VS. 0.8 & 0.9
+
+        //0.9.3d Find the first token to be added to the Combat Tracker and work around that
+        let firstAddedToCT = null; 
 
         let tokenObject;
-        for (const token of createdTokens) {
-            if (isFoundryV8) {//0.8.0e: 
+        for (const token of encounterTokens) {
+            if (QuickEncounter.isFoundryV8Plus) {//0.8.0e: 
                 tokenObject = token.object;
             } else {//Foundry 0.7.x
                 tokenObject = token;
-            }            
-            tokenObject.control({releaseOthers : false, updateSight : false});
+            }      
+            //0.9.3d: Only add to Combat Tracker if addToCombatTracker set (the default)      
+            //Control the tokens (because that is checked in adding them to the Combat Tracker)
+            if (token.addToCombatTracker) {
+                if (!firstAddedToCT) {
+                    //But release any others first (so that we don't inadvertently add them to combat) using the "first" one arbitrarily
+                    firstAddedToCT = tokenObject;
+                    firstAddedToCT.control({releaseOthers : true, updateSight : false, pan : true});
+                }
+                tokenObject.control({releaseOthers : false, updateSight : false});
+            }
         }
 
         //Load the recovered tokens into the combat Tracker
         //Only have to toggle one of them to add all the controlled tokens
-        await createdToken0.toggleCombat();
+        if (firstAddedToCT) await firstAddedToCT.toggleCombat();
 
         //0.6: Moved after toggling combat in case that actually creates the combat entity
         const tabApp = ui.combat;
@@ -1107,8 +1273,8 @@ export class QuickEncounter {
         //If the tokens are not on the Scene then add them
 
         //Now release control of them as a group, because otherwise the stack is hard to see             
-        for (const token of createdTokens) {
-            if (isFoundryV8) {//0.8.0e: 
+        for (const token of encounterTokens) {
+            if (QuickEncounter.isFoundryV8Plus) {//0.8.0e: 
                 tokenObject = token.object;
             } else {//Foundry 0.7.x
                 tokenObject = token;
@@ -1119,27 +1285,39 @@ export class QuickEncounter {
     }
 
     static async onDeleteCombat(combat, options, userId) {
-        const isFoundryV8 = game.data.version.startsWith("0.8");
+        if (!combat || !game.user.isGM) {return;}    
 
-        //Only works with 5e
-        //If the display XP option is set, work out how many defeated foes and how many Player tokens
-        const shouldDisplayXPAfterCombat = game.settings.get(QE.MODULE_NAME, "displayXPAfterCombat");
-        if (!shouldDisplayXPAfterCombat || !combat || !game.user.isGM) {return;}
-
-        //Get list of non-friendly NPCs
-        let nonFriendlyNPCTokens;
-        if (isFoundryV8) {//Foundry 0.8.x
-            nonFriendlyNPCTokens = combat.turns?.filter(t => ((t.token?.data?.disposition === CONST.TOKEN_DISPOSITIONS.HOSTILE) && (!t.actor || !t.players?.length)));
+        //v0.9.0c: This has always been hostile NPCs
+        //Get list of hostile NPCs
+        let hostileNPCCombatants;
+        let defeatedHostileNPCCombatants; 
+        if (QuickEncounter.isFoundryV8Plus) {//Foundry 0.8.x
+            hostileNPCCombatants = combat.turns?.filter(t => ((t.token?.data?.disposition === CONST.TOKEN_DISPOSITIONS.HOSTILE) && (!t.actor || !t.players?.length)));
+            defeatedHostileNPCCombatants = combat.turns?.filter(t => (t.data.defeated &&
+                                                            (t.token?.data?.disposition === CONST.TOKEN_DISPOSITIONS.HOSTILE) && (!t.actor || !t.players?.length)));
         } else {//Foundry 0.7.x
-            nonFriendlyNPCTokens = combat.turns?.filter(t => ((t.token?.disposition === CONST.TOKEN_DISPOSITIONS.HOSTILE) && (!t.actor || !t.players?.length)));
+            hostileNPCCombatants = combat.turns?.filter(t => ((t.token?.disposition === CONST.TOKEN_DISPOSITIONS.HOSTILE) && (!t.actor || !t.players?.length)));
         }
 
         //And of player-owned tokens
         const pcTokens = combat.turns?.filter(t => (t.actor && t.players?.length));
 
+        //If the "Display XP" option is set, work out how many defeated foes and how many Player tokens
+        //v0.9.0: Moved to displayXP
+        //Only works with 5e - the setting is only displayed if that's true
+        const shouldDisplayXPAfterCombat = game.settings.get(QE.MODULE_NAME, "displayXPAfterCombat");
+        if (shouldDisplayXPAfterCombat) {await QuickEncounter.displayXP(hostileNPCCombatants, pcTokens);}
+
+        //If the "Delete Tokens after Combat" option is set, ask with a two option dialog
+        const showDeleteTokensDialogAfterCombat = game.settings.get(QE.MODULE_NAME, "showDeleteTokensDialogAfterCombat");
+        if (showDeleteTokensDialogAfterCombat) {await QuickEncounter.deleteTokensAfterCombatDialog(hostileNPCCombatants, defeatedHostileNPCCombatants);}
+
+    }
+
+    static async displayXP(hostileNPCCombatants, pcTokens) {
         //Now compute total XP and XP per player
-        if (!nonFriendlyNPCTokens || !nonFriendlyNPCTokens.length || !pcTokens) {return;}
-        const totalXP = QuickEncounter.computeTotalXPFromTokens(nonFriendlyNPCTokens);
+        if (!hostileNPCCombatants || !hostileNPCCombatants.length || !pcTokens) {return;}
+        const totalXP = QuickEncounter.computeTotalXPFromTokens(hostileNPCCombatants);
         if (!totalXP) {return;}
         const xpPerPlayer = pcTokens.length ? Math.round(totalXP/pcTokens.length) : null;
         let content = game.i18n.localize("QE.XPtoAward.TOTAL") + totalXP;
@@ -1156,6 +1334,25 @@ export class QuickEncounter {
                 width: 400,
                 jQuery: false
             }
+        });
+    }
+
+    static async deleteTokensAfterCombatDialog(hostileNPCCombatants, defeatedHostileNPCCombatants) {
+        Dialog3.buttons3({
+            title: game.i18n.localize("QE.DeleteTokensAfterCombat.TITLE"),
+            content: game.i18n.localize("QE.DeleteTokensAfterCombat.CONTENT"),
+            button1cb: () => {//All
+                //in QE v0.9.x we're only supporting Foundry 0.8.+
+                const tokensToDeleteIds = hostileNPCCombatants.map(ct => {return ct.token.id});
+                canvas.scene.deleteEmbeddedDocuments("Token", tokensToDeleteIds);
+            },
+            button2cb: () => {//Defeated Only
+                //in QE v0.9.x we're only supporting Foundry 0.8.+
+                const tokensToDeleteIds = defeatedHostileNPCCombatants.map(ct => {return ct.token.id});
+                canvas.scene.deleteEmbeddedDocuments("Token", tokensToDeleteIds);
+            },
+            button3cb: null,
+            buttonLabels : ["QE.DeleteTokensAfterCombat.DELETEALL",  "QE.DeleteTokensAfterCombat.DELETEDEFEATED"]
         });
     }
 
@@ -1303,48 +1500,47 @@ export class QuickEncounter {
 export class Dialog3 extends Dialog {
     static async buttons3({title, content, button1cb, button2cb, button3cb, buttonLabels, options={}}) {
         //Also can function as a generic 2-button dialog by passing button3b=null
-            return new Promise((resolve, reject) => {
-        const dialog = new this({
-            title: title,
-            content: content,
-            buttons: {
-                button1: {
-                    icon: null,
-                    label: game.i18n.localize(buttonLabels[0]),
-                    callback: html => {
-                    const result = button1cb ? button1cb(html) : true;
-                    resolve(result);
+        return new Promise((resolve, reject) => {
+            const dialog = new this({
+                title: title,
+                content: content,
+                buttons: {
+                    button1: {
+                        icon: null,
+                        label: game.i18n.localize(buttonLabels[0]),
+                        callback: html => {
+                            const result = button1cb ? button1cb(html) : true;
+                            resolve(result);
+                        }
+                    },
+                    button2: {
+                        icon: null,
+                        label: game.i18n.localize(buttonLabels[1]),
+                        callback: html => {
+                            const result = button2cb ? button2cb(html) : false;
+                            resolve(result);
+                        }
+                    },
+                    button3: {
+                        icon: null,
+                        label: game.i18n.localize(buttonLabels[2]),
+                        callback: html => {
+                            const result = button3cb ? button3cb(html) : false;
+                            resolve(result);
+                        }
                     }
                 },
-                button2: {
-                    icon: null,
-                    label: game.i18n.localize(buttonLabels[1]),
-                    callback: html => {
-                    const result = button2cb ? button2cb(html) : false;
-                    resolve(result);
-                    }
-                },
-                button3: {
-                    icon: null,
-                    label: game.i18n.localize(buttonLabels[2]),
-                    callback: html => {
-                    const result = button3cb ? button3cb(html) : false;
-                    resolve(result);
-                    }
-                }
-            },
-            default: "button1",
-            close: () => reject
-        }, options);
+                default: "button1",
+                close: () => reject
+            }, options);
 
-        if (!button3cb) {
-            delete dialog.data.buttons.button3;
-        }
-        dialog.render(true);
+            if (!button3cb) {
+                delete dialog.data.buttons.button3;
+            }
+            dialog.render(true);
         });
     }
 }
-
 
 
 /** HOOKS */
@@ -1367,14 +1563,21 @@ Hooks.on(`renderJournalSheet`,  QuickEncounter.onRenderJournalSheet);
 //Placing a map Note is moved to when you actually run the Encounter
 Hooks.on('closeJournalSheet', async (journalSheet, html) => {
     if (!game.user.isGM) {return;}
-    const journalEntry = journalSheet.object;
+    const journalEntry = journalSheet.object; 
 
     //0.5.3: BUG: If you had the Tutorial JE open it would delete another Journal Entry when you closed it
     //This was happening because $("QuickEncountersTutorial") by itself was searching the whole DOM
     if (journalSheet.element.find("#QuickEncountersTutorial").length) {
         //This is the tutorial Journal Entry
         //v0.4.0 Check that we haven't already deleted this (because onDelete -> close)
-        if (game.journal.get(journalEntry.id)) {await JournalEntry.delete(journalEntry.id);}
+        if (game.journal.get(journalEntry.id)) {
+            //v0.8.3: Switch to use JournalEntry.deleteDocuments(ids)
+            if (QuickEncounter.isFoundryV8Plus) {
+                await JournalEntry.deleteDocuments([journalEntry.id]);
+            } else {//Foundry v0.7
+                await JournalEntry.delete(journalEntry.id);
+            }
+        }
     }
 
     //v0.6.1: If there's a QE dialog open, close that too
@@ -1391,3 +1594,8 @@ Hooks.on('getSceneControlButtons', QuickEncounter.getSceneControlButtons);
 Hooks.on("deleteCombat", (combat, options, userId) => {
     QuickEncounter.onDeleteCombat(combat, options, userId);
 });
+
+//0.9.1a: (from ironmonk88) Add a QE (fist) control to the command palette for Monk's Enhanced Journal
+Hooks.on("activateControls", (journal, controls) => {
+	controls.push({id: 'quickencounter', text: "Quick Encounter", icon: 'fa-fist-raised', conditional: game.user.isGM, callback: QuickEncounter.runAddOrCreate.bind(journal?.subsheet)});
+});												 

@@ -1,13 +1,50 @@
 # RELEASE NOTES
+## 0.9 
+- Supports Foundry 0.8+ and 9.x only
+### 0.9.6
+- Fixed: compatibleCoreVersion format now 9.x not 0.9.x
+- Updated Spanish translation
+### 0.9.5
+- Fixed: Really work with Foundry 0.9; was choking on deprecated .entity references
+### 0.9.4
+- Submit/save QE when you press Run Quick Encounter (to capture Add to CT status)
+### 0.9.3
+- Updated Spanish translation
+- Check behavior for Foundry 0.9 - fix critical deprecation warnings
+- Fixed [#34](https://github.com/spetzel2020/quick-encounters/issues/34): Add "Show Add to Combat Tracker" setting (default: false); if true and Add to CT checkbox is cleared, QE will not add the Actor to the Combat Tracker
+### 0.9.2
+- Fixed: [#62](https://github.com/spetzel2020/quick-encounters/issues/62) (more improvements planned)
+- Closed: [#53](https://github.com/spetzel2020/quick-encounters/issues/53)
+### 0.9.1
+- Merged PR#59 from ironmonk88 to work with Enhanced Journals
+- Fixed [#57](https://github.com/spetzel2020/quick-encounters/issues/57)
+- Fixed [#63](https://github.com/spetzel2020/quick-encounters/issues/63)
+- Closed [#58](https://github.com/spetzel2020/quick-encounters/issues/58) (not a bug)
+- Fixed [#61](https://github.com/spetzel2020/quick-encounters/issues/61) 
+### 0.9.0
+- Implemented Issue [#53](https://github.com/spetzel2020/quick-encounters/issues/53) ; new setting to delete All or Defeated hostile tokens after combat
+- Implemented Issue [#54](https://github.com/spetzel2020/quick-encounters/issues/54) ; new setting to Delete or Leave tokens after saving them
+    - Visual representation of left tokens is small token icon
 ## 0.8
 - Make QE dialog read-only if from QE is in Compendium Journal
-- Updated Spanish translation
-- COmpatible with Foundry 0.8
-
-## 0.8.1
+- Updated Spanish & Japanese translation
+- Compatible with Foundry 0.8.x
+- Bug fixes
+### 0.8.5
+### 0.8.4
+- Fixed: Issue [#49](https://github.com/spetzel2020/quick-encounters/issues/49) (again)
+### 0.8.4
+- Fixed: Issue [#52](https://github.com/spetzel2020/quick-encounters/issues/52)    
+### 0.8.3
+- Fixed: Issue [#48](https://github.com/spetzel2020/quick-encounters/issues/48), [#50](https://github.com/spetzel2020/quick-encounters/issues/50), [#51](https://github.com/spetzel2020/quick-encounters/issues/51)
+- Compatible with Foundry 0.8.8
+### 0.8.2
+- Fixed: Issue [#46](https://github.com/spetzel2020/quick-encounters/issues/46), [#47](https://github.com/spetzel2020/quick-encounters/issues/47)
+- Updated Japanese translation
+### 0.8.1
 - Updated Spanish translation
 - Compatible with Foundry 0.8.6
-## 0.8.0
+### 0.8.0
 - Updates to support Foundry 0.8.x
 - Make QE dialog read-only if from QE is in Compendium Journal
 - Support League standard for module.json format (switch to implicit Github latest link)

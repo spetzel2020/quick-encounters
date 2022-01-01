@@ -1,3 +1,4 @@
+import {QuickEncounter} from './QuickEncounter.js';
 /*
 Extend the placeable Map Note - select the desired tokens and then tap the Quick Encounters button
 Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tracker when you open the note?
@@ -20,6 +21,12 @@ Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tra
 7-Dec-2020      v0.6.13: delete(): Delete ALL of the Notes (in this or other Scenes) associated with the delete journal Entry
                         EncounterNote.create() and .place() return newNote so that we can store that in the quickEncounter before serialization
                         Expand the available list of Note icons (perhaps would be good to have a Setting to allow/disallow this)
+8-Aug-2021      0.8.3a: If Foundryv8 then don't do Note deletion in the current scene because new Journal._onDelete() method takes care of that  
+                        (although because of https://gitlab.com/foundrynet/foundryvtt/-/issues/5700 this won't work at all currently)  
+15-Nov-2021     v0.9.1b: Issue #57 Reintroduce deleltion of notes; doesn't seem to be handled in Foundry 0.8.9     
+6-Dec-2021      0.9.3a: Check for Foundry 0.9 OR 0.8   
+15-Dec-2021     0.9.3f: EncounterNote.create(): Check/fix deprecation warning by using canvas.scene.embeddedDocuments()      
+21-Dec-2021     0.9.5a: Use QuickEncounter.isFoundryV8Plus test                          
 */
 
 //Expand the available list of Note icons
@@ -79,6 +86,7 @@ export class EncounterNoteConfig extends NoteConfig {
 export class EncounterNote {
     static async create(quickEncounter, noteAnchor) {
         if (!quickEncounter) {return;}
+
         // Create Note data
         const noteData = {
               entryId: quickEncounter.journalEntryId,
@@ -92,22 +100,31 @@ export class EncounterNote {
               fontSize: 24
         };
 
-        //v0.5.0: Switch to Note.create() to bypass the NOte dialog
+        //v0.5.0: Switch to Note.create() to bypass the Note dialog
         //This is different from the JournalEntry._onDropData approach
-        let newNote = await Note.create(noteData);
+        //0.9.3f: Remove deprecation warning by using createEmbeddedDocuments()
+        let newNote = QuickEncounter.isFoundryV8Plus ? await canvas.scene.createEmbeddedDocuments("Note",[noteData]) : await Note.create(noteData);
         newNote._sheet = new EncounterNoteConfig(newNote);
         return newNote;
     }
 
     static async delete(journalEntry) {
+
         if (!game.user.isGM) {return;}
         //Create filtered array of matching Notes for each scene
         let matchingNoteIds;
         let numNotesDeleted = 0;
         for (const scene of game.scenes) {
-            matchingNoteIds = scene.data.notes.filter(note => note.entryId === journalEntry.id).map(note => note._id);
+            const sceneNotes = scene.data.notes;
+            if (QuickEncounter.isFoundryV8Plus) {
+                matchingNoteIds = Array.from(sceneNotes.values()).filter(nd => nd.data.entryId === journalEntry.id).map(note => note._id);
+            } else {
+                matchingNoteIds = sceneNotes.filter(note => note.entryId === journalEntry.id).map(note => note._id);
+            }
             if (!matchingNoteIds?.length) {continue;}
             //Deletion is triggered by Scene (because that's where the notes are stored)
+            //v0.8.3a: If Foundry v0.8.x then don't delete the Note in the viewed Scene because the Journal._onDelete() trigger does that
+            //v0.9.1b: Issue #57 Reintroduce deleltion of notes; doesn't seem to be handled in Foundry 0.8.9
             scene.deleteEmbeddedEntity("Note", matchingNoteIds);
             numNotesDeleted += matchingNoteIds.length;
         }
