@@ -5,7 +5,7 @@
 - Fixed: compatibleCoreVersion format now 9.x not 0.9.x
 - Merged new Japanese (thanks touge!)
 - Fixed: Issue #75 (Foundry v9: Cannot create new QEs or add tokens to existing ones)
-- Updated Spanish translation
+- Updated Spanish translation (thanks https://github.com/lozalojo!)
 ### 0.9.5
 - Fixed: Really work with Foundry 0.9; was choking on deprecated .entity references
 ### 0.9.4
