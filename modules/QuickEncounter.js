@@ -183,6 +183,7 @@
                 createCombat(): add token to the Combat Tracker if addToCombatTracker set (the default)
 15-Dec-2021     0.9.3f: Fix this deprecation error  at QuickEncounters#1173 You are calling PlaceableObject.create which has been deprecated in favor of Document.create or Scene#createEmbeddedDocuments.
 21-Dec-2021     0.9.5a: In init, set the QuickEncounter.isFoundryV8Plus variable for choosing different code-paths/data models
+1-Jan-2022      0.9.6b: Tile.layer no longer exists; must look at canvas.foreground and canvas.background
 */
 
 
@@ -429,8 +430,10 @@ export class QuickEncounter {
         const controlledTokens = Array.from(canvas.tokens?.controlled);
         const controlledNonFriendlyTokens = controlledTokens?.filter(t => t.data?.disposition !== FRIENDLY_TOKEN_DISPOSITIONS );
         const controlledFriendlyTokens = controlledTokens?.filter(t => t.data?.disposition === FRIENDLY_TOKEN_DISPOSITIONS );
-        //0.7.0b: Capture controlled tiles (will be one or the other
-        const controlledTiles = Array.from(Tile.layer.controlled);
+        //0.7.0b: Capture controlled tiles (will be one or the other of foreground or background, not both)
+        //0.9.6b: Switch to using canvas.foreground and canvas.background because Tile.layer doesn't exist in Foundry 9
+        let controlledTiles = Array.from(canvas.foreground.controlled);
+        controlledTiles = controlledTiles.concat(Array.from(canvas.background.controlled));
         //0.9.1a: (from ironmonk88) Pass this so we can check for Monk's Enhanced Journal 
         const candidateJournalEntry = QuickEncounter.findCandidateJournalEntry.call(this); 
         const quickEncounter = (candidateJournalEntry instanceof QuickEncounter ) ? candidateJournalEntry : null;
