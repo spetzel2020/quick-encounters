@@ -184,6 +184,7 @@
 15-Dec-2021     0.9.3f: Fix this deprecation error  at QuickEncounters#1173 You are calling PlaceableObject.create which has been deprecated in favor of Document.create or Scene#createEmbeddedDocuments.
 21-Dec-2021     0.9.5a: In init, set the QuickEncounter.isFoundryV8Plus variable for choosing different code-paths/data models
 1-Jan-2022      0.9.6b: Tile.layer no longer exists; must look at canvas.foreground and canvas.background
+11-Jan-2022     0.9.7a: extractActors(): Lingering use of dataPack.entity; Fix Issue #77
 */
 
 
@@ -192,7 +193,7 @@ import {QESheet} from './QESheet.js';
 
 export const QE = {
     MODULE_NAME : "quick-encounters",
-    MODULE_VERSION : "0.9.6",
+    MODULE_VERSION : "0.9.7",
     TOKENS_FLAG_KEY : "tokens",
     QE_JSON_FLAG_KEY : "quickEncounter"
 }
@@ -815,7 +816,7 @@ export class QuickEncounter {
             const dataLookup = element.attr("data-lookup");
             //Get the dataPack entity type (has to be Actor)
             const dataPack = game.packs.get(dataPackName);
-            if ((dataEntity === ACTOR) || (dataPack && (dataPack.entity === ACTOR))) {
+            if ((dataEntity === ACTOR) || (dataPack && (dataPack.documentName === ACTOR))) {
                 const dataName = element.text();
                 const prevSibling = element[0].previousSibling;
                 let multiplier = 1;
