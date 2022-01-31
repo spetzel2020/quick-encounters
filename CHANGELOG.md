@@ -1,6 +1,8 @@
 # RELEASE NOTES
 ## 0.9 
 - Supports Foundry 0.8+ and 9.x only
+### 0.9.8
+- Fixed: Issue #78 (Dice roll generation of tokens not working)
 ### 0.9.7
 - Fixed: Issue #77 (Foundry v9: QE ignores Compendium links)
 ### 0.9.6
