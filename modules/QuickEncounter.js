@@ -185,6 +185,7 @@
 21-Dec-2021     0.9.5a: In init, set the QuickEncounter.isFoundryV8Plus variable for choosing different code-paths/data models
 1-Jan-2022      0.9.6b: Tile.layer no longer exists; must look at canvas.foreground and canvas.background
 11-Jan-2022     0.9.7a: extractActors(): Lingering use of dataPack.entity; Fix Issue #77
+31-Jan-2022     0.9.8a: getNumActors(): Add async:false to Roll.evaluate() to keep synchronous; we can also change this to an await-ed call
 */
 
 
@@ -193,7 +194,7 @@ import {QESheet} from './QESheet.js';
 
 export const QE = {
     MODULE_NAME : "quick-encounters",
-    MODULE_VERSION : "0.9.7",
+    MODULE_VERSION : "0.9.8",
     TOKENS_FLAG_KEY : "tokens",
     QE_JSON_FLAG_KEY : "quickEncounter"
 }
@@ -1027,9 +1028,9 @@ export class QuickEncounter {
                 //v0.6: Pass the multiplier to the roll formula, which allows for a digit or a formula
                 let r= new Roll(multiplier);
                 if (options?.rollType === "full") {
-                    r.evaluate();
+                    r.evaluate({async: false});
                 } else {//template or other
-                    r.evaluate({minimize: false, maximize: true});
+                    r.evaluate({minimize: false, maximize: true, async: false});
                 }
                 numActors = r.total ? r.total : 1;
             } 
