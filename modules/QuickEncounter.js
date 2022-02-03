@@ -186,6 +186,7 @@
 1-Jan-2022      0.9.6b: Tile.layer no longer exists; must look at canvas.foreground and canvas.background
 11-Jan-2022     0.9.7a: extractActors(): Lingering use of dataPack.entity; Fix Issue #77
 31-Jan-2022     0.9.8a: getNumActors(): Add async:false to Roll.evaluate() to keep synchronous; we can also change this to an await-ed call
+3-Feb-2022      0.9.9a: Fixed: Issue #79 (Issue adding tiles to quick encounter ): Convert deprecated Tile.create() to Scene#createEmbeddedDOcuments()
 */
 
 
@@ -1236,7 +1237,14 @@ export class QuickEncounter {
             if (options?.ctrl) {shiftedTilesData[i].hidden = false;}  
             if (options?.alt) {shiftedTilesData[i].hidden = true;}
         }
-        const createdTiles = await Tile.create(duplicate(shiftedTilesData));
+        //0.9.9a: Tile.create() has been deprecated - must have reverted to this code from somewhere else
+        let createdTiles;
+        if (QuickEncounter.isFoundryV8Plus) {
+            createdTiles = shiftedTilesData.length ? await canvas.scene.createEmbeddedDocuments("Tile", shiftedTilesData) : [];
+        } else {
+            createdTiles = await Tile.create(duplicate(shiftedTilesData));
+        }
+
         return createdTiles;
     }
 
