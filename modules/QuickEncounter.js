@@ -187,6 +187,8 @@
 11-Jan-2022     0.9.7a: extractActors(): Lingering use of dataPack.entity; Fix Issue #77
 31-Jan-2022     0.9.8a: getNumActors(): Add async:false to Roll.evaluate() to keep synchronous; we can also change this to an await-ed call
 3-Feb-2022      0.9.9a: Fixed: Issue #79 (Issue adding tiles to quick encounter ): Convert deprecated Tile.create() to Scene#createEmbeddedDOcuments()
+8-Feb-2022      0.9.10a: Fixed Issue #81 (Run Encounter from Compendium fails) using PR#80 (thanks https://github.com/jsabol)
+                (Also checks for existing Actor before importing)
 */
 
 
@@ -195,7 +197,7 @@ import {QESheet} from './QESheet.js';
 
 export const QE = {
     MODULE_NAME : "quick-encounters",
-    MODULE_VERSION : "0.9.8",
+    MODULE_VERSION : "0.9.10",
     TOKENS_FLAG_KEY : "tokens",
     QE_JSON_FLAG_KEY : "quickEncounter"
 }

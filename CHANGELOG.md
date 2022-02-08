@@ -1,6 +1,8 @@
 # RELEASE NOTES
 ## 0.9 
 - Supports Foundry 0.8+ and 9.x only
+### 0.9.10
+- Fixed: Issue #81 (Run Encounter from Compendium fails) - fixed with PR#80 (thanks )
 ### 0.9.9
 - Fixed: Issue #79 (Issue adding tiles to quick encounter )
 ### 0.9.8
