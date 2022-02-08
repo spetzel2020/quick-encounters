@@ -1046,10 +1046,15 @@ export class QuickEncounter {
         //v0.6 Need to check whether this is a direct Actor reference or from a Compendium
         let actor = null;
         if (eActor.dataPackName) {
-            const actorPack = game.packs.get(eActor.dataPackName);
-            if (!actorPack) {return null;}
-            //Import this actor because otherwise you won't be able to see character sheet etc.
-            actor = await game.actors.importFromCollection(eActor.dataPackName, eActor.actorID, {}, {renderSheet: false});
+            // if an actor with this name has already been imported, use it
+            actor = game.actors.getName(eActor.name);
+            // couldn't find actor, get compendium and import
+            if (!actor) {
+                const actorPack = game.packs.get(eActor.dataPackName);
+                if (!actorPack) {return null;}
+                //Import this actor because otherwise you won't be able to see character sheet etc.
+                actor = await game.actors.importFromCompendium(eActor.dataPackName, eActor.actorID, {}, {renderSheet: false});
+            }
         } else {
             actor = game.actors.get(eActor.actorID);
         }
