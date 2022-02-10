@@ -189,6 +189,7 @@
 3-Feb-2022      0.9.9a: Fixed: Issue #79 (Issue adding tiles to quick encounter ): Convert deprecated Tile.create() to Scene#createEmbeddedDOcuments()
 8-Feb-2022      0.9.10a: Fixed Issue #81 (Run Encounter from Compendium fails) using PR#80 (thanks https://github.com/jsabol)
                 (Also checks for existing Actor before importing)
+10-Feb-2022     0.9.10b: Typo in first parameter of importFromCompendium(); should be pack object, not pack name                
 */
 
 
@@ -1055,7 +1056,7 @@ export class QuickEncounter {
                 const actorPack = game.packs.get(eActor.dataPackName);
                 if (!actorPack) {return null;}
                 //Import this actor because otherwise you won't be able to see character sheet etc.
-                actor = await game.actors.importFromCompendium(eActor.dataPackName, eActor.actorID, {}, {renderSheet: false});
+                actor = await game.actors.importFromCompendium(actorPack, eActor.actorID, {}, {renderSheet: false});
             }
         } else {
             actor = game.actors.get(eActor.actorID);
