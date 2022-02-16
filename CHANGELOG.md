@@ -1,4 +1,6 @@
 # RELEASE NOTES
+## 1.0
+- Instant Encounters: Drag a Quick Encounter directly from the Journals directory to the Scene to run it!
 ## 0.9 
 - Supports Foundry 0.8+ and 9.x only
 ### 0.9.10
