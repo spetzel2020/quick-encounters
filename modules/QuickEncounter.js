@@ -185,6 +185,11 @@
 21-Dec-2021     0.9.5a: In init, set the QuickEncounter.isFoundryV8Plus variable for choosing different code-paths/data models
 1-Jan-2022      0.9.6b: Tile.layer no longer exists; must look at canvas.foreground and canvas.background
 11-Jan-2022     0.9.7a: extractActors(): Lingering use of dataPack.entity; Fix Issue #77
+31-Jan-2022     0.9.8a: getNumActors(): Add async:false to Roll.evaluate() to keep synchronous; we can also change this to an await-ed call
+3-Feb-2022      0.9.9a: Fixed: Issue #79 (Issue adding tiles to quick encounter ): Convert deprecated Tile.create() to Scene#createEmbeddedDOcuments()
+8-Feb-2022      0.9.10a: Fixed Issue #81 (Run Encounter from Compendium fails) using PR#80 (thanks https://github.com/jsabol)
+                (Also checks for existing Actor before importing)
+10-Feb-2022     0.9.10b: Typo in first parameter of importFromCompendium(); should be pack object, not pack name                
 */
 
 
@@ -1027,9 +1032,9 @@ export class QuickEncounter {
                 //v0.6: Pass the multiplier to the roll formula, which allows for a digit or a formula
                 let r= new Roll(multiplier);
                 if (options?.rollType === "full") {
-                    r.evaluate();
+                    r.evaluate({async: false});
                 } else {//template or other
-                    r.evaluate({minimize: false, maximize: true});
+                    r.evaluate({minimize: false, maximize: true, async: false});
                 }
                 numActors = r.total ? r.total : 1;
             } 
@@ -1044,10 +1049,15 @@ export class QuickEncounter {
         //v0.6 Need to check whether this is a direct Actor reference or from a Compendium
         let actor = null;
         if (eActor.dataPackName) {
-            const actorPack = game.packs.get(eActor.dataPackName);
-            if (!actorPack) {return null;}
-            //Import this actor because otherwise you won't be able to see character sheet etc.
-            actor = await game.actors.importFromCollection(eActor.dataPackName, eActor.actorID, {}, {renderSheet: false});
+            // if an actor with this name has already been imported, use it
+            actor = game.actors.getName(eActor.name);
+            // couldn't find actor, get compendium and import
+            if (!actor) {
+                const actorPack = game.packs.get(eActor.dataPackName);
+                if (!actorPack) {return null;}
+                //Import this actor because otherwise you won't be able to see character sheet etc.
+                actor = await game.actors.importFromCompendium(actorPack, eActor.actorID, {}, {renderSheet: false});
+            }
         } else {
             actor = game.actors.get(eActor.actorID);
         }
@@ -1235,7 +1245,14 @@ export class QuickEncounter {
             if (options?.ctrl) {shiftedTilesData[i].hidden = false;}  
             if (options?.alt) {shiftedTilesData[i].hidden = true;}
         }
-        const createdTiles = await Tile.create(duplicate(shiftedTilesData));
+        //0.9.9a: Tile.create() has been deprecated - must have reverted to this code from somewhere else
+        let createdTiles;
+        if (QuickEncounter.isFoundryV8Plus) {
+            createdTiles = shiftedTilesData.length ? await canvas.scene.createEmbeddedDocuments("Tile", shiftedTilesData) : [];
+        } else {
+            createdTiles = await Tile.create(duplicate(shiftedTilesData));
+        }
+
         return createdTiles;
     }
 

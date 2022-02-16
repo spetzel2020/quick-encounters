@@ -3,6 +3,13 @@
 - Instant Encounters: Drag a Quick Encounter directly from the Journals directory to the Scene to run it!
 ## 0.9 
 - Supports Foundry 0.8+ and 9.x only
+### 0.9.10
+- Fixed: Issue #81 (Run Encounter from Compendium fails) - fixed with PR#80 (thanks https://github.com/jsabol )
+- Also doesn't re-import a Compendium actor previously imported (matched just by name)
+### 0.9.9
+- Fixed: Issue #79 (Issue adding tiles to quick encounter )
+### 0.9.8
+- Fixed: Issue #78 (Dice roll generation of tokens not working)
 ### 0.9.7
 - Fixed: Issue #77 (Foundry v9: QE ignores Compendium links)
 ### 0.9.6
