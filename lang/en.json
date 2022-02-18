@@ -78,5 +78,7 @@
     "QE.DeleteTokensAfterAdd.LEAVE": "Leave",
     "QE.Setting.ShowAddToCombatTrackerCheckbox.NAME" : "Show Add to CT",
     "QE.Setting.ShowAddToCombatTrackerCheckbox.HINT" : "Show an Add to Combat Tracker option for each combatant in the QE dialog (default: not shown, and all combatants are added to the Combat Tracker)",
+    "QE.Setting.CheckInstantEncounter.NAME": "Check for Instant Encounters",
+    "QE.Setting.CheckInstantEncounter.HINT": "When you drag a Quick Encounter Journal Entry to the Scene to create a QE Note, ask if QE should run it immediately as an Instant Encounter (default: Don't ask)",
     "QE.AddToCombatTracker.TITLE" : "Add to CT"
   }

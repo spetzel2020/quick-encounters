@@ -1,4 +1,4 @@
-import {QuickEncounter} from './QuickEncounter.js';
+import {QuickEncounter, QE} from './QuickEncounter.js';
 /*
 Extend the placeable Map Note - select the desired tokens and then tap the Quick Encounters button
 Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tracker when you open the note?
@@ -26,7 +26,8 @@ Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tra
 15-Nov-2021     v0.9.1b: Issue #57 Reintroduce deleltion of notes; doesn't seem to be handled in Foundry 0.8.9     
 6-Dec-2021      0.9.3a: Check for Foundry 0.9 OR 0.8   
 15-Dec-2021     0.9.3f: EncounterNote.create(): Check/fix deprecation warning by using canvas.scene.embeddedDocuments()      
-21-Dec-2021     0.9.5a: Use QuickEncounter.isFoundryV8Plus test                          
+21-Dec-2021     0.9.5a: Use QuickEncounter.isFoundryV8Plus test   
+17-Feb-2022     1.0.1a: Add Hook on dropCanvasData to intercept creation of Notes for Quick Encounters                      
 */
 
 //Expand the available list of Note icons
@@ -246,6 +247,11 @@ export class EncounterNote {
         else {return false;}
     }
 
+    static async checkForInstantEncounter(data) {
+        //Don't even pop the dialog if the setting doesn't ask you to
+        if (!game.settings.get(QE.MODULE_NAME, "checkForInstantEncounter")) return true;
+    }
+
 
 }
 
@@ -258,31 +264,42 @@ Hooks.on(`renderEncounterNoteConfig`, async (noteConfig, html, data) => {
     html.find('button[name="submit"]').text(updateEncounterMapNote);
 });
 
-//NOT YET IMPLEMENTED
+//1.0.1: Instant Encounters - intercept Note creation and check if it's an Instant Encounter (initially with a dialog)
 //If you drag a Quick Encounter Journal Entry to the Scene, then intercept it to render it similarly,
-//but this time allow you to change stuff
-/*
-Hooks.on(`renderNoteConfig`, async (noteConfig, html, data) => {
-    const note = noteConfig.object;
-    const journalEntry = note.entry;
+//and also ask about Instant Encounters
+//Note that intercepting preCreateNoteDocument is too late because we are approving the preview at that point
+//and renderNoteConfig it's too difficult to change the form of the Note
+Hooks.on(`dropCanvasData`, (canvas, data) => {
+    //Try to leave quickly if this isn't a Journal Entry
+    if (data?.type !== "JournalEntry") {return true;}
+    //Or if it isn't a Quick Encounter
+    //This is a hack because we're basically replicating canvas.notes._onDropData()
+    // Acquire Journal entry 
+    //- because it's async and this hook can't be (otherwise it prematurely returns true and creates a preview) use .then chaining
+    console.info("Replacing ")
+    JournalEntry.fromDropData(data).then(s => {
+            let journalEntry = s;
+            if ( journalEntry.compendium ) {
+                const journalData = game.journal.fromCompendium(journalEntry);
+                journalEntry = JournalEntry.implementation.create(journalData);
+            }
+            //Get the world-transformed drop position - fortuantely these have already been placed in (data.x,data.y) by Canvas._onDrop
+            const noteAnchor = {x: data?.x, y: data?.y}
 
-//FIXME: Temporary so that we skip this until we can determine if something is a Quick Encounter just from the Journal Entry (not the sheet)
-    const isQEJournalEntry = false;
+            const quickEncounter = QuickEncounter.extractQuickEncounterFromJE(journalEntry);
+            if (quickEncounter) {
+                //Confirmed this is a Quick Encounter
+                //And just create the Encounter Note without asking for details
+                const quickEncounterNote = EncounterNote.create(quickEncounter, noteAnchor);
+            } else {
+                //create a normal Journal Entry Note
+                const noteData = {entryId: journalEntry.id, x: noteAnchor.x, y: noteAnchor.y}
+                //Another hack - because we don't have event we recover the raw drop location
+                const clientX = (noteAnchor.x * canvas.stage.scale.x) + canvas.notes.worldTransform.tx;
+                const clientY = (noteAnchor.y * canvas.stage.scale.y) + canvas.notes.worldTransform.ty;
+                return canvas.notes._createPreview(noteData, {top: clientY - 20, left: clientX + 40});
+            }
+    });
 
-    if (noteConfig.intercepted || !isQEJournalEntry) {return;}
-    mergeObject(data.object, {
-        icon: CONFIG.JournalEntry.noteIcons.Combat,
-        iconSize: 80,
-        iconTint: "#FF0000",  //Red
-        //Don't specify the name so it inherits from the Journal
-        textAnchor: CONST.TEXT_ANCHOR_POINTS.TOP,
-        fontSize: 24
-    })
-
-
-    const newInnerHtml = await noteConfig._renderInner(data);
-    if (noteConfig.element.length ) {noteConfig._replaceHTML(noteConfig.element, newInnerHtml);}
-    noteConfig.activateListeners(newInnerHtml);
-    noteConfig.intercepted = true;
+    return false;   // we're replacing Journal Note creation entirely
 });
-*/

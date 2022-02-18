@@ -189,7 +189,8 @@
 3-Feb-2022      0.9.9a: Fixed: Issue #79 (Issue adding tiles to quick encounter ): Convert deprecated Tile.create() to Scene#createEmbeddedDOcuments()
 8-Feb-2022      0.9.10a: Fixed Issue #81 (Run Encounter from Compendium fails) using PR#80 (thanks https://github.com/jsabol)
                 (Also checks for existing Actor before importing)
-10-Feb-2022     0.9.10b: Typo in first parameter of importFromCompendium(); should be pack object, not pack name                
+10-Feb-2022     0.9.10b: Typo in first parameter of importFromCompendium(); should be pack object, not pack name   
+17-Feb-2022     1.0.1a: Split out inner extractQuickEncounterFromJE() so we can call from Note creation
 */
 
 
@@ -371,6 +372,15 @@ export class QuickEncounter {
         game.settings.register(QE.MODULE_NAME, "showAddToCombatTrackerCheckbox", {
             name: "QE.Setting.ShowAddToCombatTrackerCheckbox.NAME",
             hint: "QE.Setting.ShowAddToCombatTrackerCheckbox.HINT",
+            scope: "world",
+            config: true,
+            default: false,
+            type: Boolean
+        });
+        //v1.0. Check for Instant Encounters when you drag a JE to the Scene to create a Note
+        game.settings.register(QE.MODULE_NAME, "checkForInstantEncounter", {
+            name: "QE.Setting.CheckInstantEncounter.NAME",
+            hint: "QE.Setting.CheckInstantEncounter.HINT",
             scope: "world",
             config: true,
             default: false,
@@ -775,8 +785,11 @@ export class QuickEncounter {
 
     static extractQuickEncounter(journalSheet) {
         const journalEntry = journalSheet?.object;
-        if (!journalEntry) {return;}
+        return QuickEncounter.extractQuickEncounterFromJE(journalEntry);
+    }
 
+    static extractQuickEncounterFromJE(journalEntry) {
+        if (!journalEntry) {return null;}
         //0.6.1k: If quickEncounter is stored, extract that - but you can't store the actual object
         let quickEncounter = QuickEncounter.deserializeFromJournalEntry(journalEntry);
 
@@ -784,7 +797,7 @@ export class QuickEncounter {
         if (!quickEncounter) {
             //Extract it the old (v0.5) way - this also still applies if you create a Journal Entry with Actor or Compendium links
             //0.6 this now potentially includes Compendium links
-            const extractedActors = QuickEncounter.extractActors(journalSheet.element);
+            const extractedActors = QuickEncounter.extractActors(journalEntry.sheet.element);
             const savedTokensData =  journalEntry.getFlag(QE.MODULE_NAME, QE.TOKENS_FLAG_KEY);
             //v0.6.1: Backwards compatibility - set the isSavedToken flga
             savedTokensData?.forEach(td => {td.isSavedToken = true;});
