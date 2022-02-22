@@ -1,4 +1,4 @@
-import {QuickEncounter, QE} from './QuickEncounter.js';
+import {QuickEncounter, QE, Dialog3} from './QuickEncounter.js';
 /*
 Extend the placeable Map Note - select the desired tokens and then tap the Quick Encounters button
 Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tracker when you open the note?
@@ -243,13 +243,24 @@ export class EncounterNote {
             yes : () => {shouldSwitch = true},
             no : () => {shouldSwitch = false}
         });
-        if (shouldSwitch) {return await EncounterNote.switchToMapNoteScene(qeScene, qeJournalEntry);}
+        if (shouldSwitch) {return EncounterNote.switchToMapNoteScene(qeScene, qeJournalEntry);}
         else {return false;}
     }
 
-    static async checkForInstantEncounter(data) {
-        //Don't even pop the dialog if the setting doesn't ask you to
-        if (!game.settings.get(QE.MODULE_NAME, "checkForInstantEncounter")) return true;
+    static async checkForInstantEncounter(quickEncounter, qeAnchor) {
+        //already confirmed that the setting is there
+        const dialogData = {
+            title: game.i18n.localize("QE.CheckInstantEncounter.TITLE"),
+            content : game.i18n.localize("QE.CheckInstantEncounter.CONTENT"),
+            button1cb : quickEncounter?.run,  //FIX: Run Instant Encounter; Small problem that we don't have a location 
+            button2cb : () => EncounterNote.create(quickEncounter, qeAnchor),
+            button3cb : null,
+            buttonLabels :  [game.i18n.localize("QE.CheckInstantEncounter.BUTTON.RUN_INSTANT"),
+                            game.i18n.localize("QE.CheckInstantEncounter.BUTTON.CREATE_QE"),""],
+            options : {}
+        }
+
+        Dialog3.buttons3(dialogData);
     }
 
 
@@ -289,8 +300,12 @@ Hooks.on(`dropCanvasData`, (canvas, data) => {
             const quickEncounter = QuickEncounter.extractQuickEncounterFromJE(journalEntry);
             if (quickEncounter) {
                 //Confirmed this is a Quick Encounter
-                //And just create the Encounter Note without asking for details
-                const quickEncounterNote = EncounterNote.create(quickEncounter, noteAnchor);
+                //If we're checking for Instant Encounters, then pop a dialog
+                if (game.settings.get(QE.MODULE_NAME, "checkForInstantEncounter")) {
+                    EncounterNote.checkForInstantEncounter(quickEncounter, noteAnchor);
+                } else {
+                    EncounterNote.create(quickEncounter, noteAnchor);
+                }
             } else {
                 //create a normal Journal Entry Note
                 const noteData = {entryId: journalEntry.id, x: noteAnchor.x, y: noteAnchor.y}
