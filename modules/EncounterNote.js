@@ -252,7 +252,7 @@ export class EncounterNote {
         const dialogData = {
             title: game.i18n.localize("QE.CheckInstantEncounter.TITLE"),
             content : game.i18n.localize("QE.CheckInstantEncounter.CONTENT"),
-            button1cb : quickEncounter?.run,  //FIX: Run Instant Encounter; Small problem that we don't have a location 
+            button1cb : () => quickEncounter.run(),  //FIX: Run Instant Encounter; Small problem that we don't have a location 
             button2cb : () => EncounterNote.create(quickEncounter, qeAnchor),
             button3cb : null,
             buttonLabels :  [game.i18n.localize("QE.CheckInstantEncounter.BUTTON.RUN_INSTANT"),
