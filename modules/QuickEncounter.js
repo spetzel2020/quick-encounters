@@ -191,6 +191,8 @@
                 (Also checks for existing Actor before importing)
 10-Feb-2022     0.9.10b: Typo in first parameter of importFromCompendium(); should be pack object, not pack name   
 17-Feb-2022     1.0.1a: Split out inner extractQuickEncounterFromJE() so we can call from Note creation
+26-Feb-2022     1.0.1d: Accept new options parameter to QuickEncounter.run() and override map check if options.isInstantEncounter
+                Trying to fix: If you didn't have a Map Note, and were prompted to create one, didn't then run the QE
 */
 
 
@@ -880,7 +882,7 @@ export class QuickEncounter {
         - Add them to the Combat Tracker
     */
 
-    async run(event) {
+    async run(event, options={}) {
         //0.4.0 Refactored so that both buttons (embedded or external) come here
         //You open the Journal and press the button
         //- Extract the actors (if any)
@@ -897,19 +899,33 @@ export class QuickEncounter {
         //0.7.0b Need to have qeJournalEntry plus either Actors, tokens, or tiles
         if (!(extractedActors?.length || savedTokensData?.length || savedTilesData?.length)) {return;}
 
-        //0.6.13 If we have clickedNote specified we know we're in the right scene, otherwise see where there is one
-        let mapNote = qeJournalEntry.clickedNote;
-        if (!mapNote) {
-            // Switch to the correct scene if confirmed
-            const qeScene = QuickEncounter.getEncounterScene(qeJournalEntry);
-            //If there isn't a Map Note anywhere, prompt to create one in the center of the view
-            if (!qeScene) {EncounterNote.noMapNoteDialog(this);}
-            const isPlaced = await EncounterNote.mapNoteIsPlaced(qeScene, qeJournalEntry);
-            if (!isPlaced ) {return;}
-            //Something is desperately wrong if this is null
-            mapNote = qeJournalEntry.sceneNote;
+        //1.0.1: If this is an Instant Encounter, then we ignore checking for a Map Note and just use the drop coordinates
+        if (options?.isInstantEncounter) {
+            this.sourceNoteData = {
+                _id: null,
+                x: options?.qeAnchor?.x,
+                y: options?.qeAnchor?.y
+            }
+        } else {
+            //0.6.13 If we have clickedNote specified we know we're in the right scene, otherwise see where there is one
+            let mapNote = qeJournalEntry.clickedNote;
+            if (!mapNote) {
+                // Switch to the correct scene if confirmed
+                let qeScene = QuickEncounter.getEncounterScene(qeJournalEntry);
+                //If there isn't a Map Note anywhere, prompt to create one in the center of the view
+                if (!qeScene) {
+                    await EncounterNote.noMapNoteDialog(this);
+                    //Try again now that it should have a scene if yo responded yes
+                    qeScene = QuickEncounter.getEncounterScene(qeJournalEntry);
+                }
+                const isPlaced = await EncounterNote.mapNoteIsPlaced(qeScene, qeJournalEntry);
+                if (!isPlaced ) {return;}
+                //Something is desperately wrong if this is null
+                mapNote = qeJournalEntry.sceneNote;
+            }
+            this.sourceNoteData = mapNote.data;
         }
-        this.sourceNoteData = mapNote.data;
+
         //v0.6.13 If sourceNote != originalNote, then translate the savedTokens
         //0.7.1 Move shift calculation here (from combineTokenData) so it can be passed to both combineTokenData() and createTiles()
         let shift = {x:0, y:0};
@@ -932,12 +948,12 @@ export class QuickEncounter {
         //Now create the Tokens
         //v0.6.1 If you used Alt-[Run] then pass that
         //v0.6.8 Make createTokens an instance method because it reference extractedActors
-        const options = {
+        const tokenOptions = {
             alt : event?.altKey, 
             ctrl: event?.ctrlKey
         }
         //0.9.3d: encounterTokens is both created tokens and existing tokens left and not deleted
-        const encounterTokens = await this.createTokens(options);
+        const encounterTokens = await this.createTokens(tokenOptions);
 
         //And add them to the Combat Tracker (wait 200ms for drawing to finish)
         setTimeout(() => {

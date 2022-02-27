@@ -27,7 +27,8 @@ Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tra
 6-Dec-2021      0.9.3a: Check for Foundry 0.9 OR 0.8   
 15-Dec-2021     0.9.3f: EncounterNote.create(): Check/fix deprecation warning by using canvas.scene.embeddedDocuments()      
 21-Dec-2021     0.9.5a: Use QuickEncounter.isFoundryV8Plus test   
-17-Feb-2022     1.0.1a: Add Hook on dropCanvasData to intercept creation of Notes for Quick Encounters                      
+17-Feb-2022     1.0.1a: Add Hook on dropCanvasData to intercept creation of Notes for Quick Encounters      
+26-Feb-2022     1.0.1d: checkForInstantEncounter(): pass new options variable with IE information to QuickEncounter.run()                
 */
 
 //Expand the available list of Note icons
@@ -212,7 +213,7 @@ export class EncounterNote {
             title: game.i18n.localize("QE.NoMapNote.TITLE"),
             content : game.i18n.localize("QE.NoMapNote.CONTENT"),
             yes : async () => {
-                EncounterNote.place(quickEncounter, {placeDefault : true});
+                await EncounterNote.place(quickEncounter, {placeDefault : true});
                 return true;
             }
         });
@@ -252,7 +253,13 @@ export class EncounterNote {
         const dialogData = {
             title: game.i18n.localize("QE.CheckInstantEncounter.TITLE"),
             content : game.i18n.localize("QE.CheckInstantEncounter.CONTENT"),
-            button1cb : () => quickEncounter.run(),  //FIX: Run Instant Encounter; Small problem that we don't have a location 
+            button1cb : () => {
+                const options = {
+                    isInstantEncounter : true,
+                    qeAnchor: qeAnchor
+                }
+                quickEncounter.run(null, options)  //FIX: Run Instant Encounter; Small problem that we don't have a location 
+            },
             button2cb : () => EncounterNote.create(quickEncounter, qeAnchor),
             button3cb : null,
             buttonLabels :  [game.i18n.localize("QE.CheckInstantEncounter.BUTTON.RUN_INSTANT"),
