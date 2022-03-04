@@ -28,7 +28,8 @@ Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tra
 15-Dec-2021     0.9.3f: EncounterNote.create(): Check/fix deprecation warning by using canvas.scene.embeddedDocuments()      
 21-Dec-2021     0.9.5a: Use QuickEncounter.isFoundryV8Plus test   
 17-Feb-2022     1.0.1a: Add Hook on dropCanvasData to intercept creation of Notes for Quick Encounters      
-26-Feb-2022     1.0.1d: checkForInstantEncounter(): pass new options variable with IE information to QuickEncounter.run()                
+26-Feb-2022     1.0.1d: checkForInstantEncounter(): pass new options variable with IE information to QuickEncounter.run()  
+3-3Mar-2022     1.0.1f: Fixed #84 delete(): corrected to use deleteEmbeddedDocuments()              
 */
 
 //Expand the available list of Note icons
@@ -119,7 +120,7 @@ export class EncounterNote {
         for (const scene of game.scenes) {
             const sceneNotes = scene.data.notes;
             if (QuickEncounter.isFoundryV8Plus) {
-                matchingNoteIds = Array.from(sceneNotes.values()).filter(nd => nd.data.entryId === journalEntry.id).map(note => note._id);
+                matchingNoteIds = Array.from(sceneNotes.values()).filter(nd => nd.data.entryId === journalEntry.id).map(note => note.id);
             } else {
                 matchingNoteIds = sceneNotes.filter(note => note.entryId === journalEntry.id).map(note => note._id);
             }
@@ -127,7 +128,7 @@ export class EncounterNote {
             //Deletion is triggered by Scene (because that's where the notes are stored)
             //v0.8.3a: If Foundry v0.8.x then don't delete the Note in the viewed Scene because the Journal._onDelete() trigger does that
             //v0.9.1b: Issue #57 Reintroduce deleltion of notes; doesn't seem to be handled in Foundry 0.8.9
-            scene.deleteEmbeddedEntity("Note", matchingNoteIds);
+            scene.deleteEmbeddedDocuments("Note", matchingNoteIds);
             numNotesDeleted += matchingNoteIds.length;
         }
 
