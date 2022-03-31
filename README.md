@@ -3,7 +3,7 @@
 
 # Quick Encounters
 ## New in 1.0!
-Instant Encounters: Drag a Quick Encounter from the Journals directory to the Scene and run it immediately! Perfect for Random or Wandering Encounters.
+Instant Encounters: Enable the new Setting, then you can drag your Quick Encounter directly from Journals to the Scene and be prompted to run it immediately! Perfect for Random or Wandering Encounters.
 ## v0.9 
 Requires Foundry 0.8+ or 0.9; New settings: leave "captured" tokens on the scene (Issue [#54](https://github.com/spetzel2020/quick-encounters/issues/54)), delete all/defeated hostile tokens after combat (Issue [#53](https://github.com/spetzel2020/quick-encounters/issues/53)),  Add "Show Add to Combat Tracker" setting (Issue [#34](https://github.com/spetzel2020/quick-encounters/issues/34))
 
