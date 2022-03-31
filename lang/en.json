@@ -82,7 +82,7 @@
     "QE.Setting.CheckInstantEncounter.HINT": "When you drag a Quick Encounter Journal Entry to the Scene to create a QE Note, ask if QE should run it immediately as an Instant Encounter (default: Don't ask)",
     "QE.AddToCombatTracker.TITLE" : "Add to CT",
     "QE.CheckInstantEncounter.TITLE" : "Run Instant Encounter?",
-    "QE.CheckInstantEncounter.CONTENT" : "Run the Quick Encounter immediately (Instant Encounter), or create a Quick Encounter Note on the Scene (previous default)",
+    "QE.CheckInstantEncounter.CONTENT" : "Run the Quick Encounter immediately (Instant Encounter), or create a Quick Encounter Note on the Scene (previous default)?",
     "QE.CheckInstantEncounter.BUTTON.RUN_INSTANT" : "Run Instant Encounter",
     "QE.CheckInstantEncounter.BUTTON.CREATE_QE": "Create QE Note"
   }
