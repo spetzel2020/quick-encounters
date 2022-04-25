@@ -1,6 +1,8 @@
 # RELEASE NOTES
 ## 1.0
 - Issue #71: Instant Encounters: Drag a Quick Encounter directly from the Journals directory to the Scene to run it!
+### 1.0.2
+- Fixed: Issue [#88](https://github.com/spetzel2020/quick-encounters/issues/88)
 ## 0.9 
 - Supports Foundry 0.8+ and 9.x only
 ### 0.9.10

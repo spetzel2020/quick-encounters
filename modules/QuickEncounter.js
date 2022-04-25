@@ -193,6 +193,8 @@
 17-Feb-2022     1.0.1a: Split out inner extractQuickEncounterFromJE() so we can call from Note creation
 26-Feb-2022     1.0.1d: Accept new options parameter to QuickEncounter.run() and override map check if options.isInstantEncounter
                 Trying to fix: If you didn't have a Map Note, and were prompted to create one, didn't then run the QE
+25-Apr-2022     1.0.2a: Issue 88: Alt- and Ctrl- accelerators should work with the Run Instant Encounter button 
+                Override the click and submit so we can pass the event (and eventually determine if Ctrl- or Alt- were used)               
 */
 
 
@@ -1548,6 +1550,7 @@ export class QuickEncounter {
 }
 
 export class Dialog3 extends Dialog {
+    //1.0.2: Pass the event through to the button callback
     static async buttons3({title, content, button1cb, button2cb, button3cb, buttonLabels, options={}}) {
         //Also can function as a generic 2-button dialog by passing button3b=null
         return new Promise((resolve, reject) => {
@@ -1558,24 +1561,24 @@ export class Dialog3 extends Dialog {
                     button1: {
                         icon: null,
                         label: game.i18n.localize(buttonLabels[0]),
-                        callback: html => {
-                            const result = button1cb ? button1cb(html) : true;
+                        callback: (html,event=null) => {
+                            const result = button1cb ? button1cb(html, event) : true;
                             resolve(result);
                         }
                     },
                     button2: {
                         icon: null,
                         label: game.i18n.localize(buttonLabels[1]),
-                        callback: html => {
-                            const result = button2cb ? button2cb(html) : false;
+                        callback:  (html,event=null) => {
+                            const result = button2cb ? button2cb(html,event) : false;
                             resolve(result);
                         }
                     },
                     button3: {
                         icon: null,
                         label: game.i18n.localize(buttonLabels[2]),
-                        callback: html => {
-                            const result = button3cb ? button3cb(html) : false;
+                        callback:  (html,event=null) => {
+                            const result = button3cb ? button3cb(html,event) : false;
                             resolve(result);
                         }
                     }
@@ -1589,6 +1592,24 @@ export class Dialog3 extends Dialog {
             }
             dialog.render(true);
         });
+    }
+
+    //1.0.2: Override the click and submit so we can pass the event (and eventually determine if Ctrl- or Alt- were used)
+    //override
+    _onClickButton(event) {
+        const id = event.currentTarget.dataset.button;
+        const button = this.data.buttons[id];
+        this.submit(button, event);
+    }
+    //override
+    submit(button, event=null) {
+        try {
+            if (button.callback) button.callback(this.options.jQuery ? this.element : this.element[0], event);
+            this.close();
+        } catch(err) {
+            ui.notifications.error(err);
+            throw new Error(err);
+        }
     }
 }
 
