@@ -29,7 +29,8 @@ Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tra
 21-Dec-2021     0.9.5a: Use QuickEncounter.isFoundryV8Plus test   
 17-Feb-2022     1.0.1a: Add Hook on dropCanvasData to intercept creation of Notes for Quick Encounters      
 26-Feb-2022     1.0.1d: checkForInstantEncounter(): pass new options variable with IE information to QuickEncounter.run()  
-3-3Mar-2022     1.0.1f: Fixed #84 delete(): corrected to use deleteEmbeddedDocuments()              
+3-Mar-2022     1.0.1f: Fixed #84 delete(): corrected to use deleteEmbeddedDocuments()              
+4-May-2022      1.0.2b: Fixed: Misspelled poison.svg in moreNoteIcons
 */
 
 //Expand the available list of Note icons
@@ -62,7 +63,7 @@ const moreNoteIcons = {
     "Net" : "icons/svg/net.svg",
     "Padlock" : "icons/svg/padlock.svg",   
     "Paralysis" : "icons/svg/paralysis.svg",
-    "Poison" : "icons/svg/posion.svg",
+    "Poison" : "icons/svg/poison.svg",
     "Radiation" : "icons/svg/radiation.svg",
     "Sleep" : "icons/svg/sleep.svg",
     "Sound" : "icons/svg/sound.svg",  
