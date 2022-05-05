@@ -3,16 +3,17 @@
 
 # Quick Encounters
 ## New in 1.0!
-Instant Encounters: Enable the new Setting, then you can drag your Quick Encounter directly from Journals to the Scene and be prompted to run it immediately! Perfect for Random or Wandering Encounters.
+* Instant Encounters: Enable the new Setting, then you can drag your Quick Encounter directly from Journals to the Scene and be prompted to run it immediately! Perfect for Random or Wandering Encounters.
+* Basic compatibility with Foundry v10 (not fully tested)
 ## v0.9 
-Requires Foundry 0.8+ or 0.9; New settings: leave "captured" tokens on the scene (Issue [#54](https://github.com/spetzel2020/quick-encounters/issues/54)), delete all/defeated hostile tokens after combat (Issue [#53](https://github.com/spetzel2020/quick-encounters/issues/53)),  Add "Show Add to Combat Tracker" setting (Issue [#34](https://github.com/spetzel2020/quick-encounters/issues/34))
+Requires Foundry 0.8+ or v9; New settings: leave "captured" tokens on the scene (Issue [#54](https://github.com/spetzel2020/quick-encounters/issues/54)), delete all/defeated hostile tokens after combat (Issue [#53](https://github.com/spetzel2020/quick-encounters/issues/53)),  Add "Show Add to Combat Tracker" setting (Issue [#34](https://github.com/spetzel2020/quick-encounters/issues/34))
 
 Bugs fixed! [#57](https://github.com/spetzel2020/quick-encounters/issues/57), [#63](https://github.com/spetzel2020/quick-encounters/issues/63), [#58](https://github.com/spetzel2020/quick-encounters/issues/58), [#61](https://github.com/spetzel2020/quick-encounters/issues/61), [#78](https://github.com/spetzel2020/quick-encounters/issues/78)
 (See [Release Notes](https://github.com/spetzel2020/quick-encounters/blob/master/CHANGELOG.md))
 
 * **Author**: Spetzel#0103
 * **Version**: 1.0.3
-* **Foundry VTT Compatibility**: 0.8.6-9 (Does NOT work with Foundry v10)
+* **Foundry VTT Compatibility**: 0.8.6-10 (Not fully tested with Foundry v10)
 * **System Compatibility (If applicable)**: All; additional features for dnd5e
 * **Translation Support**: en, es (thanks [lozalojo!](https://github.com/lozalojo)), ja (thanks "touge"!), de (thanks @Fallayn#6414), it (thanks [riccisi](https://github.com/riccisi))
 
