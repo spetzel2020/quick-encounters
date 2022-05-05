@@ -194,7 +194,10 @@
 26-Feb-2022     1.0.1d: Accept new options parameter to QuickEncounter.run() and override map check if options.isInstantEncounter
                 Trying to fix: If you didn't have a Map Note, and were prompted to create one, didn't then run the QE
 25-Apr-2022     1.0.2a: Issue 88: Alt- and Ctrl- accelerators should work with the Run Instant Encounter button 
-                Override the click and submit so we can pass the event (and eventually determine if Ctrl- or Alt- were used)               
+                Override the click and submit so we can pass the event (and eventually determine if Ctrl- or Alt- were used)  
+5-May-2022      1.0.3a: First cuts for Foundry v10
+                init(): Set QuickEncounters.isFoundryV10; extractActors(): look for content-link (changed from entity-link) and other changes
+
 */
 
 
@@ -397,7 +400,8 @@ export class QuickEncounter {
         //0.9.5 Set the QuickEncounter.isFoundryV8Plus variable for different code-paths
         //If v9, then game.data.version will throw a deprecation warning so test for v9 first
         QuickEncounter.isFoundryV8Plus = (game.data.release?.generation >= 9) || (game.data.version?.startsWith("0.8"));
-
+        //1.0.3a: For Foundry v10
+        QuickEncounter.isFoundryV10 = (game.data.release?.generation === 10);
     }
 
 
@@ -823,7 +827,21 @@ export class QuickEncounter {
 
     static extractActors(html) {
         const ACTOR = "Actor";
-        const entityLinks = html.find(".entity-link");
+        //1.0.3a: Foundry v10 has changed the class (to content-link) and attributes used
+        let searchTerms = {
+            class : ".entity-link",
+            dataType : "data-entity",
+            dataID : "data-id"
+        }
+        if (QuickEncounter.isFoundryV10) {
+            searchTerms = {
+                class : ".content-link",
+                dataType : "data-type",
+                dataID : "data-uuid"
+            }
+        }
+
+        const entityLinks = html.find(searchTerms.class);
         if (!entityLinks || !entityLinks.length) {return null;}
 
         const extractedActors = [];
@@ -831,8 +849,9 @@ export class QuickEncounter {
 
         entityLinks.each((i, el) => {
             const element = $(el);
-            const dataEntity = element.attr("data-entity");
-            const dataID = element.attr("data-id");
+            const dataEntity = element.attr(searchTerms.dataType);
+            const dataID = element.attr(searchTerms.dataID);
+
             //0.6 If it's a Compendium we just have a data.pack attribute
             const dataPackName = element.attr("data-pack"); //Not used if Actor
             const dataLookup = element.attr("data-lookup");
