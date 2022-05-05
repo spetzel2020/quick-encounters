@@ -197,7 +197,7 @@
                 Override the click and submit so we can pass the event (and eventually determine if Ctrl- or Alt- were used)  
 5-May-2022      1.0.3a: First cuts for Foundry v10
                 init(): Set QuickEncounters.isFoundryV10; extractActors(): look for content-link (changed from entity-link) and other changes
-
+                1.0.3b: generateFullExtractedActorTokenData(): Yet another way to strip tokenData of prototype information so it can be duplicated
 */
 
 
@@ -1160,9 +1160,15 @@ export class QuickEncounter {
                     //0.8.2a: Per foundry.js#40276 use Actor.getTokenData (does handle token wildcarding)
                     const tempTokenData = await actor.getTokenData(tokenData);
                     tempToken = new TokenDocument(tempTokenData, {actor: actor});
-                    //v0.8.3b: Use Object.entries copying to get only the ownProperties (otherwise duplicate() chokes in createTokens())
-                    //0.8.3c: Switch to using toObject()
-                    tokenData = tempToken.data.toObject();
+                    if (QuickEncounter.isFoundryV10) {
+                        //1.0.3b: .data is now merged into the object itself, so we have to strip off the prototype information 
+                        tokenData = tempToken;
+                        Object.setPrototypeOf(tokenData, {});
+                    } else {
+                        //v0.8.3b: Use Object.entries copying to get only the ownProperties (otherwise duplicate() chokes in createTokens())
+                        //0.8.3c: Switch to using toObject()
+                        tokenData = tempToken.data.toObject();
+                    }
                 } else {//Foundry 0.7.x
                     //v0.6.7: Call Token.fromActor() which does the merge but also handles wildcard token images
                     tempToken = await Token.fromActor(actor, tokenData);
