@@ -11,7 +11,7 @@ Bugs fixed! [#57](https://github.com/spetzel2020/quick-encounters/issues/57), [#
 (See [Release Notes](https://github.com/spetzel2020/quick-encounters/blob/master/CHANGELOG.md))
 
 * **Author**: Spetzel#0103
-* **Version**: 1.0.1
+* **Version**: 1.0.2
 * **Foundry VTT Compatibility**: 0.8.6-9 (Does NOT work with Foundry v10)
 * **System Compatibility (If applicable)**: All; additional features for dnd5e
 * **Translation Support**: en, es (thanks [lozalojo!](https://github.com/lozalojo)), ja (thanks "touge"!), de (thanks @Fallayn#6414), it (thanks [riccisi](https://github.com/riccisi))
