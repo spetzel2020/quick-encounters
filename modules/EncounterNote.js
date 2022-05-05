@@ -108,6 +108,8 @@ export class EncounterNote {
         //This is different from the JournalEntry._onDropData approach
         //0.9.3f: Remove deprecation warning by using createEmbeddedDocuments()
         let newNote = QuickEncounter.isFoundryV8Plus ? await canvas.scene.createEmbeddedDocuments("Note",[noteData]) : await Note.create(noteData);
+        //1.0.2c: createEmbeddedDocuments returns an array, and we just want a single element
+        if (Array.isArray(newNote)) {newNote = newNote[0];}
         newNote._sheet = new EncounterNoteConfig(newNote);
         return newNote;
     }
@@ -210,12 +212,13 @@ export class EncounterNote {
         return qeJournalEntry.sceneNote;
     }
 
-    static async noMapNoteDialog(quickEncounter) {
+    //1.0.2c: Changed to sync operation (only called if there is no map note when you run)
+    static noMapNoteDialog(quickEncounter) {
         Dialog.confirm({
             title: game.i18n.localize("QE.NoMapNote.TITLE"),
             content : game.i18n.localize("QE.NoMapNote.CONTENT"),
-            yes : async () => {
-                await EncounterNote.place(quickEncounter, {placeDefault : true});
+            yes : () => {
+                EncounterNote.place(quickEncounter, {placeDefault : true});
                 return true;
             }
         });

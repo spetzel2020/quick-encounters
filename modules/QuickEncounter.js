@@ -916,7 +916,7 @@ export class QuickEncounter {
                 let qeScene = QuickEncounter.getEncounterScene(qeJournalEntry);
                 //If there isn't a Map Note anywhere, prompt to create one in the center of the view
                 if (!qeScene) {
-                    await EncounterNote.noMapNoteDialog(this);
+                    EncounterNote.noMapNoteDialog(this);
                     //Try again now that it should have a scene if yo responded yes
                     qeScene = QuickEncounter.getEncounterScene(qeJournalEntry);
                 }
