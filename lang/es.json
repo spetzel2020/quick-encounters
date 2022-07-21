@@ -81,5 +81,11 @@
   "QE.DeleteTokensAfterAdd.LEAVE": "Dejarlos",
   "QE.Setting.ShowAddToCombatTrackerCheckbox.NAME" : "Mostrar añadir al AC",
   "QE.Setting.ShowAddToCombatTrackerCheckbox.HINT" : "Muestra la opción de añadir al asistente de combate en cada contendiente en el diálogo de QE (por defecto no se muestra y todos los contendientes se añaden al AC)",
-  "QE.AddToCombatTracker.TITLE" : "Añadir al AC"
+  "QE.Setting.CheckInstantEncounter.NAME": "Check for Encuentro Inmediato",
+  "QE.Setting.CheckInstantEncounter.HINT": "Cuando arrastra un diario con un encuentro rápido a la escena para crear una nota de ER, preguntar si el ER debe abrirse directamente como un Encuentro Inmediato (por defecto: no preguntar)",
+  "QE.AddToCombatTracker.TITLE" : "Añadir al AC",
+  "QE.CheckInstantEncounter.TITLE" : "¿Abrir Encuentro Inmediato?",
+  "QE.CheckInstantEncounter.CONTENT" : "¿Abrir el Encuentro Rápido directamente (Encuentro Inmediato), o crear una nota en la escena de Encuentro Rápido (anteriormente, el valor por defecto)?",
+  "QE.CheckInstantEncounter.BUTTON.RUN_INSTANT" : "Abrir Encuentro Inmediato",
+  "QE.CheckInstantEncounter.BUTTON.CREATE_QE": "Crear nota de ER"
 }
