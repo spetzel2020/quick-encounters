@@ -1,6 +1,11 @@
 # RELEASE NOTES
 ## 1.0
 - Issue #71: Instant Encounters: Drag a Quick Encounter directly from the Journals directory to the Scene to run it!
+### 1.0.4
+- Updated Spanish translation (thanks https://github.com/lozalojo!)
+- Testing with Foundry v10 Testing 1 Release (v10.275) - fatal bugs
+- Testing with Foundry v10 Testing 3 Release (v10.277)
+- Fixed: #91 Error running Quick Encounter with Foundry 10 Testing 1 (v10.275)
 ### 1.0.3
 Basic compatibility with Foundry v10
 - When extracting embedded Actors in JE HTML use class="content-link" instead of class="entity-link"

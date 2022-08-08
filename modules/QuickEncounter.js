@@ -198,6 +198,7 @@
 5-May-2022      1.0.3a: First cuts for Foundry v10
                 init(): Set QuickEncounters.isFoundryV10; extractActors(): look for content-link (changed from entity-link) and other changes
                 1.0.3b: generateFullExtractedActorTokenData(): Yet another way to strip tokenData of prototype information so it can be duplicated
+8-Aug-2022      1.0.4b: generateFullExtractedActorTokenData(): Under Foundry v10 skip new TokenDocument() call because Actor.getTokenData() already returns a TokenDocument                
 */
 
 
@@ -1158,13 +1159,15 @@ export class QuickEncounter {
                 if (QuickEncounter.isFoundryV8Plus) {//Foundry 0.8.x
                     //0.8.0d: Use new TokenDocument constructor; does it handle token wildcarding? [probably didn't]
                     //0.8.2a: Per foundry.js#40276 use Actor.getTokenData (does handle token wildcarding)
+                    //1.0.4b: Per https://github.com/foundryvtt/foundryvtt/issues/7766, getTokenData now returns a TokenDocument directly
                     const tempTokenData = await actor.getTokenData(tokenData);
-                    tempToken = new TokenDocument(tempTokenData, {actor: actor});
                     if (QuickEncounter.isFoundryV10) {
                         //1.0.3b: .data is now merged into the object itself, so we have to strip off the prototype information 
-                        tokenData = tempToken;
+                        //1.0.4b: And tempTokenData is actually a TokenDocument itself
+                        tokenData = tempTokenData;
                         Object.setPrototypeOf(tokenData, {});
-                    } else {
+                    } else { //Foundry v8 and v9
+                        tempToken = new TokenDocument(tempTokenData, {actor: actor});
                         //v0.8.3b: Use Object.entries copying to get only the ownProperties (otherwise duplicate() chokes in createTokens())
                         //0.8.3c: Switch to using toObject()
                         tokenData = tempToken.data.toObject();
