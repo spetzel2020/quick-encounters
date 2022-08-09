@@ -1,4 +1,8 @@
-# TESTING v1.0.3 WITH FOUNDRY 0.9.269
+# TESTING v1.0.4 WITH FOUNDRY 10.x
+
+## FOUNDRY FEATURE: Multi-Page Journal Entries
+- Store a QE with a JE page (check stored per page)
+- Generate a QE from separate pages (check replaces old one)
 
 ## NEW FEATURE: Instant Encounter
 ### Create JE with embedded Actors; drag to Scene and verify two choices:

@@ -198,7 +198,9 @@
 5-May-2022      1.0.3a: First cuts for Foundry v10
                 init(): Set QuickEncounters.isFoundryV10; extractActors(): look for content-link (changed from entity-link) and other changes
                 1.0.3b: generateFullExtractedActorTokenData(): Yet another way to strip tokenData of prototype information so it can be duplicated
-8-Aug-2022      1.0.4b: generateFullExtractedActorTokenData(): Under Foundry v10 skip new TokenDocument() call because Actor.getTokenData() already returns a TokenDocument                
+8-Aug-2022      1.0.4b: generateFullExtractedActorTokenData(): Under Foundry v10 skip new TokenDocument() call because Actor.getTokenData() already returns a TokenDocument
+                1.0.4c: Issue #92: Foundry v10 Testing 3 (Build 277): A QE is no longer generated from a Journal Entry with embedded Actors
+                Added a hook on renderJournalPageSheet and new instance method buildQEDialog()                
 */
 
 
@@ -792,12 +794,12 @@ export class QuickEncounter {
 
 
 
-    static extractQuickEncounter(journalSheet) {
+    static extractQuickEncounter(journalSheet, htmlElements) {
         const journalEntry = journalSheet?.object;
-        return QuickEncounter.extractQuickEncounterFromJE(journalEntry);
+        return QuickEncounter.extractQuickEncounterFromJE(journalEntry, htmlElements);
     }
 
-    static extractQuickEncounterFromJE(journalEntry) {
+    static extractQuickEncounterFromJE(journalEntry, htmlElements) {
         if (!journalEntry) {return null;}
         //0.6.1k: If quickEncounter is stored, extract that - but you can't store the actual object
         let quickEncounter = QuickEncounter.deserializeFromJournalEntry(journalEntry);
@@ -806,9 +808,12 @@ export class QuickEncounter {
         if (!quickEncounter) {
             //Extract it the old (v0.5) way - this also still applies if you create a Journal Entry with Actor or Compendium links
             //0.6 this now potentially includes Compendium links
-            const extractedActors = QuickEncounter.extractActors(journalEntry.sheet.element);
+            //1.0.4c: If journalEntry is actually a JournalEntryPage, then content is stored differently
+            const computedHtmlElements = htmlElements ?? journalEntry.sheet.element;
+
+            const extractedActors = QuickEncounter.extractActors(computedHtmlElements);
             const savedTokensData =  journalEntry.getFlag(QE.MODULE_NAME, QE.TOKENS_FLAG_KEY);
-            //v0.6.1: Backwards compatibility - set the isSavedToken flga
+            //v0.6.1: Backwards compatibility - set the isSavedToken flag
             savedTokensData?.forEach(td => {td.isSavedToken = true;});
 
             //Minimum Quick Encounter has a Journal Entry, and tokens or actors (or 0.6 Compendium which turns into Actors)
@@ -1522,56 +1527,79 @@ export class QuickEncounter {
         }
 
         const quickEncounter = QuickEncounter.extractQuickEncounter(journalSheet);
+
+        //Build and show the QE Dialog and add to the displayed Journal Entry
         if (quickEncounter) {
-            const qeJournalEntry = journalSheet.object;
-            //0.6.13: If we opened this from a Scene Note, then remember that (because you could move off to another Note)
-            //But once the Journal Entry is open we don't reset it, even if subsequently we re-render (e.g. adding another Actor)
-            //Allows for .entry to be null (if you deleted the Note by itself)
-            if (!qeJournalEntry.clickedNote && (QuickEncounter.hoveredNote?.entry?.id === journalSheet.object.id)) {
-                qeJournalEntry.clickedNote = QuickEncounter.hoveredNote;
-            }
-            //0.6.13: If originalNoteData is not set (pre-0.6.13) then we may be able to recover it from a saved Token
-            if (quickEncounter.checkAndFixOriginalNoteData(qeJournalEntry.clickedNote)) {
-                quickEncounter.serializeIntoJournalEntry();
-            }
-            const totalXPLine = quickEncounter.renderTotalXPLine();
-
-            //If there's no Map Note, include a warning
-            let noMapNoteWarning = null;
-            const qeScene = QuickEncounter.getEncounterScene(qeJournalEntry);
-            if (!qeScene) {
-                noMapNoteWarning = `${game.i18n.localize("QE.AddToCombatTracker.NoMapNote")}`;
-            }
-            
-            //v0.6.1: Also pop open a companion dialog with details about what tokens have been placed and XP
-            //0.7.0 Remove option to not use the QE Dialog
-            //v0.6.10: First attempt to reuse the existing QE dialog (not using app.id)
-            let qeDialog = journalSheet.qeDialog;
-            if (qeDialog) {
-                qeDialog.update(quickEncounter);    //have to update since we extract a new one each time
-            } else {
-                //0.8.0: If this is being viewed out of a Compendium, present a different read-only Quick Encounter Dialog with instructions
-                //0.8.0d: Relax the null test for qeJournalEntry.compendium
-                qeDialog = new QESheet(quickEncounter, {isFromCompendium : qeJournalEntry.compendium});
-                journalSheet.qeDialog = qeDialog;
-            }
-
-            //0.7.3 OPen the QE automatically (default) in general unless you have hidden it
-            const showQEDialog =  ((quickEncounter.hideQE === null) && game.settings.get(QE.MODULE_NAME, "showQEAutomatically")) || !(quickEncounter.hideQE ?? true);
-            if (showQEDialog || qeJournalEntry?.showQEOnce) {
-                delete qeJournalEntry.showQEOnce;
-                qeDialog.render(true);
-            }
-
-            const qeJournalEntryIntro = noMapNoteWarning;
-            //qeJournalEntryIntro = await renderTemplate('modules/quick-encounters/templates/qeJournalEntryIntro.html', {totalXPLine, noMapNoteWarning});
-
-            html.find('.editor-content').prepend(qeJournalEntryIntro);
-            //If there's an embedded button, then add a listener
-            html.find('button[name="addToCombatTracker"]').click(event => {
-                quickEncounter.run(event);
-            });
+            quickEncounter.displayQEDialog(journalSheet, html);
         }
+    }
+
+    // Hook on renderJournalPageSheet for Foundry v10 multi-page Journals
+    static async onRenderJournalPageSheet(journalPageSheet, html) {
+        const header = html[0];
+        //FIX: Would prefer to use DOM Selector here, but we're already using JQuery
+        const parentElement = $(header.parentElement);
+        if (!game.user.isGM) {return;}
+
+        const quickEncounter = QuickEncounter.extractQuickEncounter(journalPageSheet, parentElement);
+
+        //Build and show the QE Dialog and add to the displayed Journal Entry
+        if (quickEncounter) {
+            quickEncounter.displayQEDialog(journalPageSheet, html);
+        }
+
+    }
+
+    //If you find a QuickEncounter, then adjust the JE sheet accordingly and pop the QE dialog
+    displayQEDialog(journalSheet, html) {
+        const qeJournalEntry = journalSheet.object;
+        //0.6.13: If we opened this from a Scene Note, then remember that (because you could move off to another Note)
+        //But once the Journal Entry is open we don't reset it, even if subsequently we re-render (e.g. adding another Actor)
+        //Allows for .entry to be null (if you deleted the Note by itself)
+        if (!qeJournalEntry.clickedNote && (QuickEncounter.hoveredNote?.entry?.id === journalSheet.object.id)) {
+            qeJournalEntry.clickedNote = QuickEncounter.hoveredNote;
+        }
+        //0.6.13: If originalNoteData is not set (pre-0.6.13) then we may be able to recover it from a saved Token
+        if (this.checkAndFixOriginalNoteData(qeJournalEntry.clickedNote)) {
+            this.serializeIntoJournalEntry();
+        }
+        const totalXPLine = this.renderTotalXPLine();
+
+        //If there's no Map Note, include a warning
+        let noMapNoteWarning = null;
+        const qeScene = QuickEncounter.getEncounterScene(qeJournalEntry);
+        if (!qeScene) {
+            noMapNoteWarning = `${game.i18n.localize("QE.AddToCombatTracker.NoMapNote")}`;
+        }
+        
+        //v0.6.1: Also pop open a companion dialog with details about what tokens have been placed and XP
+        //0.7.0 Remove option to not use the QE Dialog
+        //v0.6.10: First attempt to reuse the existing QE dialog (not using app.id)
+        let qeDialog = journalSheet.qeDialog;
+        if (qeDialog) {
+            qeDialog.update(this);    //have to update since we extract a new one each time
+        } else {
+            //0.8.0: If this is being viewed out of a Compendium, present a different read-only Quick Encounter Dialog with instructions
+            //0.8.0d: Relax the null test for qeJournalEntry.compendium
+            qeDialog = new QESheet(this, {isFromCompendium : qeJournalEntry.compendium});
+            journalSheet.qeDialog = qeDialog;
+        }
+
+        //0.7.3 OPen the QE automatically (default) in general unless you have hidden it
+        const showQEDialog =  ((this.hideQE === null) && game.settings.get(QE.MODULE_NAME, "showQEAutomatically")) || !(this.hideQE ?? true);
+        if (showQEDialog || qeJournalEntry?.showQEOnce) {
+            delete qeJournalEntry.showQEOnce;
+            qeDialog.render(true);
+        }
+
+        const qeJournalEntryIntro = noMapNoteWarning;
+        //qeJournalEntryIntro = await renderTemplate('modules/quick-encounters/templates/qeJournalEntryIntro.html', {totalXPLine, noMapNoteWarning});
+
+        html.find('.editor-content').prepend(qeJournalEntryIntro);
+        //If there's an embedded button, then add a listener
+        html.find('button[name="addToCombatTracker"]').click(event => {
+            this.run(event);
+        });
     }
 
 
@@ -1656,6 +1684,8 @@ Hooks.on("hoverNote", (note, startedHover) => {
 
 //Add a listener for the embedded Encounter button and record the scene if we can
 Hooks.on(`renderJournalSheet`,  QuickEncounter.onRenderJournalSheet);
+//1.0.4c: Foundry v10.277 - support for multipage Journal
+Hooks.on(`renderJournalPageSheet`, QuickEncounter.onRenderJournalPageSheet )
 
 
 //The Journal Sheet  looks to see if this is the Tutorial and deletes the Journal Entry if so
