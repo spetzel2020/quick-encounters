@@ -200,7 +200,8 @@
                 1.0.3b: generateFullExtractedActorTokenData(): Yet another way to strip tokenData of prototype information so it can be duplicated
 8-Aug-2022      1.0.4b: generateFullExtractedActorTokenData(): Under Foundry v10 skip new TokenDocument() call because Actor.getTokenData() already returns a TokenDocument
                 1.0.4c: Issue #92: Foundry v10 Testing 3 (Build 277): A QE is no longer generated from a Journal Entry with embedded Actors
-                Added a hook on renderJournalPageSheet and new instance method buildQEDialog()                
+                Added a hook on renderJournalPageSheet and new instance method buildQEDialog()     
+15-Aug-2022     1.0.4d: extractActors(): Strip off "Actor." prefix from UUID (because our later lookup is only an Actor one)                           
 */
 
 
@@ -833,6 +834,7 @@ export class QuickEncounter {
 
     static extractActors(html) {
         const ACTOR = "Actor";
+        const ACTOR_PERIOD = "Actor.";
         //1.0.3a: Foundry v10 has changed the class (to content-link) and attributes used
         let searchTerms = {
             class : ".entity-link",
@@ -856,7 +858,9 @@ export class QuickEncounter {
         entityLinks.each((i, el) => {
             const element = $(el);
             const dataEntity = element.attr(searchTerms.dataType);
-            const dataID = element.attr(searchTerms.dataID);
+            let dataID = element.attr(searchTerms.dataID);
+            //1.0.4d: FOr Foundry v10 the new UUID format is "Actor.xxxx" but we are still doing just actor lookup later (including for backward compatibility)
+            dataID = dataID.replace(ACTOR_PERIOD, ""); //remove Actor.
 
             //0.6 If it's a Compendium we just have a data.pack attribute
             const dataPackName = element.attr("data-pack"); //Not used if Actor
