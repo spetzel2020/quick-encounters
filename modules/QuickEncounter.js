@@ -90,7 +90,7 @@
                 0.6.1n: If we removed all the Actors, then remove the whole Quick Encounter
                 0.6.1o: init(): Remove localized version of QE.Version (which can't be read at this point); add MODULE_VERSION
                 Store MODULE_VERSION in the Quick Encounter qeData just in case we make future changes to how it's encoded
-                deserializFromJournalEntry(): Push savedTokensData into extractedActors
+                deserializeFromJournalEntry(): Push savedTokensData into extractedActors
                 extractQuickEncounter(): Code old method with qeVersion=0.5
                 v0.6.2a: addTokens(): Ignore undefined savedTokens from old method
                 Make useEmbeddedMethod=false the default going forward
@@ -201,7 +201,12 @@
 8-Aug-2022      1.0.4b: generateFullExtractedActorTokenData(): Under Foundry v10 skip new TokenDocument() call because Actor.getTokenData() already returns a TokenDocument
                 1.0.4c: Issue #92: Foundry v10 Testing 3 (Build 277): A QE is no longer generated from a Journal Entry with embedded Actors
                 Added a hook on renderJournalPageSheet and new instance method buildQEDialog()     
-15-Aug-2022     1.0.4d: extractActors(): Strip off "Actor." prefix from UUID (because our later lookup is only an Actor one)                           
+15-Aug-2022     1.0.4d: extractActors(): Strip off "Actor." prefix from UUID (because our later lookup is only an Actor one)   
+29-Aug-2022     1.0.4e: onRenderJournalPageSheet(): To handle new (Foundry v10) and pre-multi-page Journals we check:
+                    1. Is there an embedded Quick Encounter in the Journal Page Sheet
+                    2. Is there an embedded Quick Encounter in the parent Journal Sheet
+                    3. Is there a Quick Encounter which can be generated from the embedded Actors in the Page
+                    4. (Not in this hook, but for Foundry <=v9) Extract QE from embedded Actors in the Journal Sheet                       
 */
 
 
@@ -210,7 +215,7 @@ import {QESheet} from './QESheet.js';
 
 export const QE = {
     MODULE_NAME : "quick-encounters",
-    MODULE_VERSION : "1.0.1",
+    MODULE_VERSION : "1.0.4",
     TOKENS_FLAG_KEY : "tokens",
     QE_JSON_FLAG_KEY : "quickEncounter"
 }
@@ -284,6 +289,8 @@ export class QuickEncounter {
         await qeJournalEntry?.setFlag(QE.MODULE_NAME, QE.QE_JSON_FLAG_KEY, qeJSON);
     }
     static deserializeFromJournalEntry(journalEntry) {
+        //1.0.4e: Check for null journalEntry because we're removing the extractQuickEncounterFromJE
+        if (!journalEntry) {return null;}
         let quickEncounter = new QuickEncounter();  //makes sure it has functions etc.
         let qeJSON = journalEntry?.getFlag(QE.MODULE_NAME, QE.QE_JSON_FLAG_KEY);
         if (qeJSON) try {
@@ -797,38 +804,44 @@ export class QuickEncounter {
 
     static extractQuickEncounter(journalSheet, htmlElements) {
         const journalEntry = journalSheet?.object;
-        return QuickEncounter.extractQuickEncounterFromJE(journalEntry, htmlElements);
+        return QuickEncounter.extractQuickEncounterFromJEOrEmbedded(journalEntry, htmlElements);
     }
 
-    static extractQuickEncounterFromJE(journalEntry, htmlElements) {
+    static extractQuickEncounterFromJEOrEmbedded(journalEntry, htmlElements) {
         if (!journalEntry) {return null;}
-        //0.6.1k: If quickEncounter is stored, extract that - but you can't store the actual object
+
         let quickEncounter = QuickEncounter.deserializeFromJournalEntry(journalEntry);
-
-        //If there's no quickEncounter stored, then it's in pieces - also if you are looking at a Journal Entry with Actor links
         if (!quickEncounter) {
-            //Extract it the old (v0.5) way - this also still applies if you create a Journal Entry with Actor or Compendium links
-            //0.6 this now potentially includes Compendium links
-            //1.0.4c: If journalEntry is actually a JournalEntryPage, then content is stored differently
-            const computedHtmlElements = htmlElements ?? journalEntry.sheet.element;
+            quickEncounter = QuickEncounter.extractQuickEncounterFromEmbedded(journalEntry, htmlElements);
+        }
+        return quickEncounter;
+    }
 
-            const extractedActors = QuickEncounter.extractActors(computedHtmlElements);
-            const savedTokensData =  journalEntry.getFlag(QE.MODULE_NAME, QE.TOKENS_FLAG_KEY);
-            //v0.6.1: Backwards compatibility - set the isSavedToken flag
-            savedTokensData?.forEach(td => {td.isSavedToken = true;});
+    static extractQuickEncounterFromEmbedded(journalEntry, htmlElements) {
+        if (!journalEntry) {return null;}
+        let quickEncounter;
 
-            //Minimum Quick Encounter has a Journal Entry, and tokens or actors (or 0.6 Compendium which turns into Actors)
-            //If there isn't a map Note we may need to switch scenes
-            if ((extractedActors && extractedActors.length) || (savedTokensData && savedTokensData.length)) {
-                const qeData = {
-                    qeVersion : 0.5,
-                    journalEntryId : journalEntry.id,
-                    extractedActors : extractedActors,
-                    savedTokensData : savedTokensData
-                }
-                quickEncounter = new QuickEncounter(qeData);
+        //Extract it the old (v0.5) way - this also still applies if you create a Journal Entry with Actor or Compendium links
+        //0.6 this now potentially includes Compendium links
+        //1.0.4c: If journalEntry is actually a JournalEntryPage, then content is stored differently
+        const computedHtmlElements = htmlElements ?? journalEntry.sheet.element;
+
+        const extractedActors = QuickEncounter.extractActors(computedHtmlElements);
+        const savedTokensData =  journalEntry.getFlag(QE.MODULE_NAME, QE.TOKENS_FLAG_KEY);
+        //v0.6.1: Backwards compatibility - set the isSavedToken flag
+        savedTokensData?.forEach(td => {td.isSavedToken = true;});
+
+        //Minimum Quick Encounter has a Journal Entry, and tokens or actors (or 0.6 Compendium which turns into Actors)
+        //If there isn't a map Note we may need to switch scenes
+        if ((extractedActors && extractedActors.length) || (savedTokensData && savedTokensData.length)) {
+            const qeData = {
+                qeVersion : 0.5,
+                journalEntryId : journalEntry.id,
+                extractedActors : extractedActors,
+                savedTokensData : savedTokensData
             }
-        }//end if !quickEncounter
+            quickEncounter = new QuickEncounter(qeData);
+        }
         return quickEncounter;
     }
 
@@ -1520,7 +1533,8 @@ export class QuickEncounter {
 
     /* Hook on renderJournalSheet */
     static async onRenderJournalSheet(journalSheet, html) {
-        if (!game.user.isGM) {return;}
+        //1.0.4e: In Foundry v10 we hook on JournalPageSheet (and inherit the Journal setting if present)
+        if (!game.user.isGM || QuickEncounter.isFoundryV10) {return;}
 
         //v0.5.0 If this could be a Quick Encounter, add the button at the top and the total XP
         //v0.5.3 Remove any existing versions of this first before recomputing it - limit to 5 checks just in case
@@ -1540,12 +1554,30 @@ export class QuickEncounter {
 
     // Hook on renderJournalPageSheet for Foundry v10 multi-page Journals
     static async onRenderJournalPageSheet(journalPageSheet, html) {
-        const header = html[0];
+        //Should never get into onRenderJournalPageSheet unless v10 but test anyway
+        if (!game.user.isGM || !QuickEncounter.isFoundryV10) {return;}  
+        /* 1.0.4e: To handle new (Foundry v10) and pre-multi-page Journals we check:
+            1. Is there an embedded Quick Encounter in the Journal Page Sheet
+            2. Is there an embedded Quick Encounter in the parent Journal Sheet
+            3. Is there a Quick Encounter which can be generated from the embedded Actors in the Page
+            4. (Not in this hook, but for Foundry <=v9) Extract QE from embedded Actors in the Journal Sheet
+        */
+        //Option 1: Is there embedded Quick Encounter in the Journal Page Sheet?
         //FIX: Would prefer to use DOM Selector here, but we're already using JQuery
-        const parentElement = $(header.parentElement);
-        if (!game.user.isGM) {return;}
+        const journalEntryPage = journalPageSheet?.object;
+        let quickEncounter = QuickEncounter.deserializeFromJournalEntry(journalEntryPage);
 
-        const quickEncounter = QuickEncounter.extractQuickEncounter(journalPageSheet, parentElement);
+        if (!quickEncounter) {
+            //Option 2: Is there an embedded Quick Encounter in the parent Journal Sheet?
+            const journalEntry = journalPageSheet?.object?.parent;
+            quickEncounter = QuickEncounter.deserializeFromJournalEntry(journalEntry);
+        }
+        if (!quickEncounter) {
+            //Option 3: Extract a Quick Encounter from embedded Actors
+            const header = html[0];
+            const parentElement = $(header.parentElement);
+            quickEncounter = QuickEncounter.extractQuickEncounterFromEmbedded(journalPageSheet, parentElement);
+        }
 
         //Build and show the QE Dialog and add to the displayed Journal Entry
         if (quickEncounter) {
@@ -1666,7 +1698,7 @@ export class Dialog3 extends Dialog {
         try {
             if (button.callback) button.callback(this.options.jQuery ? this.element : this.element[0], event);
             this.close();
-        } catch(err) {
+        } catch (err) {
             ui.notifications.error(err);
             throw new Error(err);
         }

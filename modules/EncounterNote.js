@@ -309,7 +309,7 @@ Hooks.on(`dropCanvasData`, (canvas, data) => {
             //Get the world-transformed drop position - fortuantely these have already been placed in (data.x,data.y) by Canvas._onDrop
             const noteAnchor = {x: data?.x, y: data?.y}
 
-            const quickEncounter = QuickEncounter.extractQuickEncounterFromJE(journalEntry);
+            const quickEncounter = QuickEncounter.extractQuickEncounterFromJEOrEmbedded(journalEntry);
             if (quickEncounter) {
                 //Confirmed this is a Quick Encounter
                 //If we're checking for Instant Encounters, then pop a dialog
