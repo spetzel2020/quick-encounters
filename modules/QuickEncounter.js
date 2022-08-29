@@ -1576,7 +1576,7 @@ export class QuickEncounter {
             //Option 3: Extract a Quick Encounter from embedded Actors
             const header = html[0];
             const parentElement = $(header.parentElement);
-            quickEncounter = QuickEncounter.extractQuickEncounterFromEmbedded(journalPageSheet, parentElement);
+            quickEncounter = QuickEncounter.extractQuickEncounterFromEmbedded(journalEntryPage, parentElement);
         }
 
         //Build and show the QE Dialog and add to the displayed Journal Entry
@@ -1718,11 +1718,9 @@ Hooks.on("hoverNote", (note, startedHover) => {
     }
 });
 
+//pre-Foundry v10 (no multi-page Journal)
 //Add a listener for the embedded Encounter button and record the scene if we can
 Hooks.on(`renderJournalSheet`,  QuickEncounter.onRenderJournalSheet);
-//1.0.4c: Foundry v10.277 - support for multipage Journal
-Hooks.on(`renderJournalPageSheet`, QuickEncounter.onRenderJournalPageSheet )
-
 
 //The Journal Sheet  looks to see if this is the Tutorial and deletes the Journal Entry if so
 //Placing a map Note is moved to when you actually run the Encounter
@@ -1752,6 +1750,23 @@ Hooks.on('closeJournalSheet', async (journalSheet, html) => {
     }
     delete journalEntry.clickedNote;
 });
+
+
+//1.0.4c: Foundry v10.277 - support for multipage Journal
+Hooks.on(`renderJournalPageSheet`, QuickEncounter.onRenderJournalPageSheet )
+//Don't have to worry about Tutorial (deal with that on close Journal Entry)
+Hooks.on('closeJournalPageSheet', async (journalPageSheet, html) => {
+    if (!game.user.isGM) {return;}
+    const journalPageEntry = journalPageSheet.object; 
+
+    //v0.6.1: If there's a QE dialog open, close that too
+    if (journalPageSheet.qeDialog) {
+        journalPageSheet.qeDialog.close();
+        delete journalPageSheet.qeDialog;
+    }
+    delete journalPageEntry.clickedNote;
+});
+
 
 Hooks.on("getJournalSheetHeaderButtons", QuickEncounter.getJournalSheetHeaderButtons);
 Hooks.on("init", QuickEncounter.init);
