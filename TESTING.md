@@ -1,53 +1,37 @@
-# TESTING v1.0.4 WITH FOUNDRY 10.x
-
-## FOUNDRY FEATURE: Multi-Page Journal Entries
-- Store a QE with a JE page (check stored per page)
-- Generate a QE from separate pages (check replaces old one)
-
-## NEW FEATURE: Instant Encounter
-### Create JE with embedded Actors; drag to Scene and verify two choices:
-- Run Instant Encounter behaves as if you ran QE from a Note                                                OK in 1.0.3
-- Open the QE, press [Run QE] and see if creates the default Note at the center of your view                OK in 1.0.3
-- Create QE Note creates a note (Silently) which can be run                                                 OK in 1.0.3
-- Open the QE and use the Run Quick Encounter (should run around the Note)                                  OK in 1.0.1
-### Create a Note for a QE and then re-drag that QE to the Scene in a different location
-- Runs the QE in the new locations                                                                          OK in 1.0.1
-
-### Create a QE with some captured Tokens and some generated Tokens (will place a Note)
-- When you drag the QE and Run Instant Encounter, it should place the captured Tokens and move the generated OK in 1.0.3
+# TESTING v1.0.4 WITH FOUNDRY 10 Testing 5 (Build 279)
 
 ## BASIC
 ### METHOD 1 - create JE from selected tokens 
-1. Select one friendly token and press QE button -> should ask if you want to add to JE                     OK in 1.0.3
-2. Select multiple friendly and neutral tokens -> should ask...						                        OK in 1.0.3
-3. Select one hostile token and press QE button -> adds to JE	                                            OK in 1.0.3					               
-4. Select multiple hostile and neutral tokens and press QE button -> adds to JE 				            OK in 1.0.3	
+1. Select one friendly token and press QE button -> should ask if you want to add to JE                     ?? in 1.0.4
+2. Select multiple friendly and neutral tokens -> should ask...						                        ?? in 1.0.4
+3. Select one hostile token and press QE button -> adds to JE	                                            ?? in 1.0.4
+4. Select multiple hostile and neutral tokens and press QE button -> adds to JE 				            BROKEN [#94](https://github.com/spetzel2020/quick-encounters/issues/94)
 
 ### METHOD 2 - add Actors/Tokens to blank JE
-1. Embed actor references in a vanilla Journal Entry ; should re-render with QE dialog                      OK in 1.0.3
-2. Open a vanilla Journal Entry, select tokens, and press the QE button to turn this into a QE -> ADD vs. CREATE dialog   OK in 1.0.3
-3. Add a Compendium Entry "Dire Wolf" to the Journal Entry		                                       	    OK in 1.0.1
+1. Embed actor references in a vanilla Journal Entry ; should re-render with QE dialog                      OK in 1.0.4
+2. Open a vanilla Journal Entry, select tokens, and press the QE button to turn this into a QE -> ADD vs. CREATE dialog   ?? in 1.0.4
+3. Add a Compendium Entry "Dire Wolf" to the Journal Entry		                                       	    ?? in 1.0.4
 
 ### METHOD 3 - add/remove tokens                                                        
-1. Open an existing QE with 1xActor; select 3 of the same tokens - should increase the number to 4          OK in 1.0.3
-2. Change # to random (1d4+2)                                                                               OK in 1.0.3
-3. Hover over Token in QE dialog and remove                                                                 OK in 1.0.3
-4. Hover over Tile in QE dialog and remove		                                                            Not Tested in 1.0.3
+1. Open an existing QE with 1xActor; select 3 of the same tokens - should increase the number to 4          ?? in 1.0.4
+2. Change # to random (1d4+2)                                                                               ?? in 1.0.4
+3. Hover over Token in QE dialog and remove                                                                 ?? in 1.0.4
+4. Hover over Tile in QE dialog and remove		                                                            ?? in 1.0.4
 
 ### RUNNING QEs
-1. Open QE with QE Dialog and Run                                                                           OK in 1.0.3
-2. Close Combat encounter: Show total XP and XP per player token to GM                                      OK in 1.0.3
-3. Alt- or Ctrl- Run to force invisible or visible                                                          OK in 1.0.3
-4. Turn on "Show Add to CT" Module setting; clear for one Actor and check not included in CT                OK in 1.0.3
-5. Turn off "Show Add to CT" Module setting and check all now included in CT                                OK in 1.0.3
+1. Open QE with QE Dialog and Run                                                                           ?? in 1.0.4
+2. Close Combat encounter: Show total XP and XP per player token to GM                                      ?? in 1.0.4
+3. Alt- or Ctrl- Run to force invisible or visible                                                          ?? in 1.0.4
+4. Turn on "Show Add to CT" Module setting; clear for one Actor and check not included in CT                ?? in 1.0.4
+5. Turn off "Show Add to CT" Module setting and check all now included in CT                                ?? in 1.0.4
 
 ### MAP NOTES
-1. Delete Note; should warn there is no Note when you open the Journal Entry                                OK in 1.0.3 				               
-2. Move Note - Generated Actor tokens (but not Saved) should be created at the position of the Note         OK in 1.0.3
-3. Start on another Scene and run an Encounter - should switch scenes     					                OK in 1.0.3 (didn't work once)
-5. Delete the original Map Note and launch from a different Map Note                                        OK in 1.0.3
-7. Launch from the Journal Entry - should find a random Note or prompt to create one                        TESTED in 1.0.1 - IS RUNNING THE QE WITHOUT CREATING A MAP NOTE
-8. Delete the QE Journal Entry - should delete all the related Notes                                        OK in 1.0.1						                                      															
+1. Delete Note; should warn there is no Note when you open the Journal Entry                                ?? in 1.0.4
+2. Move Note - Generated Actor tokens (but not Saved) should be created at the position of the Note         ?? in 1.0.4
+3. Start on another Scene and run an Encounter - should switch scenes     					                ?? in 1.0.4 (didn't work once)
+5. Delete the original Map Note and launch from a different Map Note                                        ?? in 1.0.4
+7. Launch from the Journal Entry - should find a random Note or prompt to create one                        ?? im 1.0.4
+8. Delete the QE Journal Entry - should delete all the related Notes                                        ?? in 1.0.4
 ### Hide/Show and ShowAuto setting
 1. ShowAuto = Yes:
 1.1 New QE should show QE first and second time								
@@ -56,8 +40,28 @@
 2.1 Existing QE should not show QE unless you use Show button							
 2.2 Linked or Created QE should force show the first time
 ## 0.9 NEW FEATURES
-1. [#54](https://github.com/spetzel2020/quick-encounters/issues/54): Uncheck "Delete tokens after Add/Link" and verify manual deletion      OK in 1.0.1
-2. [#53](https://github.com/spetzel2020/quick-encounters/issues/53): Check "Show delete dialog after Combat" and verify All/Defeated delete TEST in 1.0.1
+1. Uncheck "Delete tokens after Add/Link" and verify manual deletion                                        ?? in 1.0.4
+2. Check "Show delete dialog after Combat" and verify All/Defeated delete                                   ?? in 1.0.4
+
+## NEW FOUNDRY FEATURE: Multi-Page Journal Entries
+- Store a QE with a JE page (check stored per page)                                                         ?? in 1.0.4
+- Generate a QE from separate pages (check replaces old one)                                                OK in 1.0.4
+- In JE "flow mode", all QEs should display                                                                 OK in 1.0.4
+- If a JE had a QE, that should display with the first page and be marked as "used"                         ?? in 1.0.4
+- If a JE had a QE, it shouldn't display with subsequent pages                                              ?? in 1.0.4
+
+## NEW FEATURE: Instant Encounter
+### Create JE with embedded Actors; drag to Scene and verify two choices:
+- Drag JE to the map; run Instant Encounter behaves as if you ran QE from a Note                            ?? in 1.0.4
+- Open the QE, press [Run QE] and see if creates the default Note at the center of your view                ?? in 1.0.4
+- Create QE Note creates a note (Silently) which can be run                                                 ?? in 1.0.4
+- Open the QE and use the Run Quick Encounter (should run around the Note)                                  ?? in 1.0.4
+### Create a Note for a QE and then re-drag that QE to the Scene in a different location
+- Runs the QE in the new locations                                                                          ?? in 1.0.4
+
+### Create a QE with some captured Tokens and some generated Tokens (will place a Note)
+- When you drag the QE and Run Instant Encounter, it should place the captured Tokens and move the generated ?? in 1.0.4
+
 
 
 ## BACKWARD COMPATIBILITY
