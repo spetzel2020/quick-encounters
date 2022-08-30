@@ -206,7 +206,9 @@
                     1. Is there an embedded Quick Encounter in the Journal Page Sheet
                     2. Is there an embedded Quick Encounter in the parent Journal Sheet
                     3. Is there a Quick Encounter which can be generated from the embedded Actors in the Page
-                    4. (Not in this hook, but for Foundry <=v9) Extract QE from embedded Actors in the Journal Sheet                       
+                    4. (Not in this hook, but for Foundry <=v9) Extract QE from embedded Actors in the Journal Sheet     
+                1.0.4g: Convert serializeIntoJournalEntry to use journalEntry or journalEntryPage      
+                displayQEDialog() now passes journalSheet.title to new QEDialog()           
 */
 
 
@@ -269,18 +271,18 @@ export class QuickEncounter {
         }
     }
     
-    async serializeIntoJournalEntry(journalEntryId=null) {
+    async serializeIntoJournalEntry(journalEntry=null) {
         /*Handles three possibilities as a form of polymorphism:
-        1. journalEntryId is non-null and this.journalEntryId is non null; set the qe.journalEntryId and update
-        2. journalEntryId is null, but the qe.journalEntryId is non-null - update
-        3. journalEntryId is null, and qe.journalEntryId is null - do nothing
+        1. journalEntry is non-null and this.journalEntry is non null; set the qe.journalEntryId and update
+        2. journalEntry is null, but the qe.journalEntryId is non-null - update
+        3. journalEntry is null, and qe.journalEntryId is null - do nothing
         */
         if (!this.journalEntryId) {
-            if (!journalEntryId) {return;}
-            this.journalEntryId = journalEntryId;
+            if (!journalEntry) {return;}
+            this.journalEntryId = journalEntry.id;
         }
 
-        const qeJournalEntry = game.journal.get(this.journalEntryId);
+        const qeJournalEntry = journalEntry;    //1.0.4g: could be JournalEntry or JournalEntryPage
         //v0.6.1 - store created quickEncounter - but can't store object, so serialize data
         this.qeVersion = QE.MODULE_VERSION;
         //0.7.3 When we've changed the Quick Encounter we want to force showing the QE dialog
@@ -288,6 +290,7 @@ export class QuickEncounter {
         qeJournalEntry.showQEOnce = true;   //because we made a change
         await qeJournalEntry?.setFlag(QE.MODULE_NAME, QE.QE_JSON_FLAG_KEY, qeJSON);
     }
+
     static deserializeFromJournalEntry(journalEntry) {
         //1.0.4e: Check for null journalEntry because we're removing the extractQuickEncounterFromJE
         if (!journalEntry) {return null;}
@@ -555,14 +558,14 @@ export class QuickEncounter {
         let journalEntry = await JournalEntry.create(journalData, {activate: false});
 
 //REFACTOR: Individual property setting and order is fragile        
-        quickEncounter.serializeIntoJournalEntry(journalEntry.id);
+        quickEncounter.serializeIntoJournalEntry(journalEntry);
         //And create the Map Note - needs journalEntry.id to be set already
         const newNote = await EncounterNote.place(quickEncounter);
         //0.6.13: Record the Map Note data because we will use it to distinguish between the original and copied Scene Notes
         quickEncounter.originalNoteData = newNote?.data;
         
         //v0.6.1k Update the created/changed QuickEncounter into the Journal Entry
-        quickEncounter.serializeIntoJournalEntry(journalEntry.id);
+        quickEncounter.serializeIntoJournalEntry(journalEntry);
 
         //v0.6.3: Show the Journal Sheet last so it can see the Map Note
         const ejSheet = new JournalSheet(journalEntry);
@@ -580,7 +583,7 @@ export class QuickEncounter {
         let quickEncounter = QuickEncounter.createQuickEncounterAndAdd(controlledAssets);
         const journalEntry = openJournalSheet?.object;
         //FIXME: add() already calls serializeIntoJournalEntry(), but here we are updating with the source journalEntry
-        quickEncounter.serializeIntoJournalEntry(journalEntry.id);
+        quickEncounter.serializeIntoJournalEntry(journalEntry);
         //Force a re-render which should pop up the QE dialog
         //FIXME: Is this necessary? I thought setFlag() would already force a re-render of the JE
         openJournalSheet?.render(true);
@@ -1617,7 +1620,7 @@ export class QuickEncounter {
         } else {
             //0.8.0: If this is being viewed out of a Compendium, present a different read-only Quick Encounter Dialog with instructions
             //0.8.0d: Relax the null test for qeJournalEntry.compendium
-            qeDialog = new QESheet(this, {isFromCompendium : qeJournalEntry.compendium});
+            qeDialog = new QESheet(this, {title : journalSheet.title, isFromCompendium : qeJournalEntry.compendium});
             journalSheet.qeDialog = qeDialog;
         }
 
@@ -1757,14 +1760,14 @@ Hooks.on(`renderJournalPageSheet`, QuickEncounter.onRenderJournalPageSheet )
 //Don't have to worry about Tutorial (deal with that on close Journal Entry)
 Hooks.on('closeJournalPageSheet', async (journalPageSheet, html) => {
     if (!game.user.isGM) {return;}
-    const journalPageEntry = journalPageSheet.object; 
+    const journalEntryPage = journalPageSheet.object; 
 
     //v0.6.1: If there's a QE dialog open, close that too
     if (journalPageSheet.qeDialog) {
         journalPageSheet.qeDialog.close();
         delete journalPageSheet.qeDialog;
     }
-    delete journalPageEntry.clickedNote;
+    delete journalEntryPage.clickedNote;
 });
 
 

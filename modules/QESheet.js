@@ -34,14 +34,16 @@ Reused as EncounterCompanionSheet
                 TODO: Not currently saving it, even locally - will need to save and then persist  
 14-Dec-2021     0.9.3d: Add addToCombatTracker to combatant data model and persist       
 18-Dec-2021     0.9.4a: When you press "Run Quick Encounter" then submit form first before Running the QE (to capture the Add To CT status)
+29-Aug-2022     1.0.4g: Override the title to the name of the Journal Entry or Journal Page Entry (passed in options)
+                Weren't calling super() correctly; this.object stores the related object for which is the sheet
 */
 
 
 export class QESheet extends FormApplication {
     constructor(quickEncounter, options = {}) {
-        super(options);
+        //1.0.4g: This call has always been wrong; was being called as super(options)
+        super(quickEncounter, options); //sets this.object
         if (!game.user.isGM || !quickEncounter) {return;}
-        this.quickEncounter = quickEncounter;
 
         game.users.apps.push(this)
     }
@@ -52,8 +54,14 @@ export class QESheet extends FormApplication {
 	    return `${QE.MODULE_NAME}-${this.appId}`;
     }
 
+    /** @override */
+    //1.0.4g: Override the title to the name of the JE Page (especially important when we are displaying in flow mode)
+    get title() {
+        return this.options?.title;
+    }
+
     update(quickEncounter) {
-        if (quickEncounter) this.quickEncounter = quickEncounter;
+        if (quickEncounter) this.object = quickEncounter;
     }
 
     /** @override  */
@@ -61,7 +69,6 @@ export class QESheet extends FormApplication {
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
             //no longer setting id here because it gives the same element all the time- override get id() so we can have multiple QE JEs open
-            title : game.i18n.localize("QE.Name"),
             template : "modules/quick-encounters/templates/qe-sheet.html",
             closeOnSubmit : false,
             submitOnClose : false,
@@ -92,8 +99,8 @@ export class QESheet extends FormApplication {
             icon: "fas fa-fist-raised",
             onclick: async ev => {
                 //Toggle the default to not show from now on (you'll have to click the Show button in the JE)
-                this.quickEncounter.hideQE = true;
-                this.quickEncounter.serializeIntoJournalEntry();
+                this.object.hideQE = true;
+                this.object.serializeIntoJournalEntry();
                 this.close();
             }
         });
@@ -106,7 +113,7 @@ export class QESheet extends FormApplication {
         if (!this.object?.isFromCompendium) {
             html.find('button[name="addToCombatTracker"]').click(event => {
                 // FIX: Need to submit the form first and then run; await this.submit({preventClose: true})
-                this.submit({preventClose: true}).then(this.quickEncounter?.run(event));
+                this.submit({preventClose: true}).then(this.object?.run(event));
             });
             //0.7.0: Listeners for when you click - in actor or tile
             html.find("#QEContainers .actor-container").each((i, thumbnail) => {
@@ -133,7 +140,7 @@ export class QESheet extends FormApplication {
         //We don't have to store totalXPLine, but this.combatants needs to be referenced in _updateData()
         return {
            combatants: this.combatants,
-           tilesData: this.quickEncounter?.savedTilesData,
+           tilesData: this.object?.savedTilesData,
            totalXPLine : this.totalXPLine,
            isFromCompendium : this.object?.isFromCompendium,    //FIX: This setting should be on a combatant basis, not one
            //0.9.3 Setting to show this checkbox (checked by default)
@@ -143,12 +150,12 @@ export class QESheet extends FormApplication {
 
     async computeCombatantsForDisplay() {
         //This version of the Quick Encounter is what is extracted from in the Journal Entry
-        this.quickEncounter.generateTemplateExtractedActorTokenData();     //this is just sparse array with the correct numbers
-        this.quickEncounter.combineTokenData();
+        this.object.generateTemplateExtractedActorTokenData();     //this is just sparse array with the correct numbers
+        this.object.combineTokenData();
 
         let combatants = [];
-        if (this.quickEncounter.extractedActors) {
-            for (const [i,eActor] of this.quickEncounter.extractedActors.entries()) {
+        if (this.object.extractedActors) {
+            for (const [i,eActor] of this.object.extractedActors.entries()) {
                 const combatant = {
                     rowNum : i,
                     numActors : eActor.numActors,
@@ -185,7 +192,7 @@ export class QESheet extends FormApplication {
         }
 
         this.combatants = combatants;
-        this.totalXPLine = this.quickEncounter.renderTotalXPLine();
+        this.totalXPLine = this.object.renderTotalXPLine();
     }
 
     /** @override */
@@ -256,10 +263,10 @@ export class QESheet extends FormApplication {
         //0.6.1o: The saved tokens for a removed ExtractedActor will now be discarded also
 
         //If we removed all the Actors and (0.7.0) all the Tiles, then remove the whole Quick Encounter
-        if (extractedActors.length || this.quickEncounter?.savedTilesData?.length) {
-            this.quickEncounter?.update({extractedActors : extractedActors});
+        if (extractedActors.length || this.object?.savedTilesData?.length) {
+            this.object?.update({extractedActors : extractedActors});
         } else {
-            this.quickEncounter?.remove();
+            this.object?.remove();
             //And close this sheet
             this.close();
         }
@@ -291,8 +298,8 @@ export class QESheet extends FormApplication {
             const rowNum = event.srcElement.id;
 
             //Handle this by clearing the appropriate combatant field and re-rendering
-            if ((rowNum >= 0) && (rowNum < this.quickEncounter?.savedTilesData.length)) {
-                this.quickEncounter.savedTilesData.splice(rowNum,1);
+            if ((rowNum >= 0) && (rowNum < this.object?.savedTilesData.length)) {
+                this.object.savedTilesData.splice(rowNum,1);
             }
             this._onChange();
         }
