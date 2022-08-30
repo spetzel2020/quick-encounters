@@ -1079,9 +1079,16 @@ export class QuickEncounter {
         else {          
             //Now we need to search through the available scenes to find a note with this Journal Entry
             for (const scene of game.scenes) {
-                const notes = scene.data.notes;
+                let notes;
+                if (QuickEncounter.isFoundryV10) {
+                    notes = scene.notes;
+                } else {
+                    notes = scene.data.notes;
+                }
                 let foundNote;
-                if (QuickEncounter.isFoundryV8Plus) {
+                if (QuickEncounter.isFoundryV10) {
+                    foundNote = Array.from(notes.values()).find(nd => nd.entryId === journalEntry.id);
+                } else if (QuickEncounter.isFoundryV8Plus) {
                     foundNote = Array.from(notes.values()).find(nd => nd.data.entryId === journalEntry.id);
                 } else {
                     foundNote = notes.find(note => note.entryId === journalEntry.id);
@@ -1465,7 +1472,11 @@ export class QuickEncounter {
     static getActorXP(actor) {
         if ((game.system.id !== "dnd5e") || !actor) {return null;}
         try {
-            return actor.data?.data?.details?.xp?.value;
+            if (QuickEncounter.isFoundryV10) {
+                return actor.system?.details?.xp?.value;
+            } else {
+                return actor.data?.data?.details?.xp?.value;
+            }
         } catch (err) {
             return null;
         }
@@ -1490,7 +1501,7 @@ export class QuickEncounter {
                 const actor = game.actors.get(eActor.actorID);
                 const actorXP = QuickEncounter.getActorXP(actor);
                 //Only include non-character tokens in XP
-                if (actorXP && (actor.data.type === "npc")) {
+                if (actorXP && ((QuickEncounter.isFoundryV10 && (actor.type === "npc")) || (actor.data.type === "npc"))) {
                     if (!totalXP) {totalXP = 0;}
                     //Allow for numActors being a roll (e.g. [[/r 1d4]]) in which case we ignore the XP
                     //although we probably should provide a range or average
