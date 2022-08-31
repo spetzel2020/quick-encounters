@@ -19,7 +19,7 @@
 4. Hover over Tile in QE dialog and remove		                                                            ?? in 1.0.4
 
 ### RUNNING QEs
-1. Open QE with QE Dialog and Run                                                                           ?? in 1.0.4
+1. Open QE with QE Dialog and Run                                                                           BROKEN in 1.0.4
 2. Close Combat encounter: Show total XP and XP per player token to GM                                      ?? in 1.0.4
 3. Alt- or Ctrl- Run to force invisible or visible                                                          ?? in 1.0.4
 4. Turn on "Show Add to CT" Module setting; clear for one Actor and check not included in CT                ?? in 1.0.4
@@ -63,29 +63,26 @@
 - When you drag the QE and Run Instant Encounter, it should place the captured Tokens and move the generated ?? in 1.0.4
 
 
-
 ## BACKWARD COMPATIBILITY
-- Create a QE in v0.5 and make sure it mostly works in 0.6.8
-- Pre 0.6.13 (for originalNote): Copy a pre-0.6.13 Note and confirm token placement (with/without saved)
+- Create a QE in v0.9 and make sure it mostly works in Foundry v10
 ## OLDER TESTING (only on major release)
 ### BUG FIXES
-1. Create 10 saved tokens - check that QE positions saved tokens correctly                                  TEST in 1.0.1
-2. Reduce 10 to 5 - check that QE positions saved tokens correctly                                          TEST in 1.0.1
-3. Increase 5 back to 10 - extra 5 tokens should be generated next to Map Note                              TEST in 1.0.1
+1. Create 10 saved tokens - check that QE positions saved tokens correctly                                  ?? in 1.0.4
+2. Reduce 10 to 5 - check that QE positions saved tokens correctly                                          ?? in 1.0.4
+3. Increase 5 back to 10 - extra 5 tokens should be generated next to Map Note                              ?? in 1.0.4
 ### TUTORIAL
-1. Press Quick Encounter button with nothing selected -> should pop up Tutorial					 			TEST in 1.0.1            		
-2. With Tutorial open, repeat #1 -> should keep existing Tutorial         						        	TEST in 1.0.1                        	
-3. Close Tutorial -> should delete the Journal Entry                          						        TEST in 1.0.1				    	
-4. Open some Journal Entries with no embedded Actors, press QE button -> should open Tutorial               TEST in 1.0.1  		    	
-5. Open multiple Journal Entries with embedded Actors, press QE button -> should run the Encounter          TEST in 1.0.1
-6. Leave Tutorial Window open; create another Journal Entry, Save, and then close - should be kept		    TEST in 1.0.1	
+1. Press Quick Encounter button with nothing selected -> should pop up Tutorial					 			?? in 1.0.4
+2. With Tutorial open, repeat #1 -> should keep existing Tutorial         						        	?? in 1.0.4
+3. Close Tutorial -> should delete the Journal Entry                          						        ?? in 1.0.4
+4. Open some Journal Entries with no embedded Actors, press QE button -> should open Tutorial               ?? in 1.0.4
+5. Open multiple Journal Entries with embedded Actors, press QE button -> should run the Encounter          ?? in 1.0.4
+6. Leave Tutorial Window open; create another Journal Entry, Save, and then close - should be kept		    ?? in 1.0.4	
     - was being deleted in 0.5.2 because it was finding the Tutorial Window
 
-
+## NO LONGER TESTING
 ### TEST WITH Foundry 0.7.9
 May need to test for version:
 - Test CONST.TOKEN_DISPOSITIONS
-
 ### USE OLD EMBEDDED METHOD - DEPRECATED
 Verify above tests with Use Companion Dialog = TRUE and Use Companion Dialog = FALSE
 1. Check that previously created encounters work with new Setting = TRUE

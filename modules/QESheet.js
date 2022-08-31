@@ -36,6 +36,7 @@ Reused as EncounterCompanionSheet
 18-Dec-2021     0.9.4a: When you press "Run Quick Encounter" then submit form first before Running the QE (to capture the Add To CT status)
 29-Aug-2022     1.0.4g: Override the title to the name of the Journal Entry or Journal Page Entry (passed in options)
                 Weren't calling super() correctly; this.object stores the related object for which is the sheet
+31-Aug-2022     1.0.4j: constructor: receive options.qeJournalEntry so we don't need to look it up using journalEntryId (which is trickier now that we have multi-page journals)                
 */
 
 
@@ -266,7 +267,8 @@ export class QESheet extends FormApplication {
         if (extractedActors.length || this.object?.savedTilesData?.length) {
             this.object?.update({extractedActors : extractedActors});
         } else {
-            this.object?.remove();
+            //1.0.4j: Pass qeJournalEntry so we don't have to look it up via ID
+            this.object?.remove(this.options.qeJournalEntry);
             //And close this sheet
             this.close();
         }

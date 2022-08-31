@@ -208,7 +208,10 @@
                     3. Is there a Quick Encounter which can be generated from the embedded Actors in the Page
                     4. (Not in this hook, but for Foundry <=v9) Extract QE from embedded Actors in the Journal Sheet     
                 1.0.4g: Convert serializeIntoJournalEntry to use journalEntry or journalEntryPage      
-                displayQEDialog() now passes journalSheet.title to new QEDialog()           
+                displayQEDialog() now passes journalSheet.title to new QEDialog()  
+31-Aug-2022     1.0.4j: Serialize QE into Journal Page (Foundry v10)
+                Pass qeJournalEntry to QESheet so it can be passed back for remove()
+                Set journalEntry in qeData (but make sure in serialize to null before serializing the whole JE object into JE)                         
 */
 
 
@@ -229,7 +232,8 @@ export const dieRollReg = /^([0-9]+\s*d[4,6,8,10,12](?:\s*[+,-]\s*[0-9]+)*)/;
 export class QuickEncounter {
     constructor(qeData={}) {
         if (!qeData) {return;}
-        this.journalEntryId = qeData.journalEntryId;
+        this.journalEntry = qeData.journalEntry;        //1.0.4j: Preparatory to removing journalEntryId
+        this.journalEntryId = qeData.journalEntryId;    //DEPRECATED
         //In v0.6 this contains savedTokensData
         this.extractedActors = qeData.extractedActors;
         //0.7 Now has tiles as well
@@ -270,25 +274,27 @@ export class QuickEncounter {
             }
         }
     }
-    
-    async serializeIntoJournalEntry(journalEntry=null) {
-        /*Handles three possibilities as a form of polymorphism:
-        1. journalEntry is non-null and this.journalEntry is non null; set the qe.journalEntryId and update
-        2. journalEntry is null, but the qe.journalEntryId is non-null - update
-        3. journalEntry is null, and qe.journalEntryId is null - do nothing
-        */
-        if (!this.journalEntryId) {
-            if (!journalEntry) {return;}
-            this.journalEntryId = journalEntry.id;
-        }
 
-        const qeJournalEntry = journalEntry;    //1.0.4g: could be JournalEntry or JournalEntryPage
+    async serializeIntoJournalEntry(newJournalEntry=null) {
+        /*Handles three possibilities as a form of polymorphism:
+        1. newJournalEntry is non-null => update this.journalEntry and the other variables
+        2. newJournalEntry is null, but the qe.journalEntry is non-null - update the existing JE
+        3. newJournalEntry is null, and qe.journalEntry is null - do nothing
+        */
+        // 1.0.4j: Save journalEntry so we can avoid serializing the whole object into the JSON
+        const qeJournalEntry = this.journalEntry ?? newJournalEntry;
+        if (!qeJournalEntry) {return;}
+        this.journalEntry = null;   //temporary until after serializing into JE
+
         //v0.6.1 - store created quickEncounter - but can't store object, so serialize data
         this.qeVersion = QE.MODULE_VERSION;
         //0.7.3 When we've changed the Quick Encounter we want to force showing the QE dialog
         const qeJSON = JSON.stringify(this);
+        this.journalEntry = qeJournalEntry;
+
         qeJournalEntry.showQEOnce = true;   //because we made a change
-        await qeJournalEntry?.setFlag(QE.MODULE_NAME, QE.QE_JSON_FLAG_KEY, qeJSON);
+        //1.0.4j: Try removing the await
+        qeJournalEntry?.setFlag(QE.MODULE_NAME, QE.QE_JSON_FLAG_KEY, qeJSON);
     }
 
     static deserializeFromJournalEntry(journalEntry) {
@@ -307,6 +313,9 @@ export class QuickEncounter {
         } catch {
             console.log(`Invalid JSON: ${qeJSON}`);
         }
+        //1.0.4j: Record journalEntry in preparation to eliminating lookup via journalEntryId
+        quickEncounter.journalEntry = journalEntry;
+
         //quickEncounter will ALWAYS be non-null, but we want to make sure it has real data
         //0.7.0b Check now that either extractedActors or savedTiles is non-null
         if (!quickEncounter.extractedActors && !quickEncounter.savedTilesData) {quickEncounter = null;}
@@ -317,8 +326,8 @@ export class QuickEncounter {
         //Update into Journal Entry
         this.serializeIntoJournalEntry();
     }
-    async remove() {
-        const qeJournalEntry = game.journal.get(this.journalEntryId);
+    async remove(qeJournalEntry) {
+        //DEPRECATED: Shouldn't need to pass this from QESheet
         await qeJournalEntry?.setFlag(QE.MODULE_NAME, QE.QE_JSON_FLAG_KEY, null);
     }
 
@@ -839,6 +848,7 @@ export class QuickEncounter {
         if ((extractedActors && extractedActors.length) || (savedTokensData && savedTokensData.length)) {
             const qeData = {
                 qeVersion : 0.5,
+                journalEntry : journalEntry,        //1.0.4j: Preparatory to removing journalEntryId (could be JE or JE Page)
                 journalEntryId : journalEntry.id,
                 extractedActors : extractedActors,
                 savedTokensData : savedTokensData
@@ -935,7 +945,8 @@ export class QuickEncounter {
         //- Extract the actors (if any)
         //- Find the encounter location based on the Note position
         //- Create tokens (or use existing ones if they exist)
-        const qeJournalEntry = game.journal.get(this.journalEntryId);
+        //1.0.4j: Get journalEntry from QE property 
+        const qeJournalEntry = this.journalEntry;
         if (!qeJournalEntry) return;
 
         const extractedActors = this.extractedActors;
@@ -1631,7 +1642,8 @@ export class QuickEncounter {
         } else {
             //0.8.0: If this is being viewed out of a Compendium, present a different read-only Quick Encounter Dialog with instructions
             //0.8.0d: Relax the null test for qeJournalEntry.compendium
-            qeDialog = new QESheet(this, {title : journalSheet.title, isFromCompendium : qeJournalEntry.compendium});
+            //1.0.4j: Pass qeJournalEntry so we don't need the journalEntryId to do a QuickEncounter.remove()
+            qeDialog = new QESheet(this, {qeJournalEntry : qeJournalEntry, title : journalSheet.title, isFromCompendium : qeJournalEntry.compendium});
             journalSheet.qeDialog = qeDialog;
         }
 
