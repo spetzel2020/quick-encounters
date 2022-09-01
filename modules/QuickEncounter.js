@@ -948,8 +948,9 @@ export class QuickEncounter {
         //- Find the encounter location based on the Note position
         //- Create tokens (or use existing ones if they exist)
         //1.0.4j: Get journalEntry from QE property 
-        const qeJournalEntry = this.journalEntry;
-        if (!qeJournalEntry) return;
+        //1.0.4k: Use parent (which is what is saved to the map) is this is JournalEntryPage
+        const noteJournalEntry = (this.journalEntry instanceof JournalEntryPage) ? this.journalEntry.parent : this.journalEntry;
+        if (!noteJournalEntry) return;
 
         const extractedActors = this.extractedActors;
         const savedTokensData = this.savedTokensData; 
@@ -968,20 +969,20 @@ export class QuickEncounter {
             }
         } else {
             //0.6.13 If we have clickedNote specified we know we're in the right scene, otherwise see where there is one
-            let mapNote = qeJournalEntry.clickedNote;
+            let mapNote = noteJournalEntry.clickedNote;
             if (!mapNote) {
                 // Switch to the correct scene if confirmed
-                let qeScene = EncounterNote.getEncounterScene(qeJournalEntry);
+                let qeScene = EncounterNote.getEncounterScene(noteJournalEntry);
                 //If there isn't a Map Note anywhere, prompt to create one in the center of the view
                 if (!qeScene) {
                     EncounterNote.noMapNoteDialog(this);
                     //Try again now that it should have a scene if yo responded yes
-                    qeScene = EncounterNote.getEncounterScene(qeJournalEntry);
+                    qeScene = EncounterNote.getEncounterScene(noteJournalEntry);
                 }
-                const isPlaced = await EncounterNote.mapNoteIsPlaced(qeScene, qeJournalEntry);
+                const isPlaced = await EncounterNote.mapNoteIsPlaced(qeScene, noteJournalEntry);
                 if (!isPlaced ) {return;}
                 //Something is desperately wrong if this is null
-                mapNote = qeJournalEntry.sceneNote;
+                mapNote = noteJournalEntry.sceneNote;
             }
             this.sourceNoteData = mapNote.data;
         }

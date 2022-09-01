@@ -33,7 +33,8 @@ Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tra
 4-May-2022      1.0.2b: Fixed: Misspelled poison.svg in moreNoteIcons
 31-Aug-2022     1.0.4k: Get parent JournalEntry for JournalEntryPage (because Notes are associated with Journal Entries)
 1-Sep-2022      1.0.4k: Move getEncounterScene() to EncounterNote from QuickEncounter
-                Check journalEntry to see if we should be looking at parent
+                Check journalEntry to see if we should be looking at parent\
+                Also in mapNoteIsPlaced
 */
 
 //Expand the available list of Note icons
@@ -261,11 +262,13 @@ export class EncounterNote {
         });
     }
 
-    static async mapNoteIsPlaced(qeScene, qeJournalEntry) {
+    static async mapNoteIsPlaced(qeScene, journalEntry) {
         //Get the scene for this Quick Encounter (can't use sceneNote if we're in the wrong scene)
-        if (!qeScene || !qeJournalEntry) {return false;}
+        if (!qeScene || !journalEntry) {return false;}
+        //1.0.4k: Use parent (which is what is saved to the map) is this is JournalEntryPage
+        const parentJournalEntry = (journalEntry instanceof JournalEntryPage) ? journalEntry.parent : journalEntry;
         //If we're viewing the relevant scene and the map note was placed, then good
-        if (qeJournalEntry.sceneNote) {return true;}
+        if (parentJournalEntry.sceneNote) {return true;}
 
         //Otherwise ask if you want to switch to the scene - default is No/false
         let shouldSwitch = false;
@@ -285,7 +288,7 @@ export class EncounterNote {
             yes : () => {shouldSwitch = true},
             no : () => {shouldSwitch = false}
         });
-        if (shouldSwitch) {return EncounterNote.switchToMapNoteScene(qeScene, qeJournalEntry);}
+        if (shouldSwitch) {return EncounterNote.switchToMapNoteScene(qeScene, parentJournalEntry);}
         else {return false;}
     }
 
