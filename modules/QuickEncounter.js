@@ -295,8 +295,7 @@ export class QuickEncounter {
         this.journalEntry = qeJournalEntry;
 
         qeJournalEntry.showQEOnce = true;   //because we made a change
-        //1.0.4j: Try removing the await
-        qeJournalEntry?.setFlag(QE.MODULE_NAME, QE.QE_JSON_FLAG_KEY, qeJSON);
+        await qeJournalEntry?.setFlag(QE.MODULE_NAME, QE.QE_JSON_FLAG_KEY, qeJSON);
     }
 
     static deserializeFromJournalEntry(journalEntry) {
@@ -476,15 +475,24 @@ export class QuickEncounter {
         //0.6.4: If there's an open Journal Entry it asks if you want to add the tokens to it or run it
         //Method 1: Get the selected tokens and the scene
         //Exclude friendly tokens unless you say yes to the dialog
+        //Tokens
         const controlledTokens = Array.from(canvas.tokens?.controlled);
         const controlledNonFriendlyTokens = controlledTokens?.filter(t => t.data?.disposition !== FRIENDLY_TOKEN_DISPOSITIONS );
         const controlledFriendlyTokens = controlledTokens?.filter(t => t.data?.disposition === FRIENDLY_TOKEN_DISPOSITIONS );
+
+        //Tiles
         //0.7.0b: Capture controlled tiles (will be one or the other of foreground or background, not both)
         //0.9.6b: Switch to using canvas.foreground and canvas.background because Tile.layer doesn't exist in Foundry 9
-        let controlledTiles = Array.from(canvas.foreground.controlled);
-        controlledTiles = controlledTiles.concat(Array.from(canvas.background.controlled));
+        //1.0.4l: Foundry v10 has controlled array like tokens
+        let controlledTiles;
+        if (QuickEncounter.isFoundryV10) {
+            controlledTiles = Array.from(canvas.tiles?.controlled); 
+        } else {
+            controlledTiles = Array.from(canvas.foreground.controlled);
+            controlledTiles = controlledTiles.concat(Array.from(canvas.background.controlled));
+        }
         //0.9.1a: (from ironmonk88) Pass this so we can check for Monk's Enhanced Journal 
-        const candidateJournalEntry = QuickEncounter.findCandidateJournalEntry.call(this); 
+        const candidateJournalEntry = QuickEncounter.findQuickEncounter.call(this); 
         const quickEncounter = (candidateJournalEntry instanceof QuickEncounter ) ? candidateJournalEntry : null;
 
         //v0.6.1 If you have both controlledNonFriendly tokens AND an open Quick Encounter, ask if you want to add to it
@@ -631,7 +639,10 @@ export class QuickEncounter {
         //Add the new tokens to the existing ones (or creates new ones)
         //Use tokenData because tokens is too deep to store in flags
         let controlledTokensData;
-        if (QuickEncounter.isFoundryV8Plus) {
+        if (QuickEncounter.isFoundryV10) {
+            //1.0.4l: "data" replaced by "document" object
+            controlledTokensData = controlledTokens.map(ct => {return ct.document.toObject()});
+        } else if (QuickEncounter.isFoundryV8Plus) {
             //0.8.3c: Use the toObject() function to get a shallow copy (without prototypes) of controlledTokens.data
             controlledTokensData = controlledTokens.map(ct => {return ct.data.toObject()});
         } else { //Foundry 0.6.x or 0.7.x
@@ -776,7 +787,7 @@ export class QuickEncounter {
     /* Method 2: Look through open Windows to find a Journal Entry with Actors and a Map Note
     *
     */
-    static findCandidateJournalEntry() {
+    static findQuickEncounter() {
         //Return either a Quick Encounter, a Journal Sheet, or null (in order of priority)
         if (Object.keys(ui.windows).length === 0) {return null;}
         else {
