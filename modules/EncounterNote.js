@@ -31,6 +31,9 @@ Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tra
 26-Feb-2022     1.0.1d: checkForInstantEncounter(): pass new options variable with IE information to QuickEncounter.run()  
 3-Mar-2022     1.0.1f: Fixed #84 delete(): corrected to use deleteEmbeddedDocuments()              
 4-May-2022      1.0.2b: Fixed: Misspelled poison.svg in moreNoteIcons
+31-Aug-2022     1.0.4k: Get parent JournalEntry for JournalEntryPage (because Notes are associated with Journal Entries)
+1-Sep-2022      1.0.4k: Move getEncounterScene() to EncounterNote from QuickEncounter
+                Check journalEntry to see if we should be looking at parent
 */
 
 //Expand the available list of Note icons
@@ -91,9 +94,12 @@ export class EncounterNote {
     static async create(quickEncounter, noteAnchor) {
         if (!quickEncounter) {return;}
 
+        const journalEntry = quickEncounter.journalEntry;
+        //1.0.4k: Use parent (which is what is saved to the map) is this is JournalEntryPage
+        const parentJournalEntry = (journalEntry instanceof JournalEntryPage) ? journalEntry.parent : journalEntry;
         // Create Note data
         const noteData = {
-              entryId: quickEncounter.journalEntryId,
+              entryId: parentJournalEntry.Id,
               x: noteAnchor.x,
               y: noteAnchor.y,
               icon: CONFIG.JournalEntry.noteIcons.Combat,
@@ -115,7 +121,8 @@ export class EncounterNote {
     }
 
     static async delete(journalEntry) {
-
+        //1.0.4k: This should always be a real parent JournalEntry
+        
         if (!game.user.isGM) {return;}
         //Create filtered array of matching Notes for each scene
         let matchingNoteIds;
@@ -198,6 +205,36 @@ export class EncounterNote {
         return qeNote;
     }
 
+    static getEncounterScene(journalEntry) {
+        if (!journalEntry) {return null;}
+        //1.0.4k: Use parent (which is what is saved to the map) is this is JournalEntryPage
+        const parentJournalEntry = (journalEntry instanceof JournalEntryPage) ? journalEntry.parent : journalEntry;
+        //if sceneNote is available, then we're in the Note Scene already
+        if (parentJournalEntry.sceneNote) {return game.scenes.viewed;}
+        else {          
+            //Now we need to search through the available scenes to find a note with this Journal Entry
+            for (const scene of game.scenes) {
+                let notes;
+                if (QuickEncounter.isFoundryV10) {
+                    notes = scene.notes;
+                } else {
+                    notes = scene.data.notes;
+                }
+                let foundNote;
+                if (QuickEncounter.isFoundryV10) {
+                    foundNote = Array.from(notes.values()).find(nd => nd.entryId === parentJournalEntry.id);
+                } else if (QuickEncounter.isFoundryV8Plus) {
+                    foundNote = Array.from(notes.values()).find(nd => nd.data.entryId === parentJournalEntry.id);
+                } else {
+                    foundNote = notes.find(note => note.entryId === parentJournalEntry.id);
+                }
+                if (foundNote) {
+                    return scene;
+                }
+            }
+        }
+        return null;
+    }
 
     static async switchToMapNoteScene(qeScene, qeJournalEntry) {
         if (!qeScene) {return null;}
@@ -223,7 +260,6 @@ export class EncounterNote {
             }
         });
     }
-
 
     static async mapNoteIsPlaced(qeScene, qeJournalEntry) {
         //Get the scene for this Quick Encounter (can't use sceneNote if we're in the wrong scene)

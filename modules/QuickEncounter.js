@@ -211,7 +211,9 @@
                 displayQEDialog() now passes journalSheet.title to new QEDialog()  
 31-Aug-2022     1.0.4j: Serialize QE into Journal Page (Foundry v10)
                 Pass qeJournalEntry to QESheet so it can be passed back for remove()
-                Set journalEntry in qeData (but make sure in serialize to null before serializing the whole JE object into JE)                         
+                Set journalEntry in qeData (but make sure in serialize to null before serializing the whole JE object into JE)   
+                1.0.4k: getEncounterScene should look for Journal Entry instead of Journal Entry Page   
+1-Sep-2022      1.0.4k: Move getEncounterScene() to EncounterNote from QuickEncounter                                   
 */
 
 
@@ -969,12 +971,12 @@ export class QuickEncounter {
             let mapNote = qeJournalEntry.clickedNote;
             if (!mapNote) {
                 // Switch to the correct scene if confirmed
-                let qeScene = QuickEncounter.getEncounterScene(qeJournalEntry);
+                let qeScene = EncounterNote.getEncounterScene(qeJournalEntry);
                 //If there isn't a Map Note anywhere, prompt to create one in the center of the view
                 if (!qeScene) {
                     EncounterNote.noMapNoteDialog(this);
                     //Try again now that it should have a scene if yo responded yes
-                    qeScene = QuickEncounter.getEncounterScene(qeJournalEntry);
+                    qeScene = EncounterNote.getEncounterScene(qeJournalEntry);
                 }
                 const isPlaced = await EncounterNote.mapNoteIsPlaced(qeScene, qeJournalEntry);
                 if (!isPlaced ) {return;}
@@ -1084,33 +1086,7 @@ export class QuickEncounter {
     }
 
 
-    static getEncounterScene(journalEntry) {
-        //if sceneNote is available, then we're in the Note Scene already
-        if (journalEntry.sceneNote) {return game.scenes.viewed;}
-        else {          
-            //Now we need to search through the available scenes to find a note with this Journal Entry
-            for (const scene of game.scenes) {
-                let notes;
-                if (QuickEncounter.isFoundryV10) {
-                    notes = scene.notes;
-                } else {
-                    notes = scene.data.notes;
-                }
-                let foundNote;
-                if (QuickEncounter.isFoundryV10) {
-                    foundNote = Array.from(notes.values()).find(nd => nd.entryId === journalEntry.id);
-                } else if (QuickEncounter.isFoundryV8Plus) {
-                    foundNote = Array.from(notes.values()).find(nd => nd.data.entryId === journalEntry.id);
-                } else {
-                    foundNote = notes.find(note => note.entryId === journalEntry.id);
-                }
-                if (foundNote) {
-                    return scene;
-                }
-            }
-        }
-        return null;
-    }
+
 
     static getNumActors(extractedActor, options={}) {
         //Get the number of actors including rolling if options.rollRandom=true
@@ -1628,7 +1604,7 @@ export class QuickEncounter {
 
         //If there's no Map Note, include a warning
         let noMapNoteWarning = null;
-        const qeScene = QuickEncounter.getEncounterScene(qeJournalEntry);
+        const qeScene = EncounterNote.getEncounterScene(qeJournalEntry);
         if (!qeScene) {
             noMapNoteWarning = `${game.i18n.localize("QE.AddToCombatTracker.NoMapNote")}`;
         }
