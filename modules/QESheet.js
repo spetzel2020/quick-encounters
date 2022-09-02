@@ -36,7 +36,8 @@ Reused as EncounterCompanionSheet
 18-Dec-2021     0.9.4a: When you press "Run Quick Encounter" then submit form first before Running the QE (to capture the Add To CT status)
 29-Aug-2022     1.0.4g: Override the title to the name of the Journal Entry or Journal Page Entry (passed in options)
                 Weren't calling super() correctly; this.object stores the related object for which is the sheet
-31-Aug-2022     1.0.4j: constructor: receive options.qeJournalEntry so we don't need to look it up using journalEntryId (which is trickier now that we have multi-page journals)                
+31-Aug-2022     1.0.4j: constructor: receive options.qeJournalEntry so we don't need to look it up using journalEntryId (which is trickier now that we have multi-page journals) 
+2-Sep-2022      1.0.5a: activateListeners(): Listen for new [Add] button which allows adding selected tokens or tiles to this QE               
 */
 
 
@@ -116,7 +117,7 @@ export class QESheet extends FormApplication {
                 // FIX: Need to submit the form first and then run; await this.submit({preventClose: true})
                 this.submit({preventClose: true}).then(this.object?.run(event));
             });
-            //0.7.0: Listeners for when you click - in actor or tile
+            //0.7.0: Listeners for when you click "-" (minus)" in actor or tile
             html.find("#QEContainers .actor-container").each((i, thumbnail) => {
                 //thumbnail.setAttribute("draggable", true);
                 //thumbnail.addEventListener("dragstart", this._onDragStart, false);
@@ -128,6 +129,9 @@ export class QESheet extends FormApplication {
                 thumbnail.addEventListener("click", this._onClickTile.bind(this));
             });
         }
+        html.find('button[name="addTokensTiles"]').click(event => {
+            this.submit({preventClose: true}).then(QuickEncounter.runAddOrCreate(event, this.object));
+        });
     }
 
 

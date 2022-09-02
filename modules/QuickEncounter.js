@@ -215,7 +215,9 @@
                 1.0.4k: getEncounterScene should look for Journal Entry instead of Journal Entry Page   
 1-Sep-2022      1.0.4k: Move getEncounterScene() to EncounterNote from QuickEncounter     
                 1.0.4l: More data->document to remove deprecation warnings  
-                createFrom(): Link the Quick Encounter to the JournalEntryPage if available                            
+                createFrom(): Link the Quick Encounter to the JournalEntryPage if available 
+2-Sep-2022      1.0.5a: Support new [Add] button from QE dialog to allow adding tokens/tiles (instead of using the external fist icon on the "open" QE)
+                runAddOrCreate(): Check first if we have a clickQE (the [Add] button in an existnig QE dialog)
 */
 
 
@@ -465,7 +467,7 @@ export class QuickEncounter {
 
     }
 
-    static runAddOrCreate(event) {
+    static runAddOrCreate(event, clickedQuickEncounter) {
         let FRIENDLY_TOKEN_DISPOSITIONS;
         if (QuickEncounter.isFoundryV8Plus) {
             FRIENDLY_TOKEN_DISPOSITIONS = CONST.TOKEN_DISPOSITIONS.FRIENDLY;
@@ -501,33 +503,49 @@ export class QuickEncounter {
             controlledTiles = Array.from(canvas.foreground.controlled);
             controlledTiles = controlledTiles.concat(Array.from(canvas.background.controlled));
         }
-        //0.9.1a: (from ironmonk88) Pass this so we can check for Monk's Enhanced Journal 
-        const candidateJournalEntry = QuickEncounter.findQuickEncounter.call(this); 
-        const quickEncounter = (candidateJournalEntry instanceof QuickEncounter ) ? candidateJournalEntry : null;
 
+        let controlledAssets;
         //v0.6.1 If you have both controlledNonFriendly tokens AND an open Quick Encounter, ask if you want to add to it
         //0.7.0 Add tiles; can't have both simultaneously because you have to switch tools in the Control pallette to select tiles
         if (controlledTokens?.length || controlledTiles?.length) {
-            const controlledAssets = {
+            controlledAssets = {
                 tokens: controlledTokens, 
                 tiles : controlledTiles
             }
-            //Existing Quick Encounter: Ask whether to run, add new assets, or create one from scratch
-            if (quickEncounter && (controlledNonFriendlyTokens?.length || controlledTiles?.length)) {
+        }
+
+        //1.0.5a, If clickedQuickEncounter is set, then just Add any controlled tokens/tiles to it
+        if (clickedQuickEncounter) {
+            if (controlledAssets) {
+                clickedQuickEncounter.add(controlledAssets);
+            } else {
+                //No controlled Assets, so pop-up an alert saying so
+                ui.notifications.warn("Please select some tokens or tiles to add to the Quick Encounter");
+            }
+        } else if (controlledAssets) {
+            //See if the open QE method works
+            //0.9.1a: (from ironmonk88) Pass this so we can check for Monk's Enhanced Journal 
+            const candidateJournalEntry = QuickEncounter.findQuickEncounter.call(this); 
+            const openQuickEncounter = (candidateJournalEntry instanceof QuickEncounter ) ? candidateJournalEntry : null;
+            const openJournalEntry = ((candidateJournalEntry instanceof JournalEntry ) || (candidateJournalEntry instanceof JournalEntryPage))
+                                    ? candidateJournalEntry : null;
+
+                                    //Existing Quick Encounter: Ask whether to run, add new assets, or create one from scratch
+            if (openQuickEncounter) {
                 Dialog3.buttons3({
                     title: game.i18n.localize("QE.AddToQuickEncounter.TITLE"),
                     content: game.i18n.localize("QE.AddToQuickEncounter.CONTENT"),
-                    button1cb: () => {quickEncounter.run(event);},
-                    button2cb: () => {quickEncounter.add(controlledAssets)},
-                    button3cb: () => { QuickEncounter.createFrom(controlledAssets)},
+                    button1cb: () => {activeQuickEncounter.run(event);},
+                    button2cb: () => {activeQuickEncounter.add(controlledAssets)},
+                    button3cb: () => {QuickEncounter.createFrom(controlledAssets)},
                     buttonLabels : ["QE.AddToQuickEncounter.RUN",  "QE.AddToQuickEncounter.ADD",  "QE.AddToQuickEncounter.CREATE"]
                 });
-            } else if (candidateJournalEntry &&  (controlledNonFriendlyTokens?.length || controlledTiles?.length)) {
+            } else if (openJournalEntry) {
                 //Existing Journal Entry, ask if you want to create a Quick Encounter out of it
                 Dialog3.buttons3({
                     title: game.i18n.localize("QE.LinkToQuickEncounter.TITLE"),
                     content: game.i18n.localize("QE.LinkToQuickEncounter.CONTENT"),
-                    button1cb: () => {QuickEncounter.link(candidateJournalEntry,controlledAssets)},
+                    button1cb: () => {QuickEncounter.link(openJournalEntry,controlledAssets)},
                     button2cb: () => {QuickEncounter.createFrom(controlledAssets)},
                     button3cb: null,
                     buttonLabels : ["QE.LinkToQuickEncounter.LINK",  "QE.AddToQuickEncounter.CREATE"]
@@ -546,14 +564,11 @@ export class QuickEncounter {
             } else {
                 QuickEncounter.createFrom(controlledAssets);
             }
-        } else if (quickEncounter) {
-            //Run the open Quick Encounter
-            quickEncounter.run(event);
         } else {
-            //No selected tokens or open Journal Entry => show/reshow the Tutorial
+            //No selected tokens/tiles or open Journal Entry => show/reshow the Tutorial
             QuickEncounter.showTutorialJournalEntry();
         }
-    }
+    }//end static runAddOrCreate()
 
     /* Method 1: createFromTokens
     * Delete the controlled (selected) tokens and record their tokenData in a created Journal Entry
