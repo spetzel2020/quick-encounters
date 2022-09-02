@@ -213,7 +213,9 @@
                 Pass qeJournalEntry to QESheet so it can be passed back for remove()
                 Set journalEntry in qeData (but make sure in serialize to null before serializing the whole JE object into JE)   
                 1.0.4k: getEncounterScene should look for Journal Entry instead of Journal Entry Page   
-1-Sep-2022      1.0.4k: Move getEncounterScene() to EncounterNote from QuickEncounter                                   
+1-Sep-2022      1.0.4k: Move getEncounterScene() to EncounterNote from QuickEncounter     
+                1.0.4l: More data->document to remove deprecation warnings  
+                createFrom(): Link the Quick Encounter to the JournalEntryPage if available                            
 */
 
 
@@ -477,8 +479,16 @@ export class QuickEncounter {
         //Exclude friendly tokens unless you say yes to the dialog
         //Tokens
         const controlledTokens = Array.from(canvas.tokens?.controlled);
-        const controlledNonFriendlyTokens = controlledTokens?.filter(t => t.data?.disposition !== FRIENDLY_TOKEN_DISPOSITIONS );
-        const controlledFriendlyTokens = controlledTokens?.filter(t => t.data?.disposition === FRIENDLY_TOKEN_DISPOSITIONS );
+        let controlledNonFriendlyTokens;
+        let controlledFriendlyTokens;
+        //1.0.4l: .data is deprecated in v10
+        if (QuickEncounter.isFoundryV10) {
+            controlledNonFriendlyTokens = controlledTokens?.filter(t => t.document.disposition !== FRIENDLY_TOKEN_DISPOSITIONS );
+            controlledFriendlyTokens = controlledTokens?.filter(t => t.document.disposition === FRIENDLY_TOKEN_DISPOSITIONS );
+        } else {
+            controlledNonFriendlyTokens = controlledTokens?.filter(t => t.data?.disposition !== FRIENDLY_TOKEN_DISPOSITIONS );
+            controlledFriendlyTokens = controlledTokens?.filter(t => t.data?.disposition === FRIENDLY_TOKEN_DISPOSITIONS );
+        }
 
         //Tiles
         //0.7.0b: Capture controlled tiles (will be one or the other of foreground or background, not both)
@@ -575,6 +585,11 @@ export class QuickEncounter {
         }
         //0.9.2a: Per ironmonk88, activate:false tells Enhanced Journals to not pop up the new JE yet (because there's a sheet render below)
         let journalEntry = await JournalEntry.create(journalData, {activate: false});
+        //1.0.4l: In Foundry v10, we want to make this the first JournalEntryPage
+        if (QuickEncounter.isFoundryV10) {
+            const journalEntryPage0 = journalEntry.pages.values().next().value;
+            if (journalEntryPage0) {journalEntry = journalEntryPage0;}
+        }
 
 //REFACTOR: Individual property setting and order is fragile        
         quickEncounter.serializeIntoJournalEntry(journalEntry);
@@ -619,12 +634,24 @@ export class QuickEncounter {
         if (controlledTokens?.length) {
             //0.6.2: If we don't already have coords, then use the tokens we just added
             //0.7.0d: Set QE coords (where tokens are generated around)
-            if (!this.coords) {this.coords = {x: controlledTokens[0].data.x, y: controlledTokens[0].data.y}}
+            if (!this.coords) {
+                if (QuickEncounter.isFoundryV10) {
+                    this.coords = {x: controlledTokens[0].document.x, y: controlledTokens[0].document.y}
+                } else {
+                    this.coords = {x: controlledTokens[0].data.x, y: controlledTokens[0].data.y}
+                }
+            }
             this.addTokens(controlledTokens);
         }
         if (controlledTiles?.length) {
             //0.7.0d: Set QE coords if not already set
-            if (!this.coords) {this.coords = {x: controlledTiles[0].data.x, y: controlledTiles[0].data.y}}
+            if (!this.coords) {
+                if (QuickEncounter.isFoundryV10) {
+                    this.coords = {x: controlledTiles[0].document.x, y: controlledTiles[0].document.y}
+                } else {
+                    this.coords = {x: controlledTiles[0].data.x, y: controlledTiles[0].data.y}
+                }
+            }
             this.addTiles(controlledTiles);
 
         }

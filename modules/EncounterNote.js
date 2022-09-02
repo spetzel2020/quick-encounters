@@ -35,6 +35,9 @@ Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tra
 1-Sep-2022      1.0.4k: Move getEncounterScene() to EncounterNote from QuickEncounter
                 Check journalEntry to see if we should be looking at parent\
                 Also in mapNoteIsPlaced
+                1.0.4l: place(): Use canvas.stage.hitArea in v10
+                delete(): More deprecation warnings
+                create(): Typo in entryId
 */
 
 //Expand the available list of Note icons
@@ -100,7 +103,7 @@ export class EncounterNote {
         const parentJournalEntry = (journalEntry instanceof JournalEntryPage) ? journalEntry.parent : journalEntry;
         // Create Note data
         const noteData = {
-              entryId: parentJournalEntry.Id,
+              entryId: parentJournalEntry.id,
               x: noteAnchor.x,
               y: noteAnchor.y,
               icon: CONFIG.JournalEntry.noteIcons.Combat,
@@ -129,11 +132,12 @@ export class EncounterNote {
         let matchingNoteIds;
         let numNotesDeleted = 0;
         for (const scene of game.scenes) {
-            const sceneNotes = scene.data.notes;
-            if (QuickEncounter.isFoundryV8Plus) {
-                matchingNoteIds = Array.from(sceneNotes.values()).filter(nd => nd.data.entryId === journalEntry.id).map(note => note.id);
+            if (QuickEncounter.isFoundryV10) {
+                matchingNoteIds = Array.from(scene.notes?.values()).filter(nd => nd.entryId === journalEntry.id).map(note => note.id);
+            } else if (QuickEncounter.isFoundryV8Plus) {
+                matchingNoteIds = Array.from(scene.data.notes.values()).filter(nd => nd.data.entryId === journalEntry.id).map(note => note.id);
             } else {
-                matchingNoteIds = sceneNotes.filter(note => note.entryId === journalEntry.id).map(note => note._id);
+                matchingNoteIds = scene.data.notes.filter(nd => nd.entryId === journalEntry.id).map(note => note._id);
             }
             if (!matchingNoteIds?.length) {continue;}
             //Deletion is triggered by Scene (because that's where the notes are stored)
@@ -198,7 +202,9 @@ export class EncounterNote {
             }
         } else {return;}
         // Validate the final position is in-bounds
-        if (canvas.grid.hitArea.contains(noteAnchor.x, noteAnchor.y) ) {
+        //1.0.4l: Use canvas.stage.hitArea in v10
+        const hitArea = QuickEncounter.isFoundryV10 ? canvas.stage.hitArea : canvas.grid.hitArea;
+        if (hitArea.contains(noteAnchor.x, noteAnchor.y)) {
             // Create a Note; we don't pop-up the Note sheet because we really want this Note to be placed
             //(they can always edit it afterwards)
             qeNote = await EncounterNote.create(quickEncounter, noteAnchor);
