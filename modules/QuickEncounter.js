@@ -860,6 +860,7 @@ export class QuickEncounter {
     }
 
     static extractQuickEncounterFromJEOrEmbedded(journalEntry, htmlElements) {
+        //1.0.4: This should always be called with the correct JE or JEPage, except for when you are dropping a Note (and in that case it's called twice)
         if (!journalEntry) {return null;}
 
         let quickEncounter = QuickEncounter.deserializeFromJournalEntry(journalEntry);
@@ -1218,13 +1219,15 @@ export class QuickEncounter {
                     //0.8.0d: Use new TokenDocument constructor; does it handle token wildcarding? [probably didn't]
                     //0.8.2a: Per foundry.js#40276 use Actor.getTokenData (does handle token wildcarding)
                     //1.0.4b: Per https://github.com/foundryvtt/foundryvtt/issues/7766, getTokenData now returns a TokenDocument directly
-                    const tempTokenData = await actor.getTokenData(tokenData);
+                    let tempTokenData;
                     if (QuickEncounter.isFoundryV10) {
                         //1.0.3b: .data is now merged into the object itself, so we have to strip off the prototype information 
                         //1.0.4b: And tempTokenData is actually a TokenDocument itself
+                        tempTokenData = await actor.getTokenDocument(tokenData);
                         tokenData = tempTokenData;
                         Object.setPrototypeOf(tokenData, {});
                     } else { //Foundry v8 and v9
+                        tempTokenData = await actor.getTokenData(tokenData);
                         tempToken = new TokenDocument(tempTokenData, {actor: actor});
                         //v0.8.3b: Use Object.entries copying to get only the ownProperties (otherwise duplicate() chokes in createTokens())
                         //0.8.3c: Switch to using toObject()

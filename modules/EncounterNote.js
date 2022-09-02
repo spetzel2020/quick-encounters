@@ -38,6 +38,7 @@ Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tra
                 1.0.4l: place(): Use canvas.stage.hitArea in v10
                 delete(): More deprecation warnings
                 create(): Typo in entryId
+                1.0.4m: dropCanvasData Hook: Check first JournalEntryPage for a QE (FIX: Should check all)
 */
 
 //Expand the available list of Note icons
@@ -346,15 +347,21 @@ Hooks.on(`dropCanvasData`, (canvas, data) => {
     //- because it's async and this hook can't be (otherwise it prematurely returns true and creates a preview) use .then chaining
     console.info("Replacing ")
     JournalEntry.fromDropData(data).then(s => {
-            let journalEntry = s;
-            if ( journalEntry.compendium ) {
-                const journalData = game.journal.fromCompendium(journalEntry);
-                journalEntry = JournalEntry.implementation.create(journalData);
+            let parentJournalEntry = s;
+            if ( parentJournalEntry.compendium ) {
+                const journalData = game.journal.fromCompendium(parentJournalEntry);
+                parentJournalEntry = JournalEntry.implementation.create(journalData);
             }
             //Get the world-transformed drop position - fortuantely these have already been placed in (data.x,data.y) by Canvas._onDrop
             const noteAnchor = {x: data?.x, y: data?.y}
 
-            const quickEncounter = QuickEncounter.extractQuickEncounterFromJEOrEmbedded(journalEntry);
+            let quickEncounter = QuickEncounter.extractQuickEncounterFromJEOrEmbedded(parentJournalEntry);
+            if (!quickEncounter && QuickEncounter.isFoundryV10) {
+                //1.0.4m We have to check at least the first JournalEntryPage (we know that we have dropped a Journal Entry)
+                const journalEntryPage = parentJournalEntry.pages?.values().next().value;
+                quickEncounter = QuickEncounter.extractQuickEncounterFromJEOrEmbedded(journalEntryPage);
+            }
+
             if (quickEncounter) {
                 //Confirmed this is a Quick Encounter
                 //If we're checking for Instant Encounters, then pop a dialog
@@ -365,7 +372,7 @@ Hooks.on(`dropCanvasData`, (canvas, data) => {
                 }
             } else {
                 //create a normal Journal Entry Note
-                const noteData = {entryId: journalEntry.id, x: noteAnchor.x, y: noteAnchor.y}
+                const noteData = {entryId: parentJournalEntry.id, x: noteAnchor.x, y: noteAnchor.y}
                 //Another hack - because we don't have event we recover the raw drop location
                 const clientX = (noteAnchor.x * canvas.stage.scale.x) + canvas.notes.worldTransform.tx;
                 const clientY = (noteAnchor.y * canvas.stage.scale.y) + canvas.notes.worldTransform.ty;
