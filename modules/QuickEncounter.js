@@ -218,6 +218,7 @@
                 createFrom(): Link the Quick Encounter to the JournalEntryPage if available 
 2-Sep-2022      1.0.5a: Support new [Add] button from QE dialog to allow adding tokens/tiles (instead of using the external fist icon on the "open" QE)
                 runAddOrCreate(): Check first if we have a clickQE (the [Add] button in an existnig QE dialog)
+14-Sep-2022     1.0.5b: Fixed #107: createTokens() was updating createdTokens[i] to undefined if there were no changes
 */
 
 
@@ -1350,7 +1351,8 @@ export class QuickEncounter {
                 //Ignore errors that happen during this update
                 try {
                     //0.9.1b: Update back to the original data (in case it was changed by TokenMold or other)
-                    createdTokens[i] = await createdTokens[i].update(origCombinedTokensData[i]);
+                    //1.0.5b: If there are no updates then update() returns the (empty) list of changes leaving createdTokens[i] undefined
+                    await createdTokens[i].update(origCombinedTokensData[i]);
                 } catch {}
             }
             //0.9.3d Remember if we should/shouldn't add to Combat Tracker
