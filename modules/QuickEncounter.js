@@ -221,6 +221,7 @@
 14-Sep-2022     1.0.5b: Fixed #107: createTokens() was updating createdTokens[i] to undefined if there were no changes
                 1.0.5c: Fixed #103: Can't Add captured tokens to existing QE: onRenderJournalPageSheet() now serializes the JE QE into JournalEntryPage0
                 if it's not already found; other JEPages are either empty or generated from embedded Actors.
+                1.0.5e: #98 Closing the JE should close all open QEs: closeJournalSheet Hook iterates through #sheets using getPageSheet()
 */
 
 
@@ -605,7 +606,7 @@ export class QuickEncounter {
         let journalEntry = await JournalEntry.create(journalData, {activate: false});
         //1.0.4l: In Foundry v10, we want to make this the first JournalEntryPage
         if (QuickEncounter.isFoundryV10) {
-            const journalEntryPage0 = journalEntry.pages.values().next().value;
+            const journalEntryPage0 = journalEntry.pages?.values()?.next()?.value;
             if (journalEntryPage0) {journalEntry = journalEntryPage0;}
         }
 
@@ -1823,6 +1824,16 @@ Hooks.on('closeJournalSheet', async (journalSheet, html) => {
         journalSheet.qeDialog.close();
         delete journalSheet.qeDialog;
     }
+
+    //v1.0.5e: Close open Journal Page Sheet QEs - for some reason the journalEntryPage.sheet is not updated so we have to use the getPageSheet() method
+    for (let journalEntryPageId of journalEntry.pages?.keys()) {
+        const journalPageSheet = journalSheet.getPageSheet(journalEntryPageId);
+        if (journalPageSheet?.qeDialog) {
+            journalPageSheet.qeDialog.close();
+            delete journalPageSheet.qeDialog;
+        }
+    }
+
     delete journalEntry.clickedNote;
 });
 
