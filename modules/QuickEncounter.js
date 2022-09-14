@@ -219,6 +219,8 @@
 2-Sep-2022      1.0.5a: Support new [Add] button from QE dialog to allow adding tokens/tiles (instead of using the external fist icon on the "open" QE)
                 runAddOrCreate(): Check first if we have a clickQE (the [Add] button in an existnig QE dialog)
 14-Sep-2022     1.0.5b: Fixed #107: createTokens() was updating createdTokens[i] to undefined if there were no changes
+                1.0.5c: Fixed #103: Can't Add captured tokens to existing QE: onRenderJournalPageSheet() now serializes the JE QE into JournalEntryPage0
+                if it's not already found; other JEPages are either empty or generated from embedded Actors.
 */
 
 
@@ -1631,7 +1633,19 @@ export class QuickEncounter {
             //Option 2: Is there an embedded Quick Encounter in the parent Journal Sheet?
             const journalEntry = journalPageSheet?.object?.parent;
             quickEncounter = QuickEncounter.deserializeFromJournalEntry(journalEntry);
+
+            if (quickEncounter) {
+                //v1.0.5c: On-demand migration: If this is JournalPage0 (the default one created from pre-v10), then associate this QE with it
+                const journalEntryPage0 = journalEntry.pages?.values()?.next()?.value;
+                if (journalEntryPage === journalEntryPage0) {
+                    quickEncounter.serializeIntoJournalEntry(journalEntryPage0);
+                } else {
+                    //If this isn't page0, then ignore the QE associated with the JE (this allows us to pick QEs generated from embedded actors)
+                    quickEncounter = null;
+                }
+            }
         }
+
         if (!quickEncounter) {
             //Option 3: Extract a Quick Encounter from embedded Actors
             const header = html[0];
