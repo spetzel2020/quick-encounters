@@ -222,6 +222,9 @@
                 1.0.5c: Fixed #103: Can't Add captured tokens to existing QE: onRenderJournalPageSheet() now serializes the JE QE into JournalEntryPage0
                 if it's not already found; other JEPages are either empty or generated from embedded Actors.
                 1.0.5e: #98 Closing the JE should close all open QEs: closeJournalSheet Hook iterates through #sheets using getPageSheet()
+16-Sep-2022     1.0.5f: #106 Set an isMigratedToV10 flag at the Journal Entry level the first time we push a QE into the JournalEntryPage0,
+                and then ignore any JE-level QE with that flag set.
+                This should mean that when we remove the QE from JournalEntryPage0 it will NOT default back to the JE level
 */
 
 
@@ -327,7 +330,10 @@ export class QuickEncounter {
 
         //quickEncounter will ALWAYS be non-null, but we want to make sure it has real data
         //0.7.0b Check now that either extractedActors or savedTiles is non-null
-        if (!quickEncounter.extractedActors && !quickEncounter.savedTilesData) {quickEncounter = null;}
+        //1.0.5f If this has isMigratedToV10 then it's a JE-level one that's been copied to the JournalEntryPage0
+        if (quickEncounter.isMigratedToV10 || (!quickEncounter.extractedActors && !quickEncounter.savedTilesData)) {
+            quickEncounter = null;
+        }
         return quickEncounter;
     }
     update(newQEData) {
@@ -1632,6 +1638,7 @@ export class QuickEncounter {
 
         if (!quickEncounter) {
             //Option 2: Is there an embedded Quick Encounter in the parent Journal Sheet?
+            //(This won't return one with isMigratedToV10 set)
             const journalEntry = journalPageSheet?.object?.parent;
             quickEncounter = QuickEncounter.deserializeFromJournalEntry(journalEntry);
 
@@ -1640,6 +1647,10 @@ export class QuickEncounter {
                 const journalEntryPage0 = journalEntry.pages?.values()?.next()?.value;
                 if (journalEntryPage === journalEntryPage0) {
                     quickEncounter.serializeIntoJournalEntry(journalEntryPage0);
+                    //1.0.5f: Set isMigratedToV10 on the original JE-level QE so that it won't be read again in Foundry v10
+                    quickEncounter.isMigratedToV10 = true;
+                    quickEncounter.serializeIntoJournalEntry(journalEntry);
+                    delete quickEncounter.isMigratedToV10;  //Don't want to filter out QEs from JournalEntryPages
                 } else {
                     //If this isn't page0, then ignore the QE associated with the JE (this allows us to pick QEs generated from embedded actors)
                     quickEncounter = null;

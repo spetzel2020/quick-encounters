@@ -55,7 +55,7 @@
   "QE.XPtoAward.PERPLAYER": "<br>(Non-player Friendly or Neutral not-included)<br>XP per player: ",
   "QE.UseQuickEncounterDialog.NAME" : "Use new Quick Encounter dialog",
   "QE.UseQuickEncounterDialog.HINT" : "The new Quick Encounter dialog (default in 0.6) pops up next to the Quick Encounter Journal Entry and lets you add or remove actors/tokens and quickly run the Encounter, without having to scroll through the Journal Entry for the actors or Quick Encounter button",
-  "QE.QuickEncounterDialog.INTRO" : "You can adjust the number of Actors to an integer or die roll; the next line shows saved tokens (small icons if left, or checkboxes if deleted), and generated tokens (unchecked).<br>To save more tokens, select them on the Scene and press the Quick Encounter (fist) button. To remove an Actor or Tile, click on its icon.<br><strong>Warning: </strong>Changes you make here do not update the Journal Entry",
+  "QE.QuickEncounterDialog.INTRO" : "You can adjust the number of Actors to an integer or die roll; the next line shows saved tokens (small icons if left, or checkboxes if deleted), and generated tokens (unchecked).<br>To save more tokens, select them on the Scene and press the Add tokens/tiles button. To remove an Actor or Tile, click on its icon.<br><strong>Warning: </strong>Changes you make here do not update the Journal Entry",
   "QE.QuickEncounterDialog.INTRO_COMPENDIUM" : "To edit, place tokens, or run this Quick Encounter, first import the Journal Entry from the Compendium",
   "QE.QuickEncounterDialog.Save.BUTTON" : "Update",
   "QE.QuickEncounterDialog.Run.BUTTON" : "Run QE",
