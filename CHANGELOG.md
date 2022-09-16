@@ -3,7 +3,11 @@
 - Issue #71: Instant Encounters: Drag a Quick Encounter directly from the Journals directory to the Scene to run it!
 
 ### 1.0.5
-- Fixing: [#103](https://github.com/spetzel2020/quick-encounters/issues/103); removed support for clicking "fist" icon for an open QE since there can now be multiple open (with multi-page Journals)
+- Fixed: [#103](https://github.com/spetzel2020/quick-encounters/issues/103); removed support for clicking "fist" icon for an open QE since there can now be multiple open (with multi-page Journals)
+- Fixed: [#98](https://github.com/spetzel2020/quick-encounters/issues/98)
+- Fixed: [#99](https://github.com/spetzel2020/quick-encounters/issues/99)
+- Fixed: [#104](https://github.com/spetzel2020/quick-encounters/issues/104)
+- Fixed: [#106](https://github.com/spetzel2020/quick-encounters/issues/106)
 ### 1.0.4
 - Updated Spanish translation (thanks https://github.com/lozalojo!)
 - Testing with Foundry v10 Testing 1 Release (v10.275) - fatal bugs
