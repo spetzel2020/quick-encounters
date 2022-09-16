@@ -225,6 +225,7 @@
 16-Sep-2022     1.0.5f: #106 Set an isMigratedToV10 flag at the Journal Entry level the first time we push a QE into the JournalEntryPage0,
                 and then ignore any JE-level QE with that flag set.
                 This should mean that when we remove the QE from JournalEntryPage0 it will NOT default back to the JE level
+                1.0.5g: #99  Suppress onRenderJournalPageSheet hook if JournalPageSHeet is being edited (isEditable is set)
 */
 
 
@@ -1624,7 +1625,8 @@ export class QuickEncounter {
     // Hook on renderJournalPageSheet for Foundry v10 multi-page Journals
     static async onRenderJournalPageSheet(journalPageSheet, html) {
         //Should never get into onRenderJournalPageSheet unless v10 but test anyway
-        if (!game.user.isGM || !QuickEncounter.isFoundryV10) {return;}  
+        //1.0.5g: Suppress this hook if this an editor window (because that duplicates the QE, and incorrectly)
+        if (!game.user.isGM || journalPageSheet?.isEditable || !QuickEncounter.isFoundryV10) {return;}  
         /* 1.0.4e: To handle new (Foundry v10) and pre-multi-page Journals we check:
             1. Is there an embedded Quick Encounter in the Journal Page Sheet
             2. Is there an embedded Quick Encounter in the parent Journal Sheet
