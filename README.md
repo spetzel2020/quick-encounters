@@ -3,8 +3,9 @@
 
 # Quick Encounters
 ## New in 1.0!
+* v1.0.5 now working with Foundry v10
+* Bugs fixed: See Release Notes
 * Instant Encounters: Enable the new Setting, then you can drag your Quick Encounter directly from Journals to the Scene and be prompted to run it immediately! Perfect for Random or Wandering Encounters.
-* Basic compatibility with Foundry v10 (not fully tested)
 ## v0.9 
 Requires Foundry 0.8+ or v9; New settings: leave "captured" tokens on the scene (Issue [#54](https://github.com/spetzel2020/quick-encounters/issues/54)), delete all/defeated hostile tokens after combat (Issue [#53](https://github.com/spetzel2020/quick-encounters/issues/53)),  Add "Show Add to Combat Tracker" setting (Issue [#34](https://github.com/spetzel2020/quick-encounters/issues/34))
 
