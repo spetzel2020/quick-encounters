@@ -226,6 +226,7 @@
                 and then ignore any JE-level QE with that flag set.
                 This should mean that when we remove the QE from JournalEntryPage0 it will NOT default back to the JE level
                 1.0.5g: #99  Suppress onRenderJournalPageSheet hook if JournalPageSHeet is being edited (isEditable is set)
+3-Oct-2022      1.0.6a: #109: Referenced JournalEntryPage in Foundry v9
 */
 
 
@@ -234,7 +235,7 @@ import {QESheet} from './QESheet.js';
 
 export const QE = {
     MODULE_NAME : "quick-encounters",
-    MODULE_VERSION : "1.0.5",
+    MODULE_VERSION : "1.0.6",
     TOKENS_FLAG_KEY : "tokens",
     QE_JSON_FLAG_KEY : "quickEncounter"
 }
@@ -538,8 +539,9 @@ export class QuickEncounter {
             //0.9.1a: (from ironmonk88) Pass this so we can check for Monk's Enhanced Journal 
             const candidateJournalEntry = QuickEncounter.findQuickEncounter.call(this); 
             const openQuickEncounter = (candidateJournalEntry instanceof QuickEncounter ) ? candidateJournalEntry : null;
-            const openJournalEntry = ((candidateJournalEntry instanceof JournalEntry ) || (candidateJournalEntry instanceof JournalEntryPage))
-                                    ? candidateJournalEntry : null;
+            const openJournalEntry = (  (candidateJournalEntry instanceof JournalEntry ) || 
+                                        (QuickEncounter.isFoundryV10 && (candidateJournalEntry instanceof JournalEntryPage))
+                                    ) ? candidateJournalEntry : null;
 
                                     //Existing Quick Encounter: Ask whether to run, add new assets, or create one from scratch
             if (openQuickEncounter) {
@@ -1013,8 +1015,13 @@ export class QuickEncounter {
         //- Find the encounter location based on the Note position
         //- Create tokens (or use existing ones if they exist)
         //1.0.4j: Get journalEntry from QE property 
-        //1.0.4k: Use parent (which is what is saved to the map) is this is JournalEntryPage
-        const noteJournalEntry = (this.journalEntry instanceof JournalEntryPage) ? this.journalEntry.parent : this.journalEntry;
+        //1.0.4k: Use parent (which is what is saved to the map) if this is JournalEntryPage
+        let noteJournalEntry;
+        if (QuickEncounter.isFoundryV10 && (this.journalEntry instanceof JournalEntryPage)) {
+            noteJournalEntry = this.journalEntry.parent;
+        } else {
+            noteJournalEntry = this.journalEntry;
+        }
         if (!noteJournalEntry) return;
 
         const extractedActors = this.extractedActors;
