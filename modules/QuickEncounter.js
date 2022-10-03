@@ -1846,11 +1846,14 @@ Hooks.on('closeJournalSheet', async (journalSheet, html) => {
     }
 
     //v1.0.5e: Close open Journal Page Sheet QEs - for some reason the journalEntryPage.sheet is not updated so we have to use the getPageSheet() method
-    for (let journalEntryPageId of journalEntry.pages?.keys()) {
-        const journalPageSheet = journalSheet.getPageSheet(journalEntryPageId);
-        if (journalPageSheet?.qeDialog) {
-            journalPageSheet.qeDialog.close();
-            delete journalPageSheet.qeDialog;
+    //v1.0.7a: Check for isFoundryV10
+    if (QuickEncounter.isFoundryV10) {
+        for (let journalEntryPageId of journalEntry.pages?.keys()) {
+            const journalPageSheet = journalSheet.getPageSheet(journalEntryPageId);
+            if (journalPageSheet?.qeDialog) {
+                journalPageSheet.qeDialog.close();
+                delete journalPageSheet.qeDialog;
+            }
         }
     }
 

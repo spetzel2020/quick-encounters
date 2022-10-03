@@ -39,6 +39,7 @@ Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tra
                 delete(): More deprecation warnings
                 create(): Typo in entryId
                 1.0.4m: dropCanvasData Hook: Check first JournalEntryPage for a QE (FIX: Should check all)
+3-Oct-2022      1.0.7a: Issue #109: Check for FoundryV10 when referencing journalEntryPage or journalEntry.parent                
 */
 
 //Expand the available list of Note icons
@@ -216,7 +217,8 @@ export class EncounterNote {
     static getEncounterScene(journalEntry) {
         if (!journalEntry) {return null;}
         //1.0.4k: Use parent (which is what is saved to the map) is this is JournalEntryPage
-        const parentJournalEntry = (journalEntry instanceof JournalEntryPage) ? journalEntry.parent : journalEntry;
+        //1.0.7a: Check for FoundryV10
+        const parentJournalEntry = (QuickEncounter.isFoundryV10 && (journalEntry instanceof JournalEntryPage)) ? journalEntry.parent : journalEntry;
         //if sceneNote is available, then we're in the Note Scene already
         if (parentJournalEntry.sceneNote) {return game.scenes.viewed;}
         else {          
