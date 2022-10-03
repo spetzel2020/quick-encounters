@@ -3,7 +3,7 @@
 
 # Quick Encounters
 ## New in 1.0!
-* v1.0.5 now working with Foundry v10
+* v1.0.7 now working with Foundry v9 & v10
 * Bugs fixed: See [Release Notes](https://github.com/spetzel2020/quick-encounters/blob/master/CHANGELOG.md)
 * Instant Encounters: Enable the new Setting, then you can drag your Quick Encounter directly from Journals to the Scene and be prompted to run it immediately! Perfect for Random or Wandering Encounters.
 ## v0.9 
@@ -13,7 +13,7 @@ Bugs fixed! [#57](https://github.com/spetzel2020/quick-encounters/issues/57), [#
 (See [Release Notes](https://github.com/spetzel2020/quick-encounters/blob/master/CHANGELOG.md))
 
 * **Author**: Spetzel#0103
-* **Version**: 1.0.6
+* **Version**: 1.0.7
 * **Foundry VTT Compatibility**: 0.8.6-10
 * **System Compatibility (If applicable)**: All; additional features for dnd5e
 * **Translation Support**: en, es (thanks [lozalojo!](https://github.com/lozalojo)), ja (thanks "touge"!), de (thanks @Fallayn#6414), it (thanks [riccisi](https://github.com/riccisi))
