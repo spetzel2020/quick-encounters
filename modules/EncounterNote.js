@@ -39,7 +39,8 @@ Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tra
                 delete(): More deprecation warnings
                 create(): Typo in entryId
                 1.0.4m: dropCanvasData Hook: Check first JournalEntryPage for a QE (FIX: Should check all)
-3-Oct-2022      1.0.7a: Issue #109: Check for FoundryV10 when referencing journalEntryPage or journalEntry.parent                
+3-Oct-2022      1.0.7a: Issue #109: Check for FoundryV10 when referencing journalEntryPage or journalEntry.parent   
+6-Oct-2022      1.0.8a: Issue #112: Further references to JournalEntryPage             
 */
 
 //Expand the available list of Note icons
@@ -101,8 +102,9 @@ export class EncounterNote {
         if (!quickEncounter) {return;}
 
         const journalEntry = quickEncounter.journalEntry;
-        //1.0.4k: Use parent (which is what is saved to the map) is this is JournalEntryPage
-        const parentJournalEntry = (journalEntry instanceof JournalEntryPage) ? journalEntry.parent : journalEntry;
+        //1.0.4k: Use parent (which is what is saved to the map) if this is JournalEntryPage
+        //1.0.7a: Check for FoundryV10
+        const parentJournalEntry = (QuickEncounter.isFoundryV10 && (journalEntry instanceof JournalEntryPage)) ? journalEntry.parent : journalEntry;        
         // Create Note data
         const noteData = {
               entryId: parentJournalEntry.id,
@@ -216,7 +218,7 @@ export class EncounterNote {
 
     static getEncounterScene(journalEntry) {
         if (!journalEntry) {return null;}
-        //1.0.4k: Use parent (which is what is saved to the map) is this is JournalEntryPage
+        //1.0.4k: Use parent (which is what is saved to the map) if this is JournalEntryPage
         //1.0.7a: Check for FoundryV10
         const parentJournalEntry = (QuickEncounter.isFoundryV10 && (journalEntry instanceof JournalEntryPage)) ? journalEntry.parent : journalEntry;
         //if sceneNote is available, then we're in the Note Scene already
@@ -274,8 +276,9 @@ export class EncounterNote {
     static async mapNoteIsPlaced(qeScene, journalEntry) {
         //Get the scene for this Quick Encounter (can't use sceneNote if we're in the wrong scene)
         if (!qeScene || !journalEntry) {return false;}
-        //1.0.4k: Use parent (which is what is saved to the map) is this is JournalEntryPage
-        const parentJournalEntry = (journalEntry instanceof JournalEntryPage) ? journalEntry.parent : journalEntry;
+        //1.0.4k: Use parent (which is what is saved to the map) if this is JournalEntryPage
+        //1.0.7a: Check for FoundryV10
+        const parentJournalEntry = (QuickEncounter.isFoundryV10 && (journalEntry instanceof JournalEntryPage)) ? journalEntry.parent : journalEntry;
         //If we're viewing the relevant scene and the map note was placed, then good
         if (parentJournalEntry.sceneNote) {return true;}
 
