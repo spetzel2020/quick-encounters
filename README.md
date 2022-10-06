@@ -6,7 +6,7 @@
 
 
 ## 1.0
-* v1.0.7 now working with Foundry v9 & v10
+* v1.0.8 now working with Foundry v9 & v10
 * Bugs fixed: See [Release Notes](https://github.com/spetzel2020/quick-encounters/blob/master/CHANGELOG.md)
 * Instant Encounters: Enable the new Setting, then you can drag your Quick Encounter directly from Journals to the Scene and be prompted to run it immediately! Perfect for Random or Wandering Encounters.
 
