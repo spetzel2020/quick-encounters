@@ -1,4 +1,6 @@
 # RELEASE NOTES
+## 1.1
+
 ## 1.0
 - Issue #71: Instant Encounters: Drag a Quick Encounter directly from the Journals directory to the Scene to run it!
 ### 1.0.8
