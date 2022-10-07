@@ -235,7 +235,7 @@ import {QESheet} from './QESheet.js';
 
 export const QE = {
     MODULE_NAME : "quick-encounters",
-    MODULE_VERSION : "1.0.6",
+    MODULE_VERSION : "1.0.8",
     TOKENS_FLAG_KEY : "tokens",
     QE_JSON_FLAG_KEY : "quickEncounter"
 }
