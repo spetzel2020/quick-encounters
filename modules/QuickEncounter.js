@@ -227,6 +227,10 @@
                 This should mean that when we remove the QE from JournalEntryPage0 it will NOT default back to the JE level
                 1.0.5g: #99  Suppress onRenderJournalPageSheet hook if JournalPageSHeet is being edited (isEditable is set)
 3-Oct-2022      1.0.6a: #109: Referenced JournalEntryPage in Foundry v9
+11-Oct-2022     1.1.0b: #108: Simplify Show QE behavior for Foundry V10 (Show button always visible; use Close to temporarily close a QE)
+                getJournalSheetHeaderButtons(): In FoundryV10 always add ShowQE button; Show button opens all QEs with displayed JournalEntryPages
+                displayQEDialog(): Honor showQEAutomatically setting but no per QE Hide ability
+
 */
 
 
@@ -1587,7 +1591,8 @@ export class QuickEncounter {
     static async getJournalSheetHeaderButtons(journalSheet, buttons) {
         //0.7.3: Add a Show QE button if this JE has a Quick Encounter and showQEAutomatically is false OR the QE has been hidden
         const quickEncounter = QuickEncounter.extractQuickEncounter(journalSheet);
-        const displayShowQEButton = !game.settings.get(QE.MODULE_NAME,"showQEAutomatically") || quickEncounter?.hideQE;
+        //1.1.0b: Issue #108 (https://github.com/spetzel2020/quick-encounters/issues/108) - hack solution to always show the Show button in Foundry 10
+        const displayShowQEButton = QuickEncounter.isFoundryV10 || !game.settings.get(QE.MODULE_NAME,"showQEAutomatically") || quickEncounter?.hideQE;
         //If this is an inferred QE (from the presence of Actors), quickEncounter=null because the the journalSheet HTML hasn't been built yet
         if (displayShowQEButton) {
             buttons.unshift({
@@ -1595,13 +1600,27 @@ export class QuickEncounter {
                 class: "showQE",
                 icon: "fas fa-fist-raised",
                 onclick: async ev => {
-                    //re-extract the Quick Encounter because the HTML is now available
-                    const qe2 = QuickEncounter.extractQuickEncounter(journalSheet);
-                    //Toggle the default to always show from now on (otherwise you have no way of turning it on again)
-                    if (qe2) {
-                        qe2.hideQE = false;
-                        qe2.serializeIntoJournalEntry();
-                        journalSheet.qeDialog?.render(true);
+                    // 1.1.0b: If Foundry v10 then show all QEs 
+                    if (QuickEncounter.isFoundryV10) {
+                        for (let journalEntryPageId of journalSheet.object?.pages?.keys()) {
+                            const journalPageSheet = journalSheet.getPageSheet(journalEntryPageId);
+                            //Also reset the hide toggle (because otherwise this will never show automatically)
+                            const qe2 = QuickEncounter.extractQuickEncounter(journalPageSheet);
+                            if (qe2 && journalPageSheet?.qeDialog) {
+                                qe2.hideQE = null;
+                                qe2.serializeIntoJournalEntry();
+                                journalPageSheet.qeDialog.render(true);
+                            }
+                        }
+                    } else {
+                        //re-extract the Quick Encounter because the HTML is now available
+                        const qe2 = QuickEncounter.extractQuickEncounter(journalSheet);
+                        //Toggle the default to always show from now on (otherwise you have no way of turning it on again)
+                        if (qe2) {
+                            qe2.hideQE = false;
+                            qe2.serializeIntoJournalEntry();
+                            journalSheet.qeDialog?.render(true);
+                        }
                     }
                 }
             });
@@ -1681,7 +1700,6 @@ export class QuickEncounter {
 
     }
 
-    //If you find a QuickEncounter, then adjust the JE sheet accordingly and pop the QE dialog
     displayQEDialog(journalSheet, html) {
         const qeJournalEntry = journalSheet.object;
         //0.6.13: If we opened this from a Scene Note, then remember that (because you could move off to another Note)
@@ -1718,7 +1736,13 @@ export class QuickEncounter {
         }
 
         //0.7.3 OPen the QE automatically (default) in general unless you have hidden it
-        const showQEDialog =  ((this.hideQE === null) && game.settings.get(QE.MODULE_NAME, "showQEAutomatically")) || !(this.hideQE ?? true);
+        let showQEDialog;
+        if (QuickEncounter.isFoundryV10) {
+            //1.1.0b: No per QE Hide ability in Foundry V10
+            showQEDialog = game.settings.get(QE.MODULE_NAME, "showQEAutomatically");
+        } else {
+            showQEDialog =  ((this.hideQE === null) && game.settings.get(QE.MODULE_NAME, "showQEAutomatically")) || !(this.hideQE ?? true);
+        }
         if (showQEDialog || qeJournalEntry?.showQEOnce) {
             delete qeJournalEntry.showQEOnce;
             qeDialog.render(true);

@@ -37,7 +37,8 @@ Reused as EncounterCompanionSheet
 29-Aug-2022     1.0.4g: Override the title to the name of the Journal Entry or Journal Page Entry (passed in options)
                 Weren't calling super() correctly; this.object stores the related object for which is the sheet
 31-Aug-2022     1.0.4j: constructor: receive options.qeJournalEntry so we don't need to look it up using journalEntryId (which is trickier now that we have multi-page journals) 
-2-Sep-2022      1.0.5a: activateListeners(): Listen for new [Add] button which allows adding selected tokens or tiles to this QE               
+2-Sep-2022      1.0.5a: activateListeners(): Listen for new [Add] button which allows adding selected tokens or tiles to this QE     
+11-Oct-2022     1.1.0b: _getHeaderButtons(): Don't have a Hide button in Foundry v10 and leave the button saying Close (as a replacement) - see Issue #108 for why
 */
 
 
@@ -90,6 +91,9 @@ export class QESheet extends FormApplication {
     _getHeaderButtons() {
         let buttons = super._getHeaderButtons();
         let closeButtonIndex = buttons.findIndex(button => button.label === "Close");
+        // 1.1.0b: Don't have a Hide button in Foundry v10 and leave the button saying Close (as a replacement) - see Issue #108 for why
+        if (QuickEncounter.isFoundryV10) {return buttons;}
+
         //0.8.1: Issue #42: closeButtonIndex==-1 if not found
         if ((closeButtonIndex ?? -1) !== -1) {
             buttons[closeButtonIndex].label = "Cancel";
