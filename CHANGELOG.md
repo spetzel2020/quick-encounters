@@ -1,9 +1,9 @@
 # RELEASE NOTES
-## 1.1
+## 1.1.0
 - Fixed [#94](https://github.com/spetzel2020/quick-encounters/issues/94): Add a default folder for new QEs
 - Fixed [#108](https://github.com/spetzel2020/quick-encounters/issues/108): Removed Hide button in QE because of multi-page Journals and always add Show button (for when you have Show QE Automatically set false)
 - Fixed [#114](https://github.com/spetzel2020/quick-encounters/issues/114): QE dialog didn't appear when you created a new QE
-- Fixing #116: Compendium entries aren't working
+- Fixed #116: Compendium entries aren't working
 ## 1.0
 - Issue #71: Instant Encounters: Drag a Quick Encounter directly from the Journals directory to the Scene to run it!
 ### 1.0.8
