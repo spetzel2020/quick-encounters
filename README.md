@@ -3,7 +3,8 @@
 
 # Quick Encounters
 ## 1.1
-
+* New features: Default folder for Quick Encounters (Issue #94)
+* Bugs fixed: See [Release Notes](https://github.com/spetzel2020/quick-encounters/blob/master/CHANGELOG.md)
 
 ## 1.0
 * v1.0.8 now working with Foundry v9 & v10

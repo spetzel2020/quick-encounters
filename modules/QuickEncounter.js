@@ -232,6 +232,7 @@
                 displayQEDialog(): Honor showQEAutomatically setting but no per QE Hide ability
 19-Oct-2022     1.1.0c: #114: Was attempting to pop up a Journal Sheet for a Journal Entry Page  
                 1.1.0d: #94: Specific a default folder (defaultQEFolder) in Settings (which is looked up at QE creation time)              
+20-Oct-2022     1.1.0e: #116:QEs with embedded Compendium Entries don't run - strip off extraneous info in getActor()
 
 */
 
@@ -1221,7 +1222,9 @@ export class QuickEncounter {
                 const actorPack = game.packs.get(eActor.dataPackName);
                 if (!actorPack) {return null;}
                 //Import this actor because otherwise you won't be able to see character sheet etc.
-                actor = await game.actors.importFromCompendium(actorPack, eActor.actorID, {}, {renderSheet: false});
+                //1.1.0e: In Foundry v10 may need to strip off prepended Compendium name
+                const strippedActorId = (eActor.actorID).split(".").pop();
+                actor = await game.actors.importFromCompendium(actorPack,strippedActorId, {}, {renderSheet: false});
             }
         } else {
             actor = game.actors.get(eActor.actorID);

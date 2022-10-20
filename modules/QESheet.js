@@ -39,6 +39,7 @@ Reused as EncounterCompanionSheet
 31-Aug-2022     1.0.4j: constructor: receive options.qeJournalEntry so we don't need to look it up using journalEntryId (which is trickier now that we have multi-page journals) 
 2-Sep-2022      1.0.5a: activateListeners(): Listen for new [Add] button which allows adding selected tokens or tiles to this QE     
 11-Oct-2022     1.1.0b: _getHeaderButtons(): Don't have a Hide button in Foundry v10 and leave the button saying Close (as a replacement) - see Issue #108 for why
+20-Oct-2022     1.1.0e: Issue #116: QEs with embedded Compendium Entries don't run (added split off of trailing ID)
 */
 
 
@@ -183,7 +184,9 @@ export class QESheet extends FormApplication {
                     //0.8.0a: Block on getting the name and image information, fortunately from the index
                     //FIXME: Probably could be improved by getting all the indexes in one group so not doing this multiple times for the same index
                     const index = await pack.getIndex();
-                    const entry = index.find(e => e._id === combatant.actorId);
+                    //1.1.0e: In Foundry v10 may need to strip off prepended Compendium name
+                    const strippedActorId = (combatant.actorId).split(".").pop();
+                    const entry = index.find(e => e._id === strippedActorId);
                     combatant.img = entry?.img || CONST.DEFAULT_TOKEN;
                     combatant.actorName = entry?.name;
                 } else {      //regular actor
