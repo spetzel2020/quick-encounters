@@ -86,5 +86,7 @@
   "QE.CheckInstantEncounter.TITLE" : "Run Instant Encounter?",
   "QE.CheckInstantEncounter.CONTENT" : "Run the Quick Encounter immediately (Instant Encounter), or create a Quick Encounter Note on the Scene (previous default)?",
   "QE.CheckInstantEncounter.BUTTON.RUN_INSTANT" : "Run Instant Encounter",
-  "QE.CheckInstantEncounter.BUTTON.CREATE_QE": "Create QE Note"
+  "QE.CheckInstantEncounter.BUTTON.CREATE_QE": "Create QE Note",
+  "QE.Setting.DefaultQEFolder.NAME" : "Default QE Folder",
+  "QE.Setting.DefaultQEFolder.HINT" : "The name of an existing Journal folder in which new Quick Encounters will be created. Default: blank (New QEs will be created at the top level of Journals)"
   }

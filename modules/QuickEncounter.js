@@ -230,7 +230,8 @@
 11-Oct-2022     1.1.0b: #108: Simplify Show QE behavior for Foundry V10 (Show button always visible; use Close to temporarily close a QE)
                 getJournalSheetHeaderButtons(): In FoundryV10 always add ShowQE button; Show button opens all QEs with displayed JournalEntryPages
                 displayQEDialog(): Honor showQEAutomatically setting but no per QE Hide ability
-19-Oct-2022     1.1.0c: #114: Was attempting to pop up a Journal Sheet for a Journal Entry Page                
+19-Oct-2022     1.1.0c: #114: Was attempting to pop up a Journal Sheet for a Journal Entry Page  
+                1.1.0d: #94: Specific a default folder (defaultQEFolder) in Settings (which is looked up at QE creation time)              
 
 */
 
@@ -392,6 +393,14 @@ export class QuickEncounter {
             config: true,
             default: true,
             type: Boolean
+        });
+        game.settings.register(QE.MODULE_NAME, "defaultQEFolder", {
+            name: "QE.Setting.DefaultQEFolder.NAME",
+            hint: "QE.Setting.DefaultQEFolder.HINT",
+            scope: "world",
+            config: true,
+            default: null,
+            type: String
         });
        game.settings.register(QE.MODULE_NAME, "displayXPAfterCombat", {
             name: "QE.DisplayXPAfterCombat.NAME",
@@ -609,8 +618,14 @@ export class QuickEncounter {
             }
         }
         content += game.i18n.localize("QE.Instructions.CONTENT2");
+        //1.1.0d: Use a default folder if specified - show warning if a name is specified but not found
+        const defaultFolderName = game.settings.get(QE.MODULE_NAME, "defaultQEFolder");
+        const defaultFolder = game.folders?.getName(defaultFolderName);
+        if (defaultFolderName && !defaultFolder) {
+            ui.notifications.warn(`Folder "${defaultFolderName}" was not found; please create it first`);
+        }
         const journalData = {
-            folder: null,
+            folder: defaultFolder?.id,
             name:  `Quick Encounter: ${game.scenes?.viewed?.name}`,
             content: content,
             type: "encounter",
