@@ -230,6 +230,7 @@
 11-Oct-2022     1.1.0b: #108: Simplify Show QE behavior for Foundry V10 (Show button always visible; use Close to temporarily close a QE)
                 getJournalSheetHeaderButtons(): In FoundryV10 always add ShowQE button; Show button opens all QEs with displayed JournalEntryPages
                 displayQEDialog(): Honor showQEAutomatically setting but no per QE Hide ability
+19-Oct-2022     1.1.0c: #114: Was attempting to pop up a Journal Sheet for a Journal Entry Page                
 
 */
 
@@ -617,23 +618,25 @@ export class QuickEncounter {
         }
         //0.9.2a: Per ironmonk88, activate:false tells Enhanced Journals to not pop up the new JE yet (because there's a sheet render below)
         let journalEntry = await JournalEntry.create(journalData, {activate: false});
+        let qeJournalEntry = journalEntry; //the Journal Entry or JournalEntryPage we will store the QE with
         //1.0.4l: In Foundry v10, we want to make this the first JournalEntryPage
         if (QuickEncounter.isFoundryV10) {
             const journalEntryPage0 = journalEntry.pages?.values()?.next()?.value;
-            if (journalEntryPage0) {journalEntry = journalEntryPage0;}
+            if (journalEntryPage0) {qeJournalEntry = journalEntryPage0;}
         }
 
 //REFACTOR: Individual property setting and order is fragile        
-        quickEncounter.serializeIntoJournalEntry(journalEntry);
+        quickEncounter.serializeIntoJournalEntry(qeJournalEntry);
         //And create the Map Note - needs journalEntry.id to be set already
         const newNote = await EncounterNote.place(quickEncounter);
         //0.6.13: Record the Map Note data because we will use it to distinguish between the original and copied Scene Notes
         quickEncounter.originalNoteData = newNote?.data;
         
         //v0.6.1k Update the created/changed QuickEncounter into the Journal Entry
-        quickEncounter.serializeIntoJournalEntry(journalEntry);
+        quickEncounter.serializeIntoJournalEntry(qeJournalEntry);
 
         //v0.6.3: Show the Journal Sheet last so it can see the Map Note
+        //v1.1.0c: Create a Journal Sheet from the parent Journal Entry (which will show the sub-page if there is one)
         const ejSheet = new JournalSheet(journalEntry);
         ejSheet.render(true);   //0.6.1: This will also pop-open a QE dialog if you have that setting
     }
