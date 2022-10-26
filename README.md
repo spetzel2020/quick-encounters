@@ -38,7 +38,7 @@ Quick Encounters works well with [TokenMold](https://github.com/Moerill/token-mo
 # Using Quick Encounters
 ## Method 1 (like Fantasy Grounds "Encounters")
 1. Drag your Hostile tokens (or now Tiles!) to the map and select them
-2. Then click the Quick Encounters button (in the Basic Controls palette on the left); a new Journal Entry will be created with your tokens/tiles and their positions saved in it
+2. Then click the Quick Encounters button (in the Token Controls palette on the left); a new Journal Entry will be created with your tokens/tiles and their positions saved in it
 3. Close the Journal Entry and you will see a new Quick Encounter Map Note on the Scene; double-right-click to edit the icon, color, etc.
 4. To run your Quick Encounter, simply double-click the map Note and click the "Add to Combat Tracker" button; all your saved tokens/tiles will be positioned on the map and added to the Combat Tracker, ready to fight!
 
@@ -60,8 +60,8 @@ If you have a licensed module with existing Journal Entries you probably don't w
 3. Click the Quick Encounter button and you will be asked if you want to create a new Encounter (Method 1) or add the tokens to this Journal Entry
 4. To run the Encounter later, open the Journal Entry and use the Run Quick Encounter button in the Quick Encounter Dialog
 
-## v0.7: Working with Tokens and Tiles
-If you have BOTH Tokens and Tiles you want in your Quick Encounter, create the Quick Encounter with the tokens (and of the above methods). Leave the Quick Encounter open and switch to the Tiles menu (left side-bar). Place and select your tokens and click the Quick Encounter button to add the tiles to the open Quick Encounter.
+## Working with Tokens and Tiles
+If you have BOTH Tokens and Tiles you want in your Quick Encounter, create the Quick Encounter with the tokens (and one of the above methods). Leave the Quick Encounter open and switch to the Tile Controls menu (left side-bar). Place and select your tokens and click the Quick Encounter button to add the tiles to the open Quick Encounter.
 
 Coming soon: Drag-and-drop for tokens, tiles, and other stuff!
 
