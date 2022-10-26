@@ -233,7 +233,7 @@
 19-Oct-2022     1.1.0c: #114: Was attempting to pop up a Journal Sheet for a Journal Entry Page  
                 1.1.0d: #94: Specific a default folder (defaultQEFolder) in Settings (which is looked up at QE creation time)              
 20-Oct-2022     1.1.0e: #116:QEs with embedded Compendium Entries don't run - strip off extraneous info in getActor()
-
+25-Oct-2022     1.1.1a: #117: Add Missing i18n tags
 */
 
 
@@ -242,7 +242,7 @@ import {QESheet} from './QESheet.js';
 
 export const QE = {
     MODULE_NAME : "quick-encounters",
-    MODULE_VERSION : "1.1.0",
+    MODULE_VERSION : "1.1.1",
     TOKENS_FLAG_KEY : "tokens",
     QE_JSON_FLAG_KEY : "quickEncounter"
 }
@@ -547,7 +547,7 @@ export class QuickEncounter {
                 clickedQuickEncounter.add(controlledAssets);
             } else {
                 //No controlled Assets, so pop-up an alert saying so
-                ui.notifications.warn("Please select some tokens or tiles to add to the Quick Encounter");
+                ui.notifications.warn(game.i18n.localize("QE.Notification.SelectTokensOrTiles.WARN"));
             }
         } else if (controlledAssets) {
             //See if the open QE method works
@@ -558,13 +558,13 @@ export class QuickEncounter {
                                         (QuickEncounter.isFoundryV10 && (candidateJournalEntry instanceof JournalEntryPage))
                                     ) ? candidateJournalEntry : null;
 
-                                    //Existing Quick Encounter: Ask whether to run, add new assets, or create one from scratch
+            //Existing Quick Encounter: Ask whether to run, add new assets, or create one from scratch
             if (openQuickEncounter) {
                 Dialog3.buttons3({
                     title: game.i18n.localize("QE.AddToQuickEncounter.TITLE"),
                     content: game.i18n.localize("QE.AddToQuickEncounter.CONTENT"),
-                    button1cb: () => {activeQuickEncounter.run(event);},
-                    button2cb: () => {activeQuickEncounter.add(controlledAssets)},
+                    button1cb: () => {openQuickEncounter.run(event);},
+                    button2cb: () => {openQuickEncounter.add(controlledAssets)},
                     button3cb: () => {QuickEncounter.createFrom(controlledAssets)},
                     buttonLabels : ["QE.AddToQuickEncounter.RUN",  "QE.AddToQuickEncounter.ADD",  "QE.AddToQuickEncounter.CREATE"]
                 });
@@ -623,7 +623,7 @@ export class QuickEncounter {
         const defaultFolderName = game.settings.get(QE.MODULE_NAME, "defaultQEFolder");
         const defaultFolder = game.folders?.getName(defaultFolderName);
         if (defaultFolderName && !defaultFolder) {
-            ui.notifications.warn(`Folder "${defaultFolderName}" was not found; please create it first`);
+            ui.notifications.warn(game.i18n.format("QE.Notification.FolderNotFound.WARN",{defaultFolderName : defaultFolderName}));
         }
         const journalData = {
             folder: defaultFolder?.id,
