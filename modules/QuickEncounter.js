@@ -234,6 +234,7 @@
                 1.1.0d: #94: Specific a default folder (defaultQEFolder) in Settings (which is looked up at QE creation time)              
 20-Oct-2022     1.1.0e: #116:QEs with embedded Compendium Entries don't run - strip off extraneous info in getActor()
 25-Oct-2022     1.1.1a: #117: Add Missing i18n tags
+31-Oct-2022     1.1.1b: #40: [Suggestion/Request] Work with roll tables - Partial: Extracts rolltables (although this will generate QEs for any rolltable in a JE)
 */
 
 
@@ -930,29 +931,35 @@ export class QuickEncounter {
         //1.0.4c: If journalEntry is actually a JournalEntryPage, then content is stored differently
         const computedHtmlElements = htmlElements ?? journalEntry.sheet.element;
 
-        const extractedActors = QuickEncounter.extractActors(computedHtmlElements);
+        //v1.1.1b Extract RollTables as well (note these are not yet stored in the QuickEncounter, so if you modify the QE at all they will not be retained )
+        const {extractedActors, extractedRollTables} = QuickEncounter.extractFromEmbedded(computedHtmlElements);
         const savedTokensData =  journalEntry.getFlag(QE.MODULE_NAME, QE.TOKENS_FLAG_KEY);
         //v0.6.1: Backwards compatibility - set the isSavedToken flag
         savedTokensData?.forEach(td => {td.isSavedToken = true;});
 
         //Minimum Quick Encounter has a Journal Entry, and tokens or actors (or 0.6 Compendium which turns into Actors)
         //If there isn't a map Note we may need to switch scenes
-        if ((extractedActors && extractedActors.length) || (savedTokensData && savedTokensData.length)) {
+        if ((extractedActors && extractedActors.length) || (savedTokensData && savedTokensData.length) || (extractedRollTables && extractedRollTables.length)) {
             const qeData = {
                 qeVersion : 0.5,
                 journalEntry : journalEntry,        //1.0.4j: Preparatory to removing journalEntryId (could be JE or JE Page)
                 journalEntryId : journalEntry.id,
                 extractedActors : extractedActors,
-                savedTokensData : savedTokensData
+                savedTokensData : savedTokensData,
+                extractedRollTables : extractedRollTables
             }
             quickEncounter = new QuickEncounter(qeData);
         }
         return quickEncounter;
     }
 
-    static extractActors(html) {
+    static extractFromEmbedded(html) {
         const ACTOR = "Actor";
         const ACTOR_PERIOD = "Actor.";
+        //1.1.1c Extract Rolltable; we would still need to filter in only those that referenced Actors
+        const ROLLTABLE = "RollTable";
+        const ROLLTABLE_PERIOD = "RollTable.";
+
         //1.0.3a: Foundry v10 has changed the class (to content-link) and attributes used
         let searchTerms = {
             class : ".entity-link",
@@ -967,45 +974,49 @@ export class QuickEncounter {
             }
         }
 
-        const entityLinks = html.find(searchTerms.class);
-        if (!entityLinks || !entityLinks.length) {return null;}
-
         const extractedActors = [];
-        const intReg = "([0-9]+)[^0-9]*$"; //Matches last "number followed by non-number at the end of a string"
+        //1.1.1b Extract Rolltables
+        const extractedRollTables = [];
+        const INTREG = "([0-9]+)[^0-9]*$"; //Matches last "number followed by non-number at the end of a string"
 
+        const entityLinks = html.find(searchTerms.class);
+        if (!entityLinks || !entityLinks.length) {return {extractedActors, extractedRollTables};}
         entityLinks.each((i, el) => {
             const element = $(el);
             const dataEntity = element.attr(searchTerms.dataType);
             let dataID = element.attr(searchTerms.dataID);
-            //1.0.4d: FOr Foundry v10 the new UUID format is "Actor.xxxx" but we are still doing just actor lookup later (including for backward compatibility)
-            dataID = dataID.replace(ACTOR_PERIOD, ""); //remove Actor.
+            const dataName = element.text();
+
+            //1.1.1b Move extraction of multiplier here so it can be used in both Actor and Rolltable
+            const prevSibling = element[0].previousSibling;
+            let multiplier = 1;
+            //v0.6 Check for a die roll entry
+            if (prevSibling) {
+                if (prevSibling.classList && prevSibling.classList.contains("inline-roll")) {
+                    //Try to get it from the data-formula attribute
+                    try {
+                        multiplier = prevSibling.attributes["data-formula"].value;
+                        if (!multiplier) {multiplier = 1;}
+                    } catch {
+                        //Otherwise try to parse it out
+                        multiplier = prevSibling.textContent.match(dieRollReg);
+                        multiplier = multiplier? multiplier[0] : 1;
+                    }
+                } else {
+                    const possibleInts = prevSibling.textContent.match(INTREG);
+                    multiplier = parseInt(possibleInts ? possibleInts[0] : "1",10);
+                }
+            }
 
             //0.6 If it's a Compendium we just have a data.pack attribute
             const dataPackName = element.attr("data-pack"); //Not used if Actor
             const dataLookup = element.attr("data-lookup");
             //Get the dataPack entity type (has to be Actor)
             const dataPack = game.packs.get(dataPackName);
+
             if ((dataEntity === ACTOR) || (dataPack && (dataPack.documentName === ACTOR))) {
-                const dataName = element.text();
-                const prevSibling = element[0].previousSibling;
-                let multiplier = 1;
-                //v0.6 Check for a die roll entry
-                if (prevSibling) {
-                    if (prevSibling.classList && prevSibling.classList.contains("inline-roll")) {
-                        //Try to get it from the data-formula attribute
-                        try {
-                            multiplier = prevSibling.attributes["data-formula"].value;
-                            if (!multiplier) {multiplier = 1;}
-                        } catch {
-                            //Otherwise try to parse it out
-                            multiplier = prevSibling.textContent.match(dieRollReg);
-                            multiplier = multiplier? multiplier[0] : 1;
-                        }
-                    } else {
-                        const possibleInts = prevSibling.textContent.match(intReg);
-                        multiplier = parseInt(possibleInts ? possibleInts[0] : "1",10);
-                    }
-                }
+                //1.0.4d: FOr Foundry v10 the new UUID format is "Actor.xxxx" but we are still doing just actor lookup later (including for backward compatibility)
+                dataID = dataID.replace(ACTOR_PERIOD, ""); //remove Actor.
 
                 //If this is a Compendium, then that may use either data-lookup or data-id depending on the index
                 //Although in Foundry 0.7.4 I can't find _replaceCompendiumLink any more
@@ -1015,10 +1026,17 @@ export class QuickEncounter {
                     actorID : dataID ? dataID : dataLookup,           //If Compendium sometimes this is the reference
                     name : dataName
                 });
+            } else if ((dataEntity === ROLLTABLE)) {
+                dataID = dataID.replace(ROLLTABLE_PERIOD, ""); //remove Rolltable. (is this necessary since we are not trying to be backward compatible)
+                extractedRollTables.push({
+                    numActors : multiplier ? multiplier : 1,    //applied to each Actor in the RollTable
+                    rollTableId : dataID,
+                    name: dataName
+                })
             }
         });
 
-        return extractedActors;
+        return {extractedActors, extractedRollTables};
     }
 
 
