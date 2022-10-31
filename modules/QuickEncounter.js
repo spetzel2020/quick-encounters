@@ -235,6 +235,7 @@
 20-Oct-2022     1.1.0e: #116:QEs with embedded Compendium Entries don't run - strip off extraneous info in getActor()
 25-Oct-2022     1.1.1a: #117: Add Missing i18n tags
 31-Oct-2022     1.1.1b: #40: [Suggestion/Request] Work with roll tables - Partial: Extracts rolltables (although this will generate QEs for any rolltable in a JE)
+                1.1.1c: #40: Add yet another Setting to not look for Rolltables unless wanted
 */
 
 
@@ -444,6 +445,15 @@ export class QuickEncounter {
         game.settings.register(QE.MODULE_NAME, "checkForInstantEncounter", {
             name: "QE.Setting.CheckInstantEncounter.NAME",
             hint: "QE.Setting.CheckInstantEncounter.HINT",
+            scope: "world",
+            config: true,
+            default: false,
+            type: Boolean
+        });
+        //v1.1.1 Extract Actor RollTables into QEs
+        game.settings.register(QE.MODULE_NAME, "extractActorRollTables", {
+            name: "QE.Setting.ExtractActorRollTables.NAME",
+            hint: "QE.Setting.ExtractActorRollTables.HINT",
             scope: "world",
             config: true,
             default: false,
@@ -959,6 +969,7 @@ export class QuickEncounter {
         //1.1.1c Extract Rolltable; we would still need to filter in only those that referenced Actors
         const ROLLTABLE = "RollTable";
         const ROLLTABLE_PERIOD = "RollTable.";
+        const extractActorRollTables = game.settings.get(QE.MODULE_NAME, "extractActorRollTables");
 
         //1.0.3a: Foundry v10 has changed the class (to content-link) and attributes used
         let searchTerms = {
@@ -1026,7 +1037,7 @@ export class QuickEncounter {
                     actorID : dataID ? dataID : dataLookup,           //If Compendium sometimes this is the reference
                     name : dataName
                 });
-            } else if ((dataEntity === ROLLTABLE)) {
+            } else if (extractActorRollTables && (dataEntity === ROLLTABLE)) {
                 dataID = dataID.replace(ROLLTABLE_PERIOD, ""); //remove Rolltable. (is this necessary since we are not trying to be backward compatible)
                 extractedRollTables.push({
                     numActors : multiplier ? multiplier : 1,    //applied to each Actor in the RollTable

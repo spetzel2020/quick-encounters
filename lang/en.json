@@ -89,6 +89,8 @@
   "QE.CheckInstantEncounter.BUTTON.CREATE_QE": "Create QE Note",
   "QE.Setting.DefaultQEFolder.NAME" : "Default QE Folder",
   "QE.Setting.DefaultQEFolder.HINT" : "The name of an existing Journal folder in which new Quick Encounters will be created. Default: blank (New QEs will be created at the top level of Journals)",
+  "QE.Setting.ExtractActorRollTables.NAME" : "Extract Actor RollTables",
+  "QE.Setting.ExtractActorRollTables.HINT" : "Create a Quick Encounter from embedded Actor RollTables in a Journal Entry. When you run the QE, Quick Encounters uses the multiplier and the RollTable to generate one or more Actors to add to the Encounter",
   "QE.Notification.SelectTokensOrTiles.WARN" : "Please select some tokens or tiles to add to the Quick Encounter",
   "QE.Notification.FolderNotFound.WARN": "Folder {defaultFolderName} was not found; please create it first"
   }
