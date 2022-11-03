@@ -40,6 +40,7 @@ Reused as EncounterCompanionSheet
 2-Sep-2022      1.0.5a: activateListeners(): Listen for new [Add] button which allows adding selected tokens or tiles to this QE     
 11-Oct-2022     1.1.0b: _getHeaderButtons(): Don't have a Hide button in Foundry v10 and leave the button saying Close (as a replacement) - see Issue #108 for why
 20-Oct-2022     1.1.0e: Issue #116: QEs with embedded Compendium Entries don't run (added split off of trailing ID)
+2-Nov-2022      1.1.1d: Issue #40: Minimal implementation of RollTables - display the RollTable, add support for removing
 */
 
 
@@ -133,6 +134,9 @@ export class QESheet extends FormApplication {
                 //thumbnail.addEventListener("dragstart", this._onDragStart, false);
                 thumbnail.addEventListener("click", this._onClickTile.bind(this));
             });
+            html.find("#QEContainers .rolltable-container").each((i, thumbnail) => {
+                thumbnail.addEventListener("click", this._onClickRollTable.bind(this));
+            });
         }
         html.find('button[name="addTokensTiles"]').click(event => {
             this.submit({preventClose: true}).then(QuickEncounter.runAddOrCreate(event, this.object));
@@ -151,6 +155,7 @@ export class QESheet extends FormApplication {
         return {
            combatants: this.combatants,
            tilesData: this.object?.savedTilesData,
+           rollTables: this.object?.rollTables,
            totalXPLine : this.totalXPLine,
            isFromCompendium : this.object?.isFromCompendium,    //FIX: This setting should be on a combatant basis, not one
            //0.9.3 Setting to show this checkbox (checked by default)
@@ -318,7 +323,23 @@ export class QESheet extends FormApplication {
         }
             
     }
+    _onClickRollTable(event) {
+        event.stopPropagation();
 
+        const srcClass = event.srcElement.classList.value;
+        const isPortrait = srcClass === "actor-portrait";
+        const isHoverIcon = (srcClass === "actor-subtract") || (srcClass === "fas fa-minus");
+        if ((isPortrait) || (isHoverIcon)) {
+            const rowNum = event.srcElement.id;
+
+            //Handle this by clearing the appropriate combatant field and re-rendering
+            if ((rowNum >= 0) && (rowNum < this.object?.rollTables.length)) {
+                this.object.rollTables.splice(rowNum,1);
+            }
+            this._onChange();
+        }
+            
+    }
 
 }//end class QESHeet
 

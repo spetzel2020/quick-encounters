@@ -47,9 +47,23 @@
                         </div>
                     </div>
                     <div class="flexrow">
-                        <span>{{this.img}}</span>
+                        <span>{{this.name}}</span>
                     </div>
                 </div>
+            {{/each}}
+            {{#each rollTables}}
+            <div class="flexrow">
+                <div class="rolltable-container">
+                    <img class='actor-portrait' title="{{localize 'QE.QuickEncounterDialog.Remove'  name=''}}" src="modules\\quick-encounters\\img\\icons8-grid-3-80.png\"
+                        id="{{@index}}" />
+                    <div class="actor-subtract">
+                        <i class="fas fa-minus" title="{{localize 'QE.QuickEncounterDialog.Remove' name=''}}" id="{{@index}}"></i>
+                    </div>
+                </div>
+                <div class="flexrow">
+                    <span> {{this.numActors}} x {{this.name}}</span>
+                </div>
+            </div>
             {{/each}}
         </div>
         {{{totalXPLine}}}<br>

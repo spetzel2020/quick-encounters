@@ -236,6 +236,7 @@
 25-Oct-2022     1.1.1a: #117: Add Missing i18n tags
 31-Oct-2022     1.1.1b: #40: [Suggestion/Request] Work with roll tables - Partial: Extracts rolltables (although this will generate QEs for any rolltable in a JE)
                 1.1.1c: #40: Add yet another Setting to not look for Rolltables unless wanted
+2-Nov-2022      1.1.1d: #40: Add rollTables to qeData and QuickEncounter constructor                
 */
 
 
@@ -262,6 +263,8 @@ export class QuickEncounter {
         this.extractedActors = qeData.extractedActors;
         //0.7 Now has tiles as well
         this.savedTilesData = qeData.savedTilesData;
+        //1.1.1 Basic implementation of Actor RollTables support - should check here whether it's an Actor RollTable
+        this.rollTables = qeData.extractedRollTables;
         this.hideQE = null;     //Means it has never been set, so follow the Auto flag
         
         if (this.extractedActors?.length) {
