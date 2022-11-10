@@ -248,7 +248,8 @@ export const QE = {
     MODULE_NAME : "quick-encounters",
     MODULE_VERSION : "1.1.1",
     TOKENS_FLAG_KEY : "tokens",
-    QE_JSON_FLAG_KEY : "quickEncounter"
+    QE_JSON_FLAG_KEY : "quickEncounter",
+    ACTOR : "Actor"
 }
 
 
@@ -968,7 +969,6 @@ export class QuickEncounter {
     }
 
     static extractFromEmbedded(html) {
-        const ACTOR = "Actor";
         const ACTOR_PERIOD = "Actor.";
         //1.1.1c Extract Rolltable; we would still need to filter in only those that referenced Actors
         const ROLLTABLE = "RollTable";
@@ -1029,7 +1029,7 @@ export class QuickEncounter {
             //Get the dataPack entity type (has to be Actor)
             const dataPack = game.packs.get(dataPackName);
 
-            if ((dataEntity === ACTOR) || (dataPack && (dataPack.documentName === ACTOR))) {
+            if ((dataEntity === QE.ACTOR) || (dataPack && (dataPack.documentName === QE.ACTOR))) {
                 //1.0.4d: FOr Foundry v10 the new UUID format is "Actor.xxxx" but we are still doing just actor lookup later (including for backward compatibility)
                 dataID = dataID.replace(ACTOR_PERIOD, ""); //remove Actor.
 
@@ -1131,13 +1131,20 @@ export class QuickEncounter {
         //1.1.1 If we have rollTables, then roll them to generate additional extractedActors which we add temporarily 
         // (but only to extractedActors not to the property)
         for (const rollTable of rollTables) {
-zzzz            Use rollTableId to roll for an actorId and actorName
-            extractedActors.push({
-                    numActors : rollTable.numActors,
-                    dataPackName : null,        //only non-null if this were a compendium reference
-                    actorID : actorId ,      
-                    name : actorName                   
-            });
+            const rollTableObject = game.tables.get(rollTable.rollTableId);
+            if (rollTableObject) {
+                const {roll, results} = await rollTableObject.draw({displayChat : false});
+                for (const tableResult of results) {
+                    if (tableResult?.documentCollection === QE.ACTOR) {
+                        extractedActors.push({
+                                numActors : rollTable.numActors,
+                                dataPackName : null,        //only non-null if this were a compendium reference
+                                actorID : tableResult.documentId ,      
+                                name : tableResult.text                   
+                        });
+                    }
+                }
+            }
         }
 
         //0.6.1: createTokenDataFromActors() sets isSavedToken=false
