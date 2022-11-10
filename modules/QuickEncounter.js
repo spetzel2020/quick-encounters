@@ -236,7 +236,8 @@
 25-Oct-2022     1.1.1a: #117: Add Missing i18n tags
 31-Oct-2022     1.1.1b: #40: [Suggestion/Request] Work with roll tables - Partial: Extracts rolltables (although this will generate QEs for any rolltable in a JE)
                 1.1.1c: #40: Add yet another Setting to not look for Rolltables unless wanted
-2-Nov-2022      1.1.1d: #40: Add rollTables to qeData and QuickEncounter constructor                
+2-Nov-2022      1.1.1d: #40: Add rollTables to qeData and QuickEncounter constructor      
+9-Nov-2022      1.1.1e: #40: Generate additional extracted Actors from the rollTables (which will then be generated into tokens)          
 */
 
 
@@ -1082,10 +1083,11 @@ export class QuickEncounter {
         const extractedActors = this.extractedActors;
         const savedTokensData = this.savedTokensData; 
         const savedTilesData = this.savedTilesData;
+        const rollTables = this.rollTables;
 
         //Create tokens from embedded Actors - use saved tokens in their place if you have them
-        //0.7.0b Need to have qeJournalEntry plus either Actors, tokens, or tiles
-        if (!(extractedActors?.length || savedTokensData?.length || savedTilesData?.length)) {return;}
+        //0.7.0b Need to have qeJournalEntry plus either Actors, tokens, rolltables, or tiles
+        if (!(extractedActors?.length || savedTokensData?.length || savedTilesData?.length || rollTables?.length)) {return;}
 
         //1.0.1: If this is an Instant Encounter, then we ignore checking for a Map Note and just use the drop coordinates
         if (options?.isInstantEncounter) {
@@ -1125,6 +1127,19 @@ export class QuickEncounter {
         }
 
         canvas.tokens.activate();
+
+        //1.1.1 If we have rollTables, then roll them to generate additional extractedActors which we add temporarily 
+        // (but only to extractedActors not to the property)
+        for (const rollTable of rollTables) {
+zzzz            Use rollTableId to roll for an actorId and actorName
+            extractedActors.push({
+                    numActors : rollTable.numActors,
+                    dataPackName : null,        //only non-null if this were a compendium reference
+                    actorID : actorId ,      
+                    name : actorName                   
+            });
+        }
+
         //0.6.1: createTokenDataFromActors() sets isSavedToken=false
         //0.6.8: Don't return extractedActorTokenData; add it (as generatedTokensData) to the extractedActors
         //v0.6.13 Use this.sourceNote instead of coords
