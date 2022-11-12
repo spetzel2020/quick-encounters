@@ -5,7 +5,7 @@
 - Fixed [#118](https://github.com/spetzel2020/quick-encounters/issues/118)
 - Fixed [#70](https://github.com/spetzel2020/quick-encounters/issues/70)
 ### 1.1.1
-- Working on [#40](https://github.com/spetzel2020/quick-encounters/issues/40) - Partial (extracts any Rolltable if setting says so)
+- Issue [#40](https://github.com/spetzel2020/quick-encounters/issues/40) - Partial (extracts a RollTable from JE and generates tokens)
 ### 1.1.0
 - Fixed [#94](https://github.com/spetzel2020/quick-encounters/issues/94): Add a default folder for new QEs
 - Fixed [#108](https://github.com/spetzel2020/quick-encounters/issues/108): Removed Hide button in QE because of multi-page Journals and always add Show button (for when you have Show QE Automatically set false)

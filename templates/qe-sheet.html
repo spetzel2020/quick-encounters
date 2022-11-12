@@ -54,14 +54,14 @@
             {{#each rollTables}}
             <div class="flexrow">
                 <div class="rolltable-container">
-                    <img class='actor-portrait' title="{{localize 'QE.QuickEncounterDialog.Remove'  name=''}}" src="modules\\quick-encounters\\img\\icons8-grid-3-80.png\"
+                    <img class='actor-portrait' title="{{localize 'QE.QuickEncounterDialog.Remove'  name=this.name}}" src="modules\\quick-encounters\\img\\icons8-grid-3-80.png\"
                         id="{{@index}}" />
                     <div class="actor-subtract">
-                        <i class="fas fa-minus" title="{{localize 'QE.QuickEncounterDialog.Remove' name=''}}" id="{{@index}}"></i>
+                        <i class="fas fa-minus" title="{{localize 'QE.QuickEncounterDialog.Remove' name=this.name}}" id="{{@index}}"></i>
                     </div>
                 </div>
-                <div class="flexrow">
-                    <span> {{this.numActors}} x {{this.name}}</span>
+                <div class="flexrow vertical-centered">
+                    <input type="text" name="{{index}}.numActors" class="num-actors" id="{{this.rollTableId}}" value={{this.numActors}}>x {{this.name}}
                 </div>
             </div>
             {{/each}}
