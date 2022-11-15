@@ -237,7 +237,8 @@
 31-Oct-2022     1.1.1b: #40: [Suggestion/Request] Work with roll tables - Partial: Extracts rolltables (although this will generate QEs for any rolltable in a JE)
                 1.1.1c: #40: Add yet another Setting to not look for Rolltables unless wanted
 2-Nov-2022      1.1.1d: #40: Add rollTables to qeData and QuickEncounter constructor      
-9-Nov-2022      1.1.1e: #40: Generate additional extracted Actors from the rollTables (which will then be generated into tokens)          
+9-Nov-2022      1.1.1e: #40: Generate additional extracted Actors from the rollTables (which will then be generated into tokens)    
+15-Nov-2022     1.1.2c: #121: rollTables is not iterable (broke QE)      
 */
 
 
@@ -1130,22 +1131,25 @@ export class QuickEncounter {
 
         //1.1.1 If we have rollTables, then roll them to generate additional extractedActors which we add temporarily 
         // (but only to extractedActors not to the property)
-        for (const rollTable of rollTables) {
-            const rollTableObject = game.tables.get(rollTable.rollTableId);
-            if (rollTableObject) {
-                const {roll, results} = await rollTableObject.draw({displayChat : false});
-                for (const tableResult of results) {
-                    if (tableResult?.documentCollection === QE.ACTOR) {
-                        extractedActors.push({
-                                numActors : rollTable.numActors,
-                                dataPackName : null,        //only non-null if this were a compendium reference
-                                actorID : tableResult.documentId ,      
-                                name : tableResult.text                   
-                        });
+        //1.1.2c Issue #121: Check for rollTables
+        if (rollTables) {
+            for (const rollTable of rollTables) {
+                const rollTableObject = game.tables.get(rollTable.rollTableId);
+                if (rollTableObject) {
+                    const {roll, results} = await rollTableObject.draw({displayChat : false});
+                    for (const tableResult of results) {
+                        if (tableResult?.documentCollection === QE.ACTOR) {
+                            extractedActors.push({
+                                    numActors : rollTable.numActors,
+                                    dataPackName : null,        //only non-null if this were a compendium reference
+                                    actorID : tableResult.documentId ,      
+                                    name : tableResult.text                   
+                            });
+                        }
                     }
                 }
             }
-        }
+         }
 
         //0.6.1: createTokenDataFromActors() sets isSavedToken=false
         //0.6.8: Don't return extractedActorTokenData; add it (as generatedTokensData) to the extractedActors

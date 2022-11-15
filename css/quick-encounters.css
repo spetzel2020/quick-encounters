@@ -67,6 +67,12 @@
 #QEContainers .tile-container:hover .actor-subtract {
     opacity: 0.8;
 }
+#QEContainers .rolltable-container:hover .actor-portrait {
+    opacity: 0.3;
+}
+#QEContainers .rolltable-container:hover .actor-subtract {
+    opacity: 0.8;
+}
 
 #QEXP {
     position: relative;
