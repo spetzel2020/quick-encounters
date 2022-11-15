@@ -3,7 +3,7 @@
 
 # Quick Encounters
 ## 1.1
-* New features: Default folder for Quick Encounters (Issue #94)
+* New features: Default folder for Quick Encounters (Issue #94), Add Actor RollTables from Journal Entries (Issue #40) - see new Settings
 * Bugs fixed: See [Release Notes](https://github.com/spetzel2020/quick-encounters/blob/master/CHANGELOG.md)
 
 ## 1.0
