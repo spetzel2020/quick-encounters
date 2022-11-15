@@ -1545,7 +1545,12 @@ export class QuickEncounter {
         //Get list of hostile NPCs
         let hostileNPCCombatants;
         let defeatedHostileNPCCombatants; 
-        if (QuickEncounter.isFoundryV8Plus) {//Foundry 0.8.x
+        //1.1.1 Check for Foundry 10
+        if (QuickEncounter.isFoundryV10) {
+            hostileNPCCombatants = combat.turns?.filter(t => ((t.token?.disposition === CONST.TOKEN_DISPOSITIONS.HOSTILE) && (!t.actor || !t.players?.length)));
+            defeatedHostileNPCCombatants = combat.turns?.filter(t => (t.defeated &&
+                                                            (t.token?.disposition === CONST.TOKEN_DISPOSITIONS.HOSTILE) && (!t.actor || !t.players?.length)));
+        } else if (QuickEncounter.isFoundryV8Plus) {//Foundry 0.8.x
             hostileNPCCombatants = combat.turns?.filter(t => ((t.token?.data?.disposition === CONST.TOKEN_DISPOSITIONS.HOSTILE) && (!t.actor || !t.players?.length)));
             defeatedHostileNPCCombatants = combat.turns?.filter(t => (t.data.defeated &&
                                                             (t.token?.data?.disposition === CONST.TOKEN_DISPOSITIONS.HOSTILE) && (!t.actor || !t.players?.length)));

@@ -41,6 +41,7 @@ Reused as EncounterCompanionSheet
 11-Oct-2022     1.1.0b: _getHeaderButtons(): Don't have a Hide button in Foundry v10 and leave the button saying Close (as a replacement) - see Issue #108 for why
 20-Oct-2022     1.1.0e: Issue #116: QEs with embedded Compendium Entries don't run (added split off of trailing ID)
 2-Nov-2022      1.1.1d: Issue #40: Minimal implementation of RollTables - display the RollTable, add support for removing
+14-Nov-2022     1.1.1g: _updateObject(), _onChange(): Check for rollTable changes (e.g. changing number to die roll)
 */
 
 
@@ -219,18 +220,40 @@ export class QESheet extends FormApplication {
         let wasChanged = false;
         //0.9.3: Changed format of formData names to rowNum.fieldName
         for (let [rowFieldName, fieldValue] of Object.entries(formData)) {
-            let combatantWasChanged = false;
+            let fieldWasChanged = false;
             const elements = rowFieldName.split(".");
             if ((elements.length ?? 0) < 2) {continue;}   //ignore if the split doesn't work
             const rowNum = elements[0];
             const fieldName = elements[1];
-            if (rowNum >= this.combatants.length) {
-                //New combatant - not possible in the dialog yet, but will be with drag-and-drop
-                combatantWasChanged = true;
-            } else if (fieldName === "numActors") {
+            if (fieldName === "numRollTableActors") {//1.1.1 only used for RollTables
                 const numActors = fieldValue.trim();   //trim off whitespace
-                combatantWasChanged = (this.combatants[rowNum].numActors !== numActors);
-                if (combatantWasChanged) {
+                fieldWasChanged = (this.object?.rollTables[rowNum].numActors !== numActors);
+                if (fieldWasChanged) {
+                    //Validate that the change is ok
+                    //Option 1: You cleared the field or spaced it out
+                    if ((numActors === null) || (numActors === "")) {
+                        this.object.rollTables[rowNum].numActors = 0;
+                    } else if (dieRollReg.test(numActors)) {
+                        //Option 2: This is a dice roll (not guaranteed because it could just contain a dieRoll)
+                        this.object.rollTables[rowNum].numActors = numActors;
+                    } else if (checkIntReg.test(numActors)) {
+                        const multiplier = parseInt(numActors,10);
+                        if (!Number.isNaN(multiplier)) {
+                            this.object.rollTables.numActors = multiplier;
+                        }
+                    } else {
+                        //otherwise leave unchanged - should pop up a dialog or highlight the field in red
+                        const warning = game.i18n.localize("QE.QuickEncounterDialog.InvalidNumActors.WARNING") + " " + numActors;
+                        ui.notifications.warn(warning);
+                    }
+                }
+            } else if (rowNum >= this.combatants.length) {
+                //New combatant - not possible in the dialog yet, but will be with drag-and-drop
+                fieldWasChanged = true;
+            } else if (fieldName === "numActors") {//1.1.1 only used for Extracted Actors
+                const numActors = fieldValue.trim();   //trim off whitespace
+                fieldWasChanged = (this.combatants[rowNum].numActors !== numActors);
+                if (fieldWasChanged) {
                     //Validate that the change is ok
                     //Option 1: You cleared the field or spaced it out
                     if ((numActors === null) || (numActors === "")) {
@@ -250,11 +273,11 @@ export class QESheet extends FormApplication {
                     }
                 }
             } else if (fieldName === "addToCombatTracker") {
-                combatantWasChanged = (this.combatants[rowNum].addToCombatTracker !== fieldValue);
+                fieldWasChanged = (this.combatants[rowNum].addToCombatTracker !== fieldValue);
                 this.combatants[rowNum].addToCombatTracker = fieldValue;
             }
-            wasChanged = wasChanged || combatantWasChanged;
-        }
+            wasChanged = wasChanged || fieldWasChanged;
+        }//end for over all formData entries
 
         //If wasChanged, then update the info into the Quick Encounter
         if (wasChanged) {
@@ -279,8 +302,12 @@ export class QESheet extends FormApplication {
         });
         //0.6.1o: The saved tokens for a removed ExtractedActor will now be discarded also
 
-        //If we removed all the Actors and (0.7.0) all the Tiles, then remove the whole Quick Encounter
-        if (extractedActors.length || this.object?.savedTilesData?.length) {
+        //1.1.1: Check for changes in RollTables
+        //We updated directly above so the only additional check would be to remove entries if they are zeroed out
+
+
+        //If we removed all the Actors and (0.7.0) all the Tiles and (1.1.1) all the RollTables, then remove the whole Quick Encounter
+        if (extractedActors.length || this.object?.savedTilesData?.length || this.object?.rollTables?.length) {
             this.object?.update({extractedActors : extractedActors});
         } else {
             //1.0.4j: Pass qeJournalEntry so we don't have to look it up via ID
