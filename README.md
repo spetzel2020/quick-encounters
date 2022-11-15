@@ -13,9 +13,9 @@
 
 * **Author**: Spetzel#0103
 * **Version**: 1.1.1
-* **Foundry VTT Compatibility**: 9-10
-* **System Compatibility (If applicable)**: All; additional features for dnd5e
-* **Translation Support**: en, es (thanks [lozalojo!](https://github.com/lozalojo)), ja (thanks "touge"!), de (thanks @Fallayn#6414), it (thanks [riccisi](https://github.com/riccisi))
+* * **Foundry VTT Compatibility**: 9-10
+* * **System Compatibility (If applicable)**: All; additional features for dnd5e
+* * **Translation Support**: en, es (thanks [lozalojo!](https://github.com/lozalojo)), ja (thanks "touge"!), de (thanks @Fallayn#6414), it (thanks [riccisi](https://github.com/riccisi))
 
 
 # Description
