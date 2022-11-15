@@ -239,7 +239,7 @@ export class QESheet extends FormApplication {
                     } else if (checkIntReg.test(numActors)) {
                         const multiplier = parseInt(numActors,10);
                         if (!Number.isNaN(multiplier)) {
-                            this.object.rollTables.numActors = multiplier;
+                            this.object.rollTables[rowNum].numActors = multiplier;
                         }
                     } else {
                         //otherwise leave unchanged - should pop up a dialog or highlight the field in red
