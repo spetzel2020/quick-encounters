@@ -12,7 +12,7 @@
 * Instant Encounters: Enable the new Setting, then you can drag your Quick Encounter directly from Journals to the Scene and be prompted to run it immediately! Perfect for Random or Wandering Encounters.
 
 * **Author**: Spetzel#0103
-* **Version**: 1.1.1
+* **Version**: 1.1.3
 * **Foundry VTT Compatibility**: 9-10
 * **System Compatibility (If applicable)**: All; additional features for dnd5e
 * **Translation Support**: en, es (thanks [lozalojo!](https://github.com/lozalojo)), ja (thanks "touge"!), de (thanks @Fallayn#6414), it (thanks [riccisi](https://github.com/riccisi))

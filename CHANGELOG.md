@@ -4,6 +4,10 @@
 - Fixed [#117](https://github.com/spetzel2020/quick-encounters/issues/117): Missing i18n tags
 - Fixed [#118](https://github.com/spetzel2020/quick-encounters/issues/118)
 - Fixed [#70](https://github.com/spetzel2020/quick-encounters/issues/70)
+### 1.1.3
+- Fixed Issues [#126](https://github.com/spetzel2020/quick-encounters/issues/126), [#127](https://github.com/spetzel2020/quick-encounters/issues/127)
+
+
 ### 1.1.2
 - Fixed Issue [#121](https://github.com/spetzel2020/quick-encounters/issues/121)
 - Issue [#120](https://github.com/spetzel2020/quick-encounters/issues/120): Fixed icon not dimming
