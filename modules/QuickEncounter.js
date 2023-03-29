@@ -238,7 +238,8 @@
                 1.1.1c: #40: Add yet another Setting to not look for Rolltables unless wanted
 2-Nov-2022      1.1.1d: #40: Add rollTables to qeData and QuickEncounter constructor      
 9-Nov-2022      1.1.1e: #40: Generate additional extracted Actors from the rollTables (which will then be generated into tokens)    
-15-Nov-2022     1.1.2c: #121: rollTables is not iterable (broke QE)      
+15-Nov-2022     1.1.2c: #121: rollTables is not iterable (broke QE)   
+28-Mar-2023     1.1.3a: #125: Tokens spawning with 50% opacity
 */
 
 
@@ -1340,8 +1341,12 @@ export class QuickEncounter {
                         //1.0.3b: .data is now merged into the object itself, so we have to strip off the prototype information 
                         //1.0.4b: And tempTokenData is actually a TokenDocument itself
                         tempTokenData = await actor.getTokenDocument(tokenData);
+                        /* removed for 1.1.3
                         tokenData = tempTokenData;
                         Object.setPrototypeOf(tokenData, {});
+                        */
+                       //v1.1.3 Issues #126,127 re alpha of generated tokens (previously was getting an actual TokenDocument)
+                        tokenData = tempTokenData.toObject();
                     } else { //Foundry v8 and v9
                         tempTokenData = await actor.getTokenData(tokenData);
                         tempToken = new TokenDocument(tempTokenData, {actor: actor});
