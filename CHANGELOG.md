@@ -6,7 +6,7 @@
 - Fixed [#70](https://github.com/spetzel2020/quick-encounters/issues/70)
 ### 1.1.3
 - Fixed Issues [#126](https://github.com/spetzel2020/quick-encounters/issues/126), [#127](https://github.com/spetzel2020/quick-encounters/issues/127)
-
+- Fixed Issue [#105](https://github.com/spetzel2020/quick-encounters/issues/105)
 
 ### 1.1.2
 - Fixed Issue [#121](https://github.com/spetzel2020/quick-encounters/issues/121)

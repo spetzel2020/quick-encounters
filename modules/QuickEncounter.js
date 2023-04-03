@@ -240,6 +240,7 @@
 9-Nov-2022      1.1.1e: #40: Generate additional extracted Actors from the rollTables (which will then be generated into tokens)    
 15-Nov-2022     1.1.2c: #121: rollTables is not iterable (broke QE)   
 28-Mar-2023     1.1.3a: #125: Tokens spawning with 50% opacity (changed what is saved in generateFullExtractedActorTokenData())
+3-Apr-2023      1.1.3c: #105: Replace fist icon with crossed-swords to be consistent with Combat Tracker
 */
 
 
@@ -487,7 +488,7 @@ export class QuickEncounter {
             basicControlsButton.tools.push({
                 name: "linkEncounter",
                 title: game.i18n.localize("QE.CreateQuickEncounter.BUTTON"),
-                icon: "fas fa-fist-raised",
+                icon: "fas fa-swords",
                 toggle: false,
                 button: true,
                 visible: game.user.isGM,
@@ -501,7 +502,8 @@ export class QuickEncounter {
             tileControlsButton.tools.push({
                 name: "linkEncounter",
                 title: game.i18n.localize("QE.CreateQuickEncounter.BUTTON"),
-                icon: "fas fa-fist-raised",
+                //1.1.3c Issue 105: Replace raised-fist with crossed-swords to be consistent with CT
+                icon: "fas fa-swords",
                 toggle: false,
                 button: true,
                 visible: game.user.isGM,
@@ -519,7 +521,7 @@ export class QuickEncounter {
         } else {//0.7.x
             FRIENDLY_TOKEN_DISPOSITIONS = TOKEN_DISPOSITIONS.FRIENDLY;
         }
-        //Called when you press the Quick Encounters button (fist) from the sidebar
+        //Called when you press the Quick Encounters button (crossed-swords) from the sidebar
         //If you are controlling tokens it creates a new Quick Encounter Journal Entry
         //0.6.4: If there's an open Journal Entry it asks if you want to add the tokens to it or run it
         //Method 1: Get the selected tokens and the scene
@@ -1687,7 +1689,8 @@ export class QuickEncounter {
             buttons.unshift({
                 label: "QE.JEBorder.ShowQE",
                 class: "showQE",
-                icon: "fas fa-fist-raised",
+                //1.1.3c Issue 105: Replace raised-fist with crossed-swords to be consistent with CT
+                icon: "fas fa-swords",
                 onclick: async ev => {
                     // 1.1.0b: If Foundry v10 then show all QEs 
                     if (QuickEncounter.isFoundryV10) {
@@ -1997,7 +2000,7 @@ Hooks.on("deleteCombat", (combat, options, userId) => {
     QuickEncounter.onDeleteCombat(combat, options, userId);
 });
 
-//0.9.1a: (from ironmonk88) Add a QE (fist) control to the command palette for Monk's Enhanced Journal
+//0.9.1a: (from ironmonk88) Add a QE (crossed swords) control to the command palette for Monk's Enhanced Journal
 Hooks.on("activateControls", (journal, controls) => {
-	controls.push({id: 'quickencounter', text: "Quick Encounter", icon: 'fa-fist-raised', conditional: game.user.isGM, callback: QuickEncounter.runAddOrCreate.bind(journal?.subsheet)});
+	controls.push({id: 'quickencounter', text: "Quick Encounter", icon: 'fa-swords', conditional: game.user.isGM, callback: QuickEncounter.runAddOrCreate.bind(journal?.subsheet)});
 });												 
