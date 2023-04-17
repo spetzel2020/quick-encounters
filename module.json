@@ -7,7 +7,7 @@
       "name": "Spetzel"
     }
   ],
-  "version": "1.1.3",
+  "version": "1.1.4",
   "minimumCoreVersion": "9",
   "compatibleCoreVersion": "10",
   "compatibility": {
@@ -49,6 +49,6 @@
   "bugs": "https://github.com/spetzel2020/quick-encounters/issues",
   "changelog": "https://github.com/spetzel2020/quick-encounters/blob/master/CHANGELOG.md",
   "manifest": "https://github.com/spetzel2020/quick-encounters/releases/latest/download/module.json",
-  "download": "https://github.com/spetzel2020/quick-encounters/releases/download/v1.1.3/quick-encounters.zip",
+  "download": "https://github.com/spetzel2020/quick-encounters/releases/download/v1.1.4/quick-encounters.zip",
   "url": "https://github.com/spetzel2020/quick-encounters"
 }

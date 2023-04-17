@@ -249,7 +249,7 @@ import {QESheet} from './QESheet.js';
 
 export const QE = {
     MODULE_NAME : "quick-encounters",
-    MODULE_VERSION : "1.1.3",
+    MODULE_VERSION : "1.1.4",
     TOKENS_FLAG_KEY : "tokens",
     QE_JSON_FLAG_KEY : "quickEncounter",
     ACTOR : "Actor"
@@ -515,6 +515,7 @@ export class QuickEncounter {
     }
 
     static runAddOrCreate(event, clickedQuickEncounter) {
+        //Will only have a clickedQuickEncounter when called from the QE dialog with the [Add tokens/tiles] button
         let FRIENDLY_TOKEN_DISPOSITIONS;
         if (QuickEncounter.isFoundryV8Plus) {
             FRIENDLY_TOKEN_DISPOSITIONS = CONST.TOKEN_DISPOSITIONS.FRIENDLY;
@@ -887,12 +888,24 @@ export class QuickEncounter {
     */
     static findQuickEncounter() {
         //Return either a Quick Encounter, a Journal Sheet, or null (in order of priority)
-        if (Object.keys(ui.windows).length === 0) {return null;}
-        else {
+        if (Object.keys(ui.windows).length !== 0) {
             let openJournalSheet = null;
+            //1.1.4 FoundryV10 - look at the JournalPage children of each JournalSheet for a QuickEncounter
+            if (QuickEncounter.isFoundryV10) {
+                for (let w of Object.values(ui.windows)) {
+                    //1.1.4 Return a quickEncounter stored in a JournalPageSheet preferentially
+                    if (w instanceof JournalSheet) {
+                        for (const journalEntryPage of w.document?.pages?.values()) {
+                            const quickEncounter = QuickEncounter.extractQuickEncounter(journalEntryPage?.sheet);
+                            if (quickEncounter) {return quickEncounter;}
+                        }
+                    }
+                }
+            }
+            //Otherwise look for JournalSheets, including Monks Enhanced Journal
             for (let w of (this instanceof JournalSheet ? [this] : Object.values(ui.windows))) {
-				////0.9.1a: (from ironmonk88) Check to see if this is an Enhanced Journal window and get the subsheet
-				if (w.subsheet) {w = w.subsheet;}
+                ////0.9.1a: (from ironmonk88) Check to see if this is an Enhanced Journal window and get the subsheet
+                if (w.subsheet) {w = w.subsheet;}
                 //Check open windows for a Journal Sheet with a Map Note and embedded Actors
                 if (w instanceof JournalSheet) {
                     openJournalSheet = w;
@@ -901,8 +914,8 @@ export class QuickEncounter {
                 }
                 if (openJournalSheet) {return openJournalSheet;}
             }
-            return null;
         }
+        return null;    
     }
 
     static findOpenQETutorial() {
