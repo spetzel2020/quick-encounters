@@ -314,7 +314,8 @@ export class QuickEncounter {
         3. newJournalEntry is null, and qe.journalEntry is null - do nothing
         */
         // 1.0.4j: Save journalEntry so we can avoid serializing the whole object into the JSON
-        const qeJournalEntry = this.journalEntry ?? newJournalEntry;
+        //1.1.4b: Reversed this test so that newJournalEntry takes precedence (e.g. you're moving it onto Page0 from the JE)
+        const qeJournalEntry = newJournalEntry ?? this.journalEntry;
         if (!qeJournalEntry) {return;}
         this.journalEntry = null;   //temporary until after serializing into JE
 
@@ -573,11 +574,11 @@ export class QuickEncounter {
         } else if (controlledAssets) {
             //See if the open QE method works
             //0.9.1a: (from ironmonk88) Pass this so we can check for Monk's Enhanced Journal 
-            const candidateJournalEntry = QuickEncounter.findQuickEncounter.call(this); 
-            const openQuickEncounter = (candidateJournalEntry instanceof QuickEncounter ) ? candidateJournalEntry : null;
-            const openJournalEntry = (  (candidateJournalEntry instanceof JournalEntry ) || 
-                                        (QuickEncounter.isFoundryV10 && (candidateJournalEntry instanceof JournalEntryPage))
-                                    ) ? candidateJournalEntry : null;
+            const candidateJEorQE = QuickEncounter.findQuickEncounter.call(this); 
+            const openQuickEncounter = (candidateJEorQE instanceof QuickEncounter ) ? candidateJEorQE : null;
+            const openJournalSheet = (  (candidateJEorQE instanceof JournalSheet ) || 
+                                        (QuickEncounter.isFoundryV10 && (candidateJEorQE instanceof JournalPageSheet))
+                                    ) ? candidateJEorQE : null;
 
             //Existing Quick Encounter: Ask whether to run, add new assets, or create one from scratch
             if (openQuickEncounter) {
@@ -589,12 +590,12 @@ export class QuickEncounter {
                     button3cb: () => {QuickEncounter.createFrom(controlledAssets)},
                     buttonLabels : ["QE.AddToQuickEncounter.RUN",  "QE.AddToQuickEncounter.ADD",  "QE.AddToQuickEncounter.CREATE"]
                 });
-            } else if (openJournalEntry) {
+            } else if (openJournalSheet) {
                 //Existing Journal Entry, ask if you want to create a Quick Encounter out of it
                 Dialog3.buttons3({
                     title: game.i18n.localize("QE.LinkToQuickEncounter.TITLE"),
                     content: game.i18n.localize("QE.LinkToQuickEncounter.CONTENT"),
-                    button1cb: () => {QuickEncounter.link(openJournalEntry,controlledAssets)},
+                    button1cb: () => {QuickEncounter.link(openJournalSheet,controlledAssets)},
                     button2cb: () => {QuickEncounter.createFrom(controlledAssets)},
                     button3cb: null,
                     buttonLabels : ["QE.LinkToQuickEncounter.LINK",  "QE.AddToQuickEncounter.CREATE"]
