@@ -7,6 +7,8 @@
 
 ### 1.1.4
 - Partially fixed [#130] (https://github.com/spetzel2020/quick-encounters/issues/130)
+- Fixed [#115] (https://github.com/spetzel2020/quick-encounters/issues/115)
+- Fixed [#122] (https://github.com/spetzel2020/quick-encounters/issues/122)
 ### 1.1.3
 - Fixed Issues [#126](https://github.com/spetzel2020/quick-encounters/issues/126), [#127](https://github.com/spetzel2020/quick-encounters/issues/127)
 - Fixed Issue [#105](https://github.com/spetzel2020/quick-encounters/issues/105)

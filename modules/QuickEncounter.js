@@ -241,6 +241,10 @@
 15-Nov-2022     1.1.2c: #121: rollTables is not iterable (broke QE)   
 28-Mar-2023     1.1.3a: #125: Tokens spawning with 50% opacity (changed what is saved in generateFullExtractedActorTokenData())
 3-Apr-2023      1.1.3c: #105: Replace fist icon with crossed-swords to be consistent with Combat Tracker
+16-Apr-2023     1.1.4a: #115,#130: Partial fixes: findQuickEncounter() searches for JEPages with embedded QEs
+19-Apr-2023     1.1.4b: Fixed #115. improved #130: serializeIntoJournalEntry() was overriding newJournalEntry with present value
+20-Apr-2023     1.1.4c: Fixed #122: Running QE from Journal Entry Page note would still put it on the Journal Entry map note; 
+                run() Defer checking for journalEntryMapNote and then add findMapNoteForJE to check both JE and possibly parent (if it was a JEPage)
 */
 
 
@@ -1090,19 +1094,15 @@ export class QuickEncounter {
         //- Create tokens (or use existing ones if they exist)
         //1.0.4j: Get journalEntry from QE property 
         //1.0.4k: Use parent (which is what is saved to the map) if this is JournalEntryPage
-        let noteJournalEntry;
-        if (QuickEncounter.isFoundryV10 && (this.journalEntry instanceof JournalEntryPage)) {
-            noteJournalEntry = this.journalEntry.parent;
-        } else {
-            noteJournalEntry = this.journalEntry;
-        }
-        if (!noteJournalEntry) return;
+        //1.1.4c: Allowing for the possibility that JournalEntryPage is dragged to the map, revert to saving that and check later for Map Note
+        const noteJournalEntry = this.journalEntry;
+        if (!noteJournalEntry) {return;}
 
+        //Check that we have something stored (actors, tokens, tiles, or rolltable)
         const extractedActors = this.extractedActors;
         const savedTokensData = this.savedTokensData; 
         const savedTilesData = this.savedTilesData;
         const rollTables = this.rollTables;
-
         //Create tokens from embedded Actors - use saved tokens in their place if you have them
         //0.7.0b Need to have qeJournalEntry plus either Actors, tokens, rolltables, or tiles
         if (!(extractedActors?.length || savedTokensData?.length || savedTilesData?.length || rollTables?.length)) {return;}
@@ -1115,23 +1115,16 @@ export class QuickEncounter {
                 y: options?.qeAnchor?.y
             }
         } else {
+            //Find the Map Note associated with this Journal Entry (or its parent if that exists) - if none then prompt to create one
             //0.6.13 If we have clickedNote specified we know we're in the right scene, otherwise see where there is one
             let mapNote = noteJournalEntry.clickedNote;
             if (!mapNote) {
-                // Switch to the correct scene if confirmed
-                let qeScene = EncounterNote.getEncounterScene(noteJournalEntry);
-                //If there isn't a Map Note anywhere, prompt to create one in the center of the view
-                if (!qeScene) {
-                    EncounterNote.noMapNoteDialog(this);
-                    //Try again now that it should have a scene if yo responded yes
-                    qeScene = EncounterNote.getEncounterScene(noteJournalEntry);
+                mapNote = await this.findMapNoteForJE(noteJournalEntry);
+                if (!mapNote && (noteJournalEntry instanceof JournalEntryPage)) {
+                    mapNote = await this.findMapNoteForJE(noteJournalEntry.parent);
                 }
-                const isPlaced = await EncounterNote.mapNoteIsPlaced(qeScene, noteJournalEntry);
-                if (!isPlaced ) {return;}
-                //Something is desperately wrong if this is null
-                mapNote = noteJournalEntry.sceneNote;
             }
-            this.sourceNoteData = mapNote.data;
+            this.sourceNoteData = mapNote?.data;
         }
 
         //v0.6.13 If sourceNote != originalNote, then translate the savedTokens
@@ -1144,6 +1137,7 @@ export class QuickEncounter {
             }
         }
 
+        //Activate the Token layer and generate Actors and all tokens, and combine with saved tokens
         canvas.tokens.activate();
 
         //1.1.1 If we have rollTables, then roll them to generate additional extractedActors which we add temporarily 
@@ -1213,6 +1207,28 @@ export class QuickEncounter {
         }
     }
 
+    async findMapNoteForJE(journalEntry) {
+        if (!journalEntry) {return;}
+        //0.6.13 If we have clickedNote specified we know we're in the right scene (the QE was opened by double-clicking the Map Note, rather than from the JE)
+        let mapNote = journalEntry.clickedNote;
+        if (mapNote) {return mapNote;}
+
+        //Otherwise get the correct scene (which might not be the one we're in)
+        // Switch to the correct scene if confirmed
+        let qeScene = EncounterNote.getEncounterScene(journalEntry);
+
+        if (!qeScene) {
+            //If there isn't a Map Note on any scene, prompt to create one in the center of the view
+            EncounterNote.noMapNoteDialog(this);
+            //Try again now that it should have a scene if you responded yes
+            //This step is being skipped (see Issue #83)
+            qeScene = EncounterNote.getEncounterScene(journalEntry);
+        }
+        const isPlaced = await EncounterNote.mapNoteIsPlaced(qeScene, journalEntry);
+        if (!isPlaced ) {return;}
+        //Something is desperately wrong if this is null
+        return journalEntry.sceneNote;
+    }
 
     combineTokenData(shift={x:0, y:0}) {
         //v0.5.1 If we have more actors than saved tokens, create more tokens
