@@ -245,6 +245,8 @@
 19-Apr-2023     1.1.4b: Fixed #115. improved #130: serializeIntoJournalEntry() was overriding newJournalEntry with present value
 20-Apr-2023     1.1.4c: Fixed #122: Running QE from Journal Entry Page note would still put it on the Journal Entry map note; 
                 run() Defer checking for journalEntryMapNote and then add findMapNoteForJE to check both JE and possibly parent (if it was a JEPage)
+21-Apr-2023     1.1.4d: Fixed #130: findQuickEncounter() now does a cascade of checks: open QE, open/displayed Journal Page Sheet, then Journal Entry Page currently displayed in the JE
+                Also changed to pass back JE rather than sheet, and QuickEncounter.link() changed accordingly
 */
 
 
@@ -578,10 +580,11 @@ export class QuickEncounter {
         } else if (controlledAssets) {
             //See if the open QE method works
             //0.9.1a: (from ironmonk88) Pass this so we can check for Monk's Enhanced Journal 
+            //1.1.4c: Return JournalEntry or JournalEntryPage instead of Sheet
             const candidateJEorQE = QuickEncounter.findQuickEncounter.call(this); 
             const openQuickEncounter = (candidateJEorQE instanceof QuickEncounter ) ? candidateJEorQE : null;
-            const openJournalSheet = (  (candidateJEorQE instanceof JournalSheet ) || 
-                                        (QuickEncounter.isFoundryV10 && (candidateJEorQE instanceof JournalPageSheet))
+            const openJournalEntry = (  (candidateJEorQE instanceof JournalEntry ) || 
+                                        (QuickEncounter.isFoundryV10 && (candidateJEorQE instanceof JournalEntryPage))
                                     ) ? candidateJEorQE : null;
 
             //Existing Quick Encounter: Ask whether to run, add new assets, or create one from scratch
@@ -594,12 +597,12 @@ export class QuickEncounter {
                     button3cb: () => {QuickEncounter.createFrom(controlledAssets)},
                     buttonLabels : ["QE.AddToQuickEncounter.RUN",  "QE.AddToQuickEncounter.ADD",  "QE.AddToQuickEncounter.CREATE"]
                 });
-            } else if (openJournalSheet) {
+            } else if (openJournalEntry) {
                 //Existing Journal Entry, ask if you want to create a Quick Encounter out of it
                 Dialog3.buttons3({
                     title: game.i18n.localize("QE.LinkToQuickEncounter.TITLE"),
                     content: game.i18n.localize("QE.LinkToQuickEncounter.CONTENT"),
-                    button1cb: () => {QuickEncounter.link(openJournalSheet,controlledAssets)},
+                    button1cb: () => {QuickEncounter.link(openJournalEntry,controlledAssets)},
                     button2cb: () => {QuickEncounter.createFrom(controlledAssets)},
                     button3cb: null,
                     buttonLabels : ["QE.LinkToQuickEncounter.LINK",  "QE.AddToQuickEncounter.CREATE"]
@@ -690,14 +693,14 @@ export class QuickEncounter {
         return quickEncounter;
     }
 
-    static link(openJournalSheet, controlledAssets) {
+    static link(openJournalEntry, controlledAssets) {
         let quickEncounter = QuickEncounter.createQuickEncounterAndAdd(controlledAssets);
-        const journalEntry = openJournalSheet?.object;
         //FIXME: add() already calls serializeIntoJournalEntry(), but here we are updating with the source journalEntry
-        quickEncounter.serializeIntoJournalEntry(journalEntry);
+        quickEncounter.serializeIntoJournalEntry(openJournalEntry);
         //Force a re-render which should pop up the QE dialog
         //FIXME: Is this necessary? I thought setFlag() would already force a re-render of the JE
-        openJournalSheet?.render(true);
+        //1.1.4 If the sheet is showing, then re-render
+        if (openJournalEntry.sheet) {openJournalEntry.sheet.render(true);}
     }
 
 
@@ -892,18 +895,25 @@ export class QuickEncounter {
     *
     */
     static findQuickEncounter() {
-        //Return either a Quick Encounter, a Journal Sheet, or null (in order of priority)
+        //Return either a Quick Encounter, a JournalPageSheet, a JournalEntryPage, or null (in order of priority)
         if (Object.keys(ui.windows).length !== 0) {
             let openJournalSheet = null;
             //1.1.4 FoundryV10 - look at the JournalPage children of each JournalSheet for a QuickEncounter
             if (QuickEncounter.isFoundryV10) {
+                //1.1.4d Look for any open QESheet firstly (if you have multiple, you'll get "the first" one)
                 for (let w of Object.values(ui.windows)) {
-                    //1.1.4 Return a quickEncounter stored in a JournalPageSheet preferentially
-                    if (w instanceof JournalSheet) {
-                        for (const journalEntryPage of w.document?.pages?.values()) {
-                            const quickEncounter = QuickEncounter.extractQuickEncounter(journalEntryPage?.sheet);
-                            if (quickEncounter) {return quickEncounter;}
-                        }
+                    if (w instanceof QESheet) {return w.object;}
+                }
+                //1.1.4d Look for an open JournalPageSheet (this works in single- or multi-page mode)
+                for (let w of Object.values(ui.windows)) {
+                    if (w instanceof JournalPageSheet) {return w.object;}
+                }
+                //1.1.4d Look for an open JournalSheet and pick the currently selected JournalEntryPage (in single-mode)
+                for (let w of Object.values(ui.windows)) {
+                    if ((w instanceof JournalSheet) && (w.mode === 1)) {
+                        //Get the currently selected JournalEntryPage
+                        const journalEntryPage = w.pageIndex < w.object.pages.size ? Array.from(w.object.pages)[w.pageIndex] : null;
+                        if (journalEntryPage) {return journalEntryPage;}
                     }
                 }
             }
@@ -917,7 +927,8 @@ export class QuickEncounter {
                     const quickEncounter = QuickEncounter.extractQuickEncounter(w);
                     if (quickEncounter) {return quickEncounter;}
                 }
-                if (openJournalSheet) {return openJournalSheet;}
+                //1.1.4c Changed to return JE rather than sheet
+                if (openJournalSheet) {return openJournalSheet.object;}
             }
         }
         return null;    
