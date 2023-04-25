@@ -40,7 +40,11 @@ Subsequently can add: (a) Drag additional tokens in, (b) populate the Combat Tra
                 create(): Typo in entryId
                 1.0.4m: dropCanvasData Hook: Check first JournalEntryPage for a QE (FIX: Should check all)
 3-Oct-2022      1.0.7a: Issue #109: Check for FoundryV10 when referencing journalEntryPage or journalEntry.parent   
-6-Oct-2022      1.0.8a: Issue #112: Further references to JournalEntryPage             
+6-Oct-2022      1.0.8a: Issue #112: Further references to JournalEntryPage    
+25-Apr-2023     1.1.5a: Issue #132: Intercept drag of JEPage just like Journal Entries (replace if it has a QE in it)
+                Hooks.on('dropCanvasData'): Add check for JournalEntryPage and add common function checkForQEAndCreateNote()
+                create(): Remove check for FoundryV10 and switch to parentJournalEntry
+                Re-clone _onDropData() from foundry.js to account for new Note fields (for JournalEntryPage)
 */
 
 //Expand the available list of Note icons
@@ -102,12 +106,13 @@ export class EncounterNote {
         if (!quickEncounter) {return;}
 
         const journalEntry = quickEncounter.journalEntry;
-        //1.0.4k: Use parent (which is what is saved to the map) if this is JournalEntryPage
+        //1.0.4k: REMOVED IN 1.1.5: Use parent (which is what is saved to the map) if this is JournalEntryPage
         //1.0.7a: Check for FoundryV10
-        const parentJournalEntry = (QuickEncounter.isFoundryV10 && (journalEntry instanceof JournalEntryPage)) ? journalEntry.parent : journalEntry;        
+        //1.1.5a: Remove defaulting to parent, but if it's a page you have to reference the parent JournalEntry and page reference
+        let noteJournalEntry = (journalEntry instanceof JournalEntryPage) ? journalEntry.parent : journalEntry;
         // Create Note data
         const noteData = {
-              entryId: parentJournalEntry.id,
+              entryId: noteJournalEntry.id,
               x: noteAnchor.x,
               y: noteAnchor.y,
               icon: CONFIG.JournalEntry.noteIcons.Combat,
@@ -117,6 +122,7 @@ export class EncounterNote {
               textAnchor: CONST.TEXT_ANCHOR_POINTS.TOP,
               fontSize: 24
         };
+        if (journalEntry instanceof JournalEntryPage) {noteData.pageId = journalEntry.id;}
 
         //v0.5.0: Switch to Note.create() to bypass the Note dialog
         //This is different from the JournalEntry._onDropData approach
@@ -324,9 +330,53 @@ export class EncounterNote {
         }
 
         Dialog3.buttons3(dialogData);
-    }
+    }//end checkForInstantEncounter()
 
+    //1.1.5 Created to handle JE or JEPage for hook on dropCanvasData - recloned NotesLayer._onDropData()
+    static async checkForQEAndCreateNote(journalEntry, data) {
+        //Takes either a JournalEntry or JournalEntryPage that is being dropped onto the canvas
+        let journalEntryOrJEPage = journalEntry;
+        console.warn("Replaced Journal Entry drag-and-drop with QuickEncounter.EncounterNote handling");
 
+        //JournalEntry: Check if this is from a Compendium and also for migration from pre-v10 Foundry
+        let quickEncounter;
+        if (journalEntryOrJEPage instanceof JournalEntry) {
+            if (journalEntryOrJEPage.compendium ) {
+                //If it's a Compendium JE, have to create one before dropping
+                const journalData = game.journal.fromCompendium(journalEntryOrJEPage);
+                journalEntryOrJEPage = JournalEntry.implementation.create(journalData);
+            }
+
+            quickEncounter = QuickEncounter.extractQuickEncounterFromJEOrEmbedded(journalEntryOrJEPage);
+            //Pre-v10 QEs are dynamically moved onto JournalEntryPage0 so check for that
+            if (!quickEncounter && QuickEncounter.isFoundryV10) {
+                //1.0.4m We have to check at least the first JournalEntryPage (we know that we have dropped a Journal Entry)
+                const journalEntryPage0 = journalEntryOrJEPage.pages?.values().next().value;
+                quickEncounter = QuickEncounter.extractQuickEncounterFromJEOrEmbedded(journalEntryPage0);
+            }
+        } else { //JournalEntryPage 
+            quickEncounter = QuickEncounter.extractQuickEncounterFromJEOrEmbedded(journalEntryOrJEPage);
+        }
+
+        //Get the world-transformed drop position - fortunately these have already been placed in (data.x,data.y) by Canvas._onDrop
+        const noteAnchor = {x: data?.x, y: data?.y}
+        if (quickEncounter) {
+            //Confirmed this is a Quick Encounter
+            //If we're checking for Instant Encounters, then pop a dialog
+            if (game.settings.get(QE.MODULE_NAME, "checkForInstantEncounter")) {
+                EncounterNote.checkForInstantEncounter(quickEncounter, noteAnchor);
+            } else {
+                EncounterNote.create(quickEncounter, noteAnchor);
+            }
+        } else {
+            //create a normal Journal Entry Note
+            const noteData = {entryId: journalEntryOrJEPage.id, x: noteAnchor.x, y: noteAnchor.y}
+            //Another hack - because we don't have event we recover the raw drop location
+            const clientX = (noteAnchor.x * canvas.stage.scale.x) + canvas.notes.worldTransform.tx;
+            const clientY = (noteAnchor.y * canvas.stage.scale.y) + canvas.notes.worldTransform.ty;
+            return canvas.notes._createPreview(noteData, {top: clientY - 20, left: clientX + 40});
+        }
+    }//end async checkForQEAndCreateNote()
 }
 
 //Delete any corresponding Map Notes if you delete the Journal Entry
@@ -344,46 +394,18 @@ Hooks.on(`renderEncounterNoteConfig`, async (noteConfig, html, data) => {
 //Note that intercepting preCreateNoteDocument is too late because we are approving the preview at that point
 //and renderNoteConfig it's too difficult to change the form of the Note
 Hooks.on(`dropCanvasData`, (canvas, data) => {
-    //Try to leave quickly if this isn't a Journal Entry
-    if (data?.type !== "JournalEntry") {return true;}
-    //Or if it isn't a Quick Encounter
     //This is a hack because we're basically replicating canvas.notes._onDropData()
     // Acquire Journal entry 
     //- because it's async and this hook can't be (otherwise it prematurely returns true and creates a preview) use .then chaining
-    console.info("Replacing ")
-    JournalEntry.fromDropData(data).then(s => {
-            let parentJournalEntry = s;
-            if ( parentJournalEntry.compendium ) {
-                const journalData = game.journal.fromCompendium(parentJournalEntry);
-                parentJournalEntry = JournalEntry.implementation.create(journalData);
-            }
-            //Get the world-transformed drop position - fortuantely these have already been placed in (data.x,data.y) by Canvas._onDrop
-            const noteAnchor = {x: data?.x, y: data?.y}
-
-            let quickEncounter = QuickEncounter.extractQuickEncounterFromJEOrEmbedded(parentJournalEntry);
-            if (!quickEncounter && QuickEncounter.isFoundryV10) {
-                //1.0.4m We have to check at least the first JournalEntryPage (we know that we have dropped a Journal Entry)
-                const journalEntryPage = parentJournalEntry.pages?.values().next().value;
-                quickEncounter = QuickEncounter.extractQuickEncounterFromJEOrEmbedded(journalEntryPage);
-            }
-
-            if (quickEncounter) {
-                //Confirmed this is a Quick Encounter
-                //If we're checking for Instant Encounters, then pop a dialog
-                if (game.settings.get(QE.MODULE_NAME, "checkForInstantEncounter")) {
-                    EncounterNote.checkForInstantEncounter(quickEncounter, noteAnchor);
-                } else {
-                    EncounterNote.create(quickEncounter, noteAnchor);
-                }
-            } else {
-                //create a normal Journal Entry Note
-                const noteData = {entryId: parentJournalEntry.id, x: noteAnchor.x, y: noteAnchor.y}
-                //Another hack - because we don't have event we recover the raw drop location
-                const clientX = (noteAnchor.x * canvas.stage.scale.x) + canvas.notes.worldTransform.tx;
-                const clientY = (noteAnchor.y * canvas.stage.scale.y) + canvas.notes.worldTransform.ty;
-                return canvas.notes._createPreview(noteData, {top: clientY - 20, left: clientX + 40});
-            }
-    });
-
-    return false;   // we're replacing Journal Note creation entirely
+    //1.1.5 check for either JournalEntry OR JournalEntryPage
+    if (data?.type === "JournalEntry") {
+        JournalEntry.fromDropData(data).then(journalEntry => {
+            EncounterNote.checkForQEAndCreateNote(journalEntry, data);
+        });
+    } else if (data?.type === "JournalEntryPage") {
+        JournalEntryPage.fromDropData(data).then(journalEntryPage => {
+            EncounterNote.checkForQEAndCreateNote(journalEntryPage, data);
+        });
+    } else {return true;}   //handle dropping something else
+    return false;   //stop processing - we're replacing Journal Note creation entirely
 });
