@@ -28,7 +28,7 @@ Keeps your Scene map clean and your encounters simple by saving tokens/Actors in
 * For Roving Encounters move a single Map Note, not many tokens
 * Save your player tokens at the entrance to a new Scene too!
 
-Quick Encounters works well with [TokenMold](https://github.com/Moerill/token-mold#token-mold) to vary your tokens names, HP, etc (although TokenMold is not required for Quick Encounters). Quick Encounters also previews the XP for each group of hostiles if using dnd5e)
+Quick Encounters works well with [TokenMold](https://github.com/Moerill/token-mold#token-mold) to vary your tokens names, HP, etc (although TokenMold is not required for Quick Encounters). Quick Encounters also previews the XP for each group of hostiles if using dnd5e.
 
 # Install
 1. Go to the "Add-on Modules" tab in Foundry Setup
