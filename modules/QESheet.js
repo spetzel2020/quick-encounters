@@ -42,6 +42,7 @@ Reused as EncounterCompanionSheet
 20-Oct-2022     1.1.0e: Issue #116: QEs with embedded Compendium Entries don't run (added split off of trailing ID)
 2-Nov-2022      1.1.1d: Issue #40: Minimal implementation of RollTables - display the RollTable, add support for removing
 14-Nov-2022     1.1.1g: _updateObject(), _onChange(): Check for rollTable changes (e.g. changing number to die roll)
+29-May-2023     1.1.5b: Changed isFoundryV10Plus to isFoundryV10PlusPlus (to support checks for Foundry V11)  
 */
 
 
@@ -95,7 +96,7 @@ export class QESheet extends FormApplication {
         let buttons = super._getHeaderButtons();
         let closeButtonIndex = buttons.findIndex(button => button.label === "Close");
         // 1.1.0b: Don't have a Hide button in Foundry v10 and leave the button saying Close (as a replacement) - see Issue #108 for why
-        if (QuickEncounter.isFoundryV10) {return buttons;}
+        if (QuickEncounter.isFoundryV10Plus) {return buttons;}
 
         //0.8.1: Issue #42: closeButtonIndex==-1 if not found
         if ((closeButtonIndex ?? -1) !== -1) {

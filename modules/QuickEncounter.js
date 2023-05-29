@@ -196,7 +196,7 @@
 25-Apr-2022     1.0.2a: Issue 88: Alt- and Ctrl- accelerators should work with the Run Instant Encounter button 
                 Override the click and submit so we can pass the event (and eventually determine if Ctrl- or Alt- were used)  
 5-May-2022      1.0.3a: First cuts for Foundry v10
-                init(): Set QuickEncounters.isFoundryV10; extractActors(): look for content-link (changed from entity-link) and other changes
+                init(): Set QuickEncounters.isFoundryV10Plus; extractActors(): look for content-link (changed from entity-link) and other changes
                 1.0.3b: generateFullExtractedActorTokenData(): Yet another way to strip tokenData of prototype information so it can be duplicated
 8-Aug-2022      1.0.4b: generateFullExtractedActorTokenData(): Under Foundry v10 skip new TokenDocument() call because Actor.getTokenData() already returns a TokenDocument
                 1.0.4c: Issue #92: Foundry v10 Testing 3 (Build 277): A QE is no longer generated from a Journal Entry with embedded Actors
@@ -247,6 +247,7 @@
                 run() Defer checking for journalEntryMapNote and then add findMapNoteForJE to check both JE and possibly parent (if it was a JEPage)
 21-Apr-2023     1.1.4d: Fixed #130: findQuickEncounter() now does a cascade of checks: open QE, open/displayed Journal Page Sheet, then Journal Entry Page currently displayed in the JE
                 Also changed to pass back JE rather than sheet, and QuickEncounter.link() changed accordingly
+29-May-2023     1.1.5b: Changed isFoundryV10Plus to isFoundryV10PlusPlus (to support checks for Foundry V11)                
 */
 
 
@@ -481,8 +482,8 @@ export class QuickEncounter {
         //0.9.5 Set the QuickEncounter.isFoundryV8Plus variable for different code-paths
         //If v9, then game.data.version will throw a deprecation warning so test for v9 first
         QuickEncounter.isFoundryV8Plus = (game.data.release?.generation >= 9) || (game.data.version?.startsWith("0.8"));
-        //1.0.3a: For Foundry v10
-        QuickEncounter.isFoundryV10 = (game.data.release?.generation === 10);
+        //1.0.3a: For Foundry v10 and 1.1.5b for Foundry v11
+        QuickEncounter.isFoundryV10Plus = (game.data.release?.generation >= 10);
     }
 
 
@@ -539,7 +540,7 @@ export class QuickEncounter {
         let controlledNonFriendlyTokens;
         let controlledFriendlyTokens;
         //1.0.4l: .data is deprecated in v10
-        if (QuickEncounter.isFoundryV10) {
+        if (QuickEncounter.isFoundryV10Plus) {
             controlledNonFriendlyTokens = controlledTokens?.filter(t => t.document.disposition !== FRIENDLY_TOKEN_DISPOSITIONS );
             controlledFriendlyTokens = controlledTokens?.filter(t => t.document.disposition === FRIENDLY_TOKEN_DISPOSITIONS );
         } else {
@@ -552,7 +553,7 @@ export class QuickEncounter {
         //0.9.6b: Switch to using canvas.foreground and canvas.background because Tile.layer doesn't exist in Foundry 9
         //1.0.4l: Foundry v10 has controlled array like tokens
         let controlledTiles;
-        if (QuickEncounter.isFoundryV10) {
+        if (QuickEncounter.isFoundryV10Plus) {
             controlledTiles = Array.from(canvas.tiles?.controlled); 
         } else {
             controlledTiles = Array.from(canvas.foreground.controlled);
@@ -584,7 +585,7 @@ export class QuickEncounter {
             const candidateJEorQE = QuickEncounter.findQuickEncounter.call(this); 
             const openQuickEncounter = (candidateJEorQE instanceof QuickEncounter ) ? candidateJEorQE : null;
             const openJournalEntry = (  (candidateJEorQE instanceof JournalEntry ) || 
-                                        (QuickEncounter.isFoundryV10 && (candidateJEorQE instanceof JournalEntryPage))
+                                        (QuickEncounter.isFoundryV10Plus && (candidateJEorQE instanceof JournalEntryPage))
                                     ) ? candidateJEorQE : null;
 
             //Existing Quick Encounter: Ask whether to run, add new assets, or create one from scratch
@@ -665,7 +666,7 @@ export class QuickEncounter {
         let journalEntry = await JournalEntry.create(journalData, {activate: false});
         let qeJournalEntry = journalEntry; //the Journal Entry or JournalEntryPage we will store the QE with
         //1.0.4l: In Foundry v10, we want to make this the first JournalEntryPage
-        if (QuickEncounter.isFoundryV10) {
+        if (QuickEncounter.isFoundryV10Plus) {
             const journalEntryPage0 = journalEntry.pages?.values()?.next()?.value;
             if (journalEntryPage0) {qeJournalEntry = journalEntryPage0;}
         }
@@ -715,7 +716,7 @@ export class QuickEncounter {
             //0.6.2: If we don't already have coords, then use the tokens we just added
             //0.7.0d: Set QE coords (where tokens are generated around)
             if (!this.coords) {
-                if (QuickEncounter.isFoundryV10) {
+                if (QuickEncounter.isFoundryV10Plus) {
                     this.coords = {x: controlledTokens[0].document.x, y: controlledTokens[0].document.y}
                 } else {
                     this.coords = {x: controlledTokens[0].data.x, y: controlledTokens[0].data.y}
@@ -726,7 +727,7 @@ export class QuickEncounter {
         if (controlledTiles?.length) {
             //0.7.0d: Set QE coords if not already set
             if (!this.coords) {
-                if (QuickEncounter.isFoundryV10) {
+                if (QuickEncounter.isFoundryV10Plus) {
                     this.coords = {x: controlledTiles[0].document.x, y: controlledTiles[0].document.y}
                 } else {
                     this.coords = {x: controlledTiles[0].data.x, y: controlledTiles[0].data.y}
@@ -746,7 +747,7 @@ export class QuickEncounter {
         //Add the new tokens to the existing ones (or creates new ones)
         //Use tokenData because tokens is too deep to store in flags
         let controlledTokensData;
-        if (QuickEncounter.isFoundryV10) {
+        if (QuickEncounter.isFoundryV10Plus) {
             //1.0.4l: "data" replaced by "document" object
             controlledTokensData = controlledTokens.map(ct => {return ct.document.toObject()});
         } else if (QuickEncounter.isFoundryV8Plus) {
@@ -899,7 +900,7 @@ export class QuickEncounter {
         if (Object.keys(ui.windows).length !== 0) {
             let openJournalSheet = null;
             //1.1.4 FoundryV10 - look at the JournalPage children of each JournalSheet for a QuickEncounter
-            if (QuickEncounter.isFoundryV10) {
+            if (QuickEncounter.isFoundryV10Plus) {
                 //1.1.4d Look for any open QESheet firstly (if you have multiple, you'll get "the first" one)
                 for (let w of Object.values(ui.windows)) {
                     if (w instanceof QESheet) {return w.object;}
@@ -1014,7 +1015,7 @@ export class QuickEncounter {
             dataType : "data-entity",
             dataID : "data-id"
         }
-        if (QuickEncounter.isFoundryV10) {
+        if (QuickEncounter.isFoundryV10Plus) {
             searchTerms = {
                 class : ".content-link",
                 dataType : "data-type",
@@ -1380,7 +1381,7 @@ export class QuickEncounter {
                     //0.8.2a: Per foundry.js#40276 use Actor.getTokenData (does handle token wildcarding)
                     //1.0.4b: Per https://github.com/foundryvtt/foundryvtt/issues/7766, getTokenData now returns a TokenDocument directly
                     let tempTokenData;
-                    if (QuickEncounter.isFoundryV10) {
+                    if (QuickEncounter.isFoundryV10Plus) {
                         //1.0.3b: .data is now merged into the object itself, so we have to strip off the prototype information 
                         //1.0.4b: And tempTokenData is actually a TokenDocument itself
                         tempTokenData = await actor.getTokenDocument(tokenData);
@@ -1598,7 +1599,7 @@ export class QuickEncounter {
         let hostileNPCCombatants;
         let defeatedHostileNPCCombatants; 
         //1.1.1 Check for Foundry 10
-        if (QuickEncounter.isFoundryV10) {
+        if (QuickEncounter.isFoundryV10Plus) {
             hostileNPCCombatants = combat.turns?.filter(t => ((t.token?.disposition === CONST.TOKEN_DISPOSITIONS.HOSTILE) && (!t.actor || !t.players?.length)));
             defeatedHostileNPCCombatants = combat.turns?.filter(t => (t.defeated &&
                                                             (t.token?.disposition === CONST.TOKEN_DISPOSITIONS.HOSTILE) && (!t.actor || !t.players?.length)));
@@ -1671,7 +1672,7 @@ export class QuickEncounter {
     static getActorXP(actor) {
         if ((game.system.id !== "dnd5e") || !actor) {return null;}
         try {
-            if (QuickEncounter.isFoundryV10) {
+            if (QuickEncounter.isFoundryV10Plus) {
                 return actor.system?.details?.xp?.value;
             } else {
                 return actor.data?.data?.details?.xp?.value;
@@ -1700,7 +1701,7 @@ export class QuickEncounter {
                 const actor = game.actors.get(eActor.actorID);
                 const actorXP = QuickEncounter.getActorXP(actor);
                 //Only include non-character tokens in XP
-                if (actorXP && ((QuickEncounter.isFoundryV10 && (actor.type === "npc")) || (actor.data.type === "npc"))) {
+                if (actorXP && ((QuickEncounter.isFoundryV10Plus && (actor.type === "npc")) || (actor.data.type === "npc"))) {
                     if (!totalXP) {totalXP = 0;}
                     //Allow for numActors being a roll (e.g. [[/r 1d4]]) in which case we ignore the XP
                     //although we probably should provide a range or average
@@ -1724,7 +1725,7 @@ export class QuickEncounter {
         //0.7.3: Add a Show QE button if this JE has a Quick Encounter and showQEAutomatically is false OR the QE has been hidden
         const quickEncounter = QuickEncounter.extractQuickEncounter(journalSheet);
         //1.1.0b: Issue #108 (https://github.com/spetzel2020/quick-encounters/issues/108) - hack solution to always show the Show button in Foundry 10
-        const displayShowQEButton = QuickEncounter.isFoundryV10 || !game.settings.get(QE.MODULE_NAME,"showQEAutomatically") || quickEncounter?.hideQE;
+        const displayShowQEButton = QuickEncounter.isFoundryV10Plus || !game.settings.get(QE.MODULE_NAME,"showQEAutomatically") || quickEncounter?.hideQE;
         //If this is an inferred QE (from the presence of Actors), quickEncounter=null because the the journalSheet HTML hasn't been built yet
         if (displayShowQEButton) {
             buttons.unshift({
@@ -1734,7 +1735,7 @@ export class QuickEncounter {
                 icon: "fas fa-swords",
                 onclick: async ev => {
                     // 1.1.0b: If Foundry v10 then show all QEs 
-                    if (QuickEncounter.isFoundryV10) {
+                    if (QuickEncounter.isFoundryV10Plus) {
                         for (let journalEntryPageId of journalSheet.object?.pages?.keys()) {
                             const journalPageSheet = journalSheet.getPageSheet(journalEntryPageId);
                             //Also reset the hide toggle (because otherwise this will never show automatically)
@@ -1763,7 +1764,7 @@ export class QuickEncounter {
     /* Hook on renderJournalSheet */
     static async onRenderJournalSheet(journalSheet, html) {
         //1.0.4e: In Foundry v10 we hook on JournalPageSheet (and inherit the Journal setting if present)
-        if (!game.user.isGM || QuickEncounter.isFoundryV10) {return;}
+        if (!game.user.isGM || QuickEncounter.isFoundryV10Plus) {return;}
 
         //v0.5.0 If this could be a Quick Encounter, add the button at the top and the total XP
         //v0.5.3 Remove any existing versions of this first before recomputing it - limit to 5 checks just in case
@@ -1785,7 +1786,7 @@ export class QuickEncounter {
     static async onRenderJournalPageSheet(journalPageSheet, html) {
         //Should never get into onRenderJournalPageSheet unless v10 but test anyway
         //1.0.5g: Suppress this hook if this an editor window (because that duplicates the QE, and incorrectly)
-        if (!game.user.isGM || journalPageSheet?.isEditable || !QuickEncounter.isFoundryV10) {return;}  
+        if (!game.user.isGM || journalPageSheet?.isEditable || !QuickEncounter.isFoundryV10Plus) {return;}  
         /* 1.0.4e: To handle new (Foundry v10) and pre-multi-page Journals we check:
             1. Is there an embedded Quick Encounter in the Journal Page Sheet
             2. Is there an embedded Quick Encounter in the parent Journal Sheet
@@ -1870,7 +1871,7 @@ export class QuickEncounter {
 
         //0.7.3 OPen the QE automatically (default) in general unless you have hidden it
         let showQEDialog;
-        if (QuickEncounter.isFoundryV10) {
+        if (QuickEncounter.isFoundryV10Plus) {
             //1.1.0b: No per QE Hide ability in Foundry V10
             showQEDialog = game.settings.get(QE.MODULE_NAME, "showQEAutomatically");
         } else {
@@ -2003,8 +2004,8 @@ Hooks.on('closeJournalSheet', async (journalSheet, html) => {
     }
 
     //v1.0.5e: Close open Journal Page Sheet QEs - for some reason the journalEntryPage.sheet is not updated so we have to use the getPageSheet() method
-    //v1.0.7a: Check for isFoundryV10
-    if (QuickEncounter.isFoundryV10) {
+    //v1.0.7a: Check for isFoundryV10Plus
+    if (QuickEncounter.isFoundryV10Plus) {
         for (let journalEntryPageId of journalEntry.pages?.keys()) {
             const journalPageSheet = journalSheet.getPageSheet(journalEntryPageId);
             if (journalPageSheet?.qeDialog) {
