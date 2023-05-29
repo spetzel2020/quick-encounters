@@ -41,13 +41,13 @@
             {{#each tilesData}}
                 <div class="flexrow">
                     <div class="tile-container">
-                        <img class='actor-portrait' title="{{localize 'QE.QuickEncounterDialog.Remove'  name=''}}" src="{{this.img}}" id="{{@index}}"/>
+                        <img class='actor-portrait' title="{{localize 'QE.QuickEncounterDialog.Remove'  name=''}}" src="{{this.texture.src}}" id="{{@index}}"/>
                         <div class="actor-subtract">
                             <i class="fas fa-minus" title="{{localize 'QE.QuickEncounterDialog.Remove' name=''}}" id="{{@index}}"></i>
                         </div>
                     </div>
                     <div class="flexrow">
-                        <span>{{this.name}}</span>
+                        <span>{{this.texture.src}}</span>
                     </div>
                 </div>
             {{/each}}
