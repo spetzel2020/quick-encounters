@@ -5,6 +5,7 @@
 - Fixed [#118](https://github.com/spetzel2020/quick-encounters/issues/118)
 - Fixed [#70](https://github.com/spetzel2020/quick-encounters/issues/70)
 ### 1.1.5
+- Fixed [#131] (https://github.com/spetzel2020/quick-encounters/issues/131)
 - Fixed [#132] (https://github.com/spetzel2020/quick-encounters/issues/132)
 - Fixed [#134] (https://github.com/spetzel2020/quick-encounters/issues/134)
 ### 1.1.4
