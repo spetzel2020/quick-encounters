@@ -248,6 +248,7 @@
 21-Apr-2023     1.1.4d: Fixed #130: findQuickEncounter() now does a cascade of checks: open QE, open/displayed Journal Page Sheet, then Journal Entry Page currently displayed in the JE
                 Also changed to pass back JE rather than sheet, and QuickEncounter.link() changed accordingly
 29-May-2023     1.1.5b: Changed isFoundryV10Plus to isFoundryV10PlusPlus (to support checks for Foundry V11)                
+                1.1.5c: async run(): For Foundry v10+, switch back to canvas.tiles.activate()
 */
 
 
@@ -482,7 +483,7 @@ export class QuickEncounter {
         //0.9.5 Set the QuickEncounter.isFoundryV8Plus variable for different code-paths
         //If v9, then game.data.version will throw a deprecation warning so test for v9 first
         QuickEncounter.isFoundryV8Plus = (game.data.release?.generation >= 9) || (game.data.version?.startsWith("0.8"));
-        //1.0.3a: For Foundry v10 and 1.1.5b for Foundry v11
+        //1.0.3a: For Foundry v10 and 1.1.5b for Foundry 
         QuickEncounter.isFoundryV10Plus = (game.data.release?.generation >= 10);
     }
 
@@ -1198,7 +1199,12 @@ export class QuickEncounter {
         },200);
 
         if (savedTilesData) {
-            if (QuickEncounter.isFoundryV8Plus) {   
+            //1.1.5c Switch back to single activation of Tiles layer
+            if (QuickEncounter.isFoundryV10Plus) {
+                canvas.tiles.activate();
+                await this.createTiles(savedTilesData, shift, options);
+            }
+            else if (QuickEncounter.isFoundryV8Plus) {   
                 //0.8.2b: Activate foreground/background
                 const savedBackgroundTilesData = savedTilesData.filter(std => std.layer === "background");
                 if (savedBackgroundTilesData.length) {
