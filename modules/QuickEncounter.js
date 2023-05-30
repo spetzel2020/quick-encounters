@@ -250,6 +250,7 @@
 29-May-2023     1.1.5b: Changed isFoundryV10Plus to isFoundryV10PlusPlus (to support checks for Foundry V11)                
                 1.1.5c: async run(): For Foundry v10+, switch back to canvas.tiles.activate()
                 1.1.5e: Fixed #135: generateFullExtractedActorTokenData() now rounds random coordinates (to avoid a Model Validation error)
+                1.1.5f: Fixed deprecation warning for mapNote.data
 */
 
 
@@ -1145,7 +1146,8 @@ export class QuickEncounter {
                 EncounterNote.noMapNoteDialog(this, event, options);
                 return;
             }
-            this.sourceNoteData = mapNote?.data;
+            //1.1.5f: Fix deprecation warning in Foundry v10+
+            this.sourceNoteData = QuickEncounter.isFoundryV10Plus ? mapNote?.document : mapNote?.data;
         }
 
         //v0.6.13 If sourceNote != originalNote, then translate the savedTokens
