@@ -269,12 +269,26 @@ export class EncounterNote {
     }
 
     //1.0.2c: Changed to sync operation (only called if there is no map note when you run)
-    static noMapNoteDialog(quickEncounter) {
+    static noMapNoteDialog(quickEncounter, event, options) {
         Dialog.confirm({
             title: game.i18n.localize("QE.NoMapNote.TITLE"),
             content : game.i18n.localize("QE.NoMapNote.CONTENT"),
             yes : () => {
-                EncounterNote.place(quickEncounter, {placeDefault : true});
+                //1.1.5e: Place a default MapNote and then call run() again
+                EncounterNote.place(quickEncounter, {placeDefault : true}).then(() => {
+                    //New approach - just pop up a prompt dialog
+                    EncounterNote.dialogPrompt({
+                        title: game.i18n.localize("QE.CreatedMapNote.TITLE"),
+                        content: game.i18n.localize("QE.CreatedMapNote.CONTENT"),
+                        label: "",
+                        options: {
+                            top: window.innerHeight - 350,
+                            left: window.innerWidth - 720,
+                            width: 400,
+                            jQuery: false
+                        }
+                    });
+                });
                 return true;
             }
         });

@@ -249,6 +249,7 @@
                 Also changed to pass back JE rather than sheet, and QuickEncounter.link() changed accordingly
 29-May-2023     1.1.5b: Changed isFoundryV10Plus to isFoundryV10PlusPlus (to support checks for Foundry V11)                
                 1.1.5c: async run(): For Foundry v10+, switch back to canvas.tiles.activate()
+                1.1.5e: Fixed #135: generateFullExtractedActorTokenData() now rounds random coordinates (to avoid a Model Validation error)
 */
 
 
@@ -1137,6 +1138,13 @@ export class QuickEncounter {
                     mapNote = await this.findMapNoteForJE(noteJournalEntry.parent);
                 }
             }
+            //1.1.5e If the above fails, then we need to offer to create a mapNote and then rerun this
+            if (!mapNote) {
+                //If there isn't a Map Note on any scene, prompt to create one in the center of the view
+                //and then prompt to rerun the Run QE
+                EncounterNote.noMapNoteDialog(this, event, options);
+                return;
+            }
             this.sourceNoteData = mapNote?.data;
         }
 
@@ -1228,20 +1236,14 @@ export class QuickEncounter {
     async findMapNoteForJE(journalEntry) {
         if (!journalEntry) {return;}
         //0.6.13 If we have clickedNote specified we know we're in the right scene (the QE was opened by double-clicking the Map Note, rather than from the JE)
-        let mapNote = journalEntry.clickedNote;
-        if (mapNote) {return mapNote;}
+        //1.1.5e: Simplify
+        if (journalEntry.clickedNote) {return journalEntry.clickedNote;}
 
         //Otherwise get the correct scene (which might not be the one we're in)
         // Switch to the correct scene if confirmed
         let qeScene = EncounterNote.getEncounterScene(journalEntry);
+        //1.1.5e: Removed the creation of a new Map Note here, because we want to check whether the parent has it
 
-        if (!qeScene) {
-            //If there isn't a Map Note on any scene, prompt to create one in the center of the view
-            EncounterNote.noMapNoteDialog(this);
-            //Try again now that it should have a scene if you responded yes
-            //This step is being skipped (see Issue #83)
-            qeScene = EncounterNote.getEncounterScene(journalEntry);
-        }
         const isPlaced = await EncounterNote.mapNoteIsPlaced(qeScene, journalEntry);
         if (!isPlaced ) {return;}
         //Something is desperately wrong if this is null
@@ -1374,10 +1376,11 @@ export class QuickEncounter {
 
              for (let iToken=0; iToken < numActors; iToken++) {
                  //Slightly vary the (x,y) coords so we don't pile all the tokens on top of each other and make them hard to find
+                 //1.1.5e: Round the coordinates to integers (because otherwise we get a Model validation error)
                 let tokenData = {
                     name : eActor.name,
-                    x: coords.x + (Math.random() * 2*gridSize) - gridSize, //adjust position within +/- full grid increment,
-                    y: coords.y + (Math.random() * 2*gridSize) - gridSize, //adjust position within +/- full grid increment,
+                    x: coords.x + Math.round((Math.random() * 2*gridSize) - gridSize), //adjust position within +/- full grid increment,
+                    y: coords.y + Math.round((Math.random() * 2*gridSize) - gridSize), //adjust position within +/- full grid increment,
                     hidden: true
                 }
                 //Use the prototype token from the Actors

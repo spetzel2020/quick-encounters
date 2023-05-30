@@ -25,6 +25,8 @@
   "QE.NoMapNote.CONTENT" : "There's no Map Note to place this Quick Encounter around. Do you want to create a default Note in the center of your view?",
   "QE.NoMapNote.YES" : "Create a Map Note",
   "QE.NoMapNote.NO" : "I'll do it myself",
+  "QE.CreatedMapNote.TITLE": "Created Quick Encounter Map Note",
+  "QE.CreatedMapNote.CONTENT": "Created a default Map Note; please check placement and rerun the Quick Encounter",
   "QE.IncludeFriendlies.TITLE" : "Include selected Friendlies?",
   "QE.IncludeFriendlies.CONTENT" : "You selected Friendly tokens - do you want to include them in the Quick Encounter?",
   "QE.AddToQuickEncounter.TITLE": "Add to open Quick Encounter?",
