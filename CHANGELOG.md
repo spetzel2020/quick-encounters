@@ -4,6 +4,8 @@
 - Fixed [#117](https://github.com/spetzel2020/quick-encounters/issues/117): Missing i18n tags
 - Fixed [#118](https://github.com/spetzel2020/quick-encounters/issues/118)
 - Fixed [#70](https://github.com/spetzel2020/quick-encounters/issues/70)
+### 1.1.6
+- Fixed [#119] (https://github.com/spetzel2020/quick-encounters/issues/119)
 ### 1.1.5
 - Fixed [#83] (https://github.com/spetzel2020/quick-encounters/issues/83)
 - Fixed [#131] (https://github.com/spetzel2020/quick-encounters/issues/131)
