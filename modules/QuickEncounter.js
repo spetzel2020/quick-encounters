@@ -251,6 +251,7 @@
                 1.1.5c: async run(): For Foundry v10+, switch back to canvas.tiles.activate()
                 1.1.5e: Fixed #135: generateFullExtractedActorTokenData() now rounds random coordinates (to avoid a Model Validation error)
                 1.1.5f: Fixed deprecation warning for mapNote.data
+3-Jul-2023      1.2.0a: Milestone 1.2                
 */
 
 
@@ -259,7 +260,7 @@ import {QESheet} from './QESheet.js';
 
 export const QE = {
     MODULE_NAME : "quick-encounters",
-    MODULE_VERSION : "1.1.5",
+    MODULE_VERSION : "1.2.0",
     TOKENS_FLAG_KEY : "tokens",
     QE_JSON_FLAG_KEY : "quickEncounter",
     ACTOR : "Actor"

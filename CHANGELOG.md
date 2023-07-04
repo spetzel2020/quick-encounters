@@ -1,4 +1,7 @@
 # RELEASE NOTES
+## 1.2
+- Milestone 1.2
+
 ## 1.1
 - New features: Add a default folder for new QEs: [#94](https://github.com/spetzel2020/quick-encounters/issues/94), Add Actor RollTables from Journal Entries: [#40](https://github.com/spetzel2020/quick-encounters/issues/40) 
 - Fixed [#117](https://github.com/spetzel2020/quick-encounters/issues/117): Missing i18n tags
