@@ -251,7 +251,8 @@
                 1.1.5c: async run(): For Foundry v10+, switch back to canvas.tiles.activate()
                 1.1.5e: Fixed #135: generateFullExtractedActorTokenData() now rounds random coordinates (to avoid a Model Validation error)
                 1.1.5f: Fixed deprecation warning for mapNote.data
-3-Jul-2023      1.2.0a: Milestone 1.2                
+3-Jul-2023      1.2.0a: Milestone 1.2
+8-Aug-2023      1.2.0b: Issue 123: Automatically add Player Tokens to Combat Tracker - add option                
 */
 
 
@@ -478,6 +479,21 @@ export class QuickEncounter {
             config: true,
             default: false,
             type: Boolean
+        });
+        //v1.2.0 Automatically add player tokens to Combat Tracker
+        game.settings.register(QE.MODULE_NAME, "addPlayerTokensToCT", {
+            name: "QE.Setting.AddPlayerTokensToCombatTracker.NAME",
+            hint: "QE.Setting.AddPlayerTokensToCombatTracker.HINT",
+            scope: "world",
+            config: true,
+            type: String,
+            choices: {
+                "no":"QE.Setting.AddPlayerTokensToCombatTracker.OPTION.No",
+                "all": "QE.Setting.AddPlayerTokensToCombatTracker.OPTION.All",
+                "loggedIn": "QE.Setting.AddPlayerTokensToCombatTracker.OPTION.LoggedIn",
+                "inScene" : "QE.Setting.AddPlayerTokensToCombatTracker.OPTION.InScene" 
+            },
+            default: "no"
         });
 
         //0.6.13 Initialize which Note you are hovering over
