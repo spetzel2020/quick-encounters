@@ -96,7 +96,7 @@
   "QE.Notification.SelectTokensOrTiles.WARN" : "Please select some tokens or tiles to add to the Quick Encounter",
   "QE.Notification.FolderNotFound.WARN": "Folder {defaultFolderName} was not found; please create it first",
   "QE.Setting.AddPlayerTokensToCombatTracker.NAME" : "Add Player Tokens to CT",
-  "QE.Setting.AddPlayerTokensToCombatTracker.HINT" : "Add Player Tokens to Combat Tracker automatically when you run the Quick Encounter. Options are No (default), Logged In, or In Scene",
+  "QE.Setting.AddPlayerTokensToCombatTracker.HINT" : "Add Player Tokens to Combat Tracker automatically when you run the Quick Encounter. Options are No (default), All (all players, including those not logged in), Logged In, or In Scene",
   "QE.Setting.AddPlayerTokensToCombatTracker.OPTION.No" : "No",
   "QE.Setting.AddPlayerTokensToCombatTracker.OPTION.All" : "All",
   "QE.Setting.AddPlayerTokensToCombatTracker.OPTION.LoggedIn" : "Logged In",
