@@ -1545,13 +1545,23 @@ export class QuickEncounter {
         const addPlayerTokensToCT = game.settings.get(QE.MODULE_NAME, "addPlayerTokensToCT");
         if (["inScene", "loggedIn"].includes(addPlayerTokensToCT)) {
             //Get scene tokens (documents) that are associated with players
-            const playerTokens = canvas.tokens.placeables.filter(t => t.actor?.hasPlayerOwner === true).map(t => {
+            let playerTokens = canvas.tokens.placeables.filter(t => t.actor?.hasPlayerOwner === true).map(t => {
                 const tokenDocument = t.document;
                 tokenDocument.addToCombatTracker = true;    //have to set this because non-player tokens can be selectively added
                 return tokenDocument;
             });
             if ("loggedIn" === addPlayerTokensToCT) {
-                //filter the playerTokens for only those logged-in
+                //To filter the playerTokens for only those logged-in:
+                //Get the list of "active users": game.users.filter(u => u.active === true)
+                //Look at playerTokens.filter(pt => pt.actor.ownership) and see if any active users have Owner permission (CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER)
+                const activeUsers = game.users.filter(u => u.active === true);
+                playerTokens = playerTokens.filter(pt => {
+                    for (const [actorUUID, ownershipLevel] of Object.entries(pt.actor.ownership)) {
+                        const isActive = game.users.get(actorUUID)?.active;
+                        if (isActive && (ownershipLevel >= CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER)) {return true;}
+                    }
+                    return false;
+                });
             }
             encounterTokens = encounterTokens.concat(playerTokens);
         }
