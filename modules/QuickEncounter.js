@@ -252,7 +252,8 @@
                 1.1.5e: Fixed #135: generateFullExtractedActorTokenData() now rounds random coordinates (to avoid a Model Validation error)
                 1.1.5f: Fixed deprecation warning for mapNote.data
 3-Jul-2023      1.2.0a: Milestone 1.2
-8-Aug-2023      1.2.0b: Issue 123: Automatically add Player Tokens to Combat Tracker - add option                
+8-Aug-2023      1.2.0b: Issue 123: Automatically add Player Tokens to Combat Tracker - add option    
+16-Aug-2023     1.2.0d: Removed "All" option because I don't know what it means (it would imply creating tokens for all players who weren't already in the scene)            
 */
 
 
@@ -489,9 +490,8 @@ export class QuickEncounter {
             type: String,
             choices: {
                 "no":"QE.Setting.AddPlayerTokensToCombatTracker.OPTION.No",
-                "all": "QE.Setting.AddPlayerTokensToCombatTracker.OPTION.All",
-                "loggedIn": "QE.Setting.AddPlayerTokensToCombatTracker.OPTION.LoggedIn",
-                "inScene" : "QE.Setting.AddPlayerTokensToCombatTracker.OPTION.InScene" 
+                "inScene" : "QE.Setting.AddPlayerTokensToCombatTracker.OPTION.InScene", 
+                "loggedIn": "QE.Setting.AddPlayerTokensToCombatTracker.OPTION.LoggedIn"
             },
             default: "no"
         });
@@ -1217,7 +1217,7 @@ export class QuickEncounter {
             alt : event?.altKey, 
             ctrl: event?.ctrlKey
         }
-        //0.9.3d: encounterTokens is both created tokens and existing tokens left and not deleted
+        //0.9.3d: encounterTokens is both created tokens and existing tokens left and not deleted (1.2.0d: including possibly player tokens )
         const encounterTokens = await this.createTokens(tokenOptions);
 
         //And add them to the Combat Tracker (wait 200ms for drawing to finish)
@@ -1506,11 +1506,11 @@ export class QuickEncounter {
         }
 
         //And Token.create unfortunately returns an element, not an array if you pass a length=1 array
-        let createdTokens;
+        let encounterTokens;
         if (tempCreatedTokens.length === 0) {
-            createdTokens = []; //No tokens were created (perhaps because they all exist on the scene)
+            encounterTokens = []; //No tokens were created (perhaps because they all exist on the scene)
         } else {
-            createdTokens = Array.isArray(tempCreatedTokens) ? tempCreatedTokens : [tempCreatedTokens];
+            encounterTokens = Array.isArray(tempCreatedTokens) ? tempCreatedTokens : [tempCreatedTokens];
         }
 
 
@@ -1529,20 +1529,35 @@ export class QuickEncounter {
                 try {
                     //0.9.1b: Update back to the original data (in case it was changed by TokenMold or other)
                     //1.0.5b: If there are no updates then update() returns the (empty) list of changes leaving createdTokens[i] undefined
-                    await createdTokens[i].update(origCombinedTokensData[i]);
+                    await encounterTokens[i].update(origCombinedTokensData[i]);
                 } catch {}
             }
             //0.9.3d Remember if we should/shouldn't add to Combat Tracker
             //FIX: This doesn't handle if any of the token creations fail - to do that we would have to handle token creation individually
-            createdTokens[i].addToCombatTracker = origCombinedTokensData[i].addToCombatTracker;
+            encounterTokens[i].addToCombatTracker = origCombinedTokensData[i].addToCombatTracker;
         }
 
         //0.9.3d Fixed: We can't add the existing tokens until we've taken care of the reset against origCombinedTokensData[] (=toCreateCombinedTokensData[])
         //0.9.0e: Add back the QE tokens already on the scene
-        createdTokens = createdTokens.concat(existingTokens);
+        encounterTokens = encounterTokens.concat(existingTokens);
 
-        return createdTokens;
-    }
+        //1.2.0d: See if we are meant to add Player tokens; doing in createTokens() here because of the (future) possibility we might create player tokens
+        const addPlayerTokensToCT = game.settings.get(QE.MODULE_NAME, "addPlayerTokensToCT");
+        if (["inScene", "loggedIn"].includes(addPlayerTokensToCT)) {
+            //Get scene tokens (documents) that are associated with players
+            const playerTokens = canvas.tokens.placeables.filter(t => t.actor?.hasPlayerOwner === true).map(t => {
+                const tokenDocument = t.document;
+                tokenDocument.addToCombatTracker = true;    //have to set this because non-player tokens can be selectively added
+                return tokenDocument;
+            });
+            if ("loggedIn" === addPlayerTokensToCT) {
+                //filter the playerTokens for only those logged-in
+            }
+            encounterTokens = encounterTokens.concat(playerTokens);
+        }
+
+        return encounterTokens;
+    }//end async createTokens()
 
     async createTiles(savedTilesData, shift={x:0, y:0}, options=null) {
         if (!savedTilesData?.length) {return;}
