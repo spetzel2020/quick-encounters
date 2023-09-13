@@ -2,6 +2,9 @@
 ![Forge Installs](https://img.shields.io/badge/dynamic/json?label=Forge%20Installs&query=package.installs&suffix=%25&url=https%3A%2F%2Fforge-vtt.com%2Fapi%2Fbazaar%2Fpackage%2Fquick-encounters&colorB=4aa94a)
 
 # Quick Encounters
+## 1.2
+* New feature: [#123](https://github.com/spetzel2020/quick-encounters/issues/123): New option to automatically add Player Tokens to the Combat Tracker
+* Compatible with Foundry v9 - v11
 ## 1.1
 * New features: Default folder for Quick Encounters (Issue #94), Add Actor RollTables from Journal Entries (Issue #40) - see new Settings
 * Bugs fixed: See [Release Notes](https://github.com/spetzel2020/quick-encounters/blob/master/CHANGELOG.md)
@@ -12,8 +15,8 @@
 * Instant Encounters: Enable the new Setting, then you can drag your Quick Encounter directly from Journals to the Scene and be prompted to run it immediately! Perfect for Random or Wandering Encounters.
 
 * **Author**: Spetzel#0103
-* **Version**: 1.1.5
-* **Foundry VTT Compatibility**: 9-10
+* **Version**: 1.2.1 
+* **Foundry VTT Compatibility**: 9-11
 * **System Compatibility (If applicable)**: All; additional features for dnd5e
 * **Translation Support**: en, es (thanks [lozalojo!](https://github.com/lozalojo)), ja (thanks "touge"!), de (thanks @Fallayn#6414), it (thanks [riccisi](https://github.com/riccisi))
 
