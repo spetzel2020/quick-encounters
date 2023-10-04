@@ -253,7 +253,8 @@
                 1.1.5f: Fixed deprecation warning for mapNote.data
 3-Jul-2023      1.2.0a: Milestone 1.2
 8-Aug-2023      1.2.0b: Issue 123: Automatically add Player Tokens to Combat Tracker - add option    
-16-Aug-2023     1.2.0d: Removed "All" option because I don't know what it means (it would imply creating tokens for all players who weren't already in the scene)            
+16-Aug-2023     1.2.0d: Removed "All" option because I don't know what it means (it would imply creating tokens for all players who weren't already in the scene) 
+3-Oct-2023      1.2.1c: Changed code for "Add Player Tokens option Logged In" - thanks "DrMcCoy"
 */
 
 
@@ -1552,13 +1553,12 @@ export class QuickEncounter {
             });
             if ("loggedIn" === addPlayerTokensToCT) {
                 //To filter the playerTokens for only those logged-in:
-                //Get the list of "active users": game.users.filter(u => u.active === true)
-                //Look at playerTokens.filter(pt => pt.actor.ownership) and see if any active users have Owner permission (CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER)
-                const activeUsers = game.users.filter(u => u.active === true);
+                //Get the list of "active users": game.users.filter(u => u.active === true); also filter out the GM-user
+                //1.2.1c: Thanks to "DrMcCoy"; Look at playerTokens.filter(pt => pt.actor) and see which actors match the user.character (primary assigned character)
+                const activeUsers = game.users.filter(u => (u.active === true) && (u.role <= CONST.USER_ROLES.TRUSTED));
                 playerTokens = playerTokens.filter(pt => {
-                    for (const [actorUUID, ownershipLevel] of Object.entries(pt.actor.ownership)) {
-                        const isActive = game.users.get(actorUUID)?.active;
-                        if (isActive && (ownershipLevel >= CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER)) {return true;}
+                    for (const user of activeUsers) {
+                        if (user.character === pt.actor) {return true;}
                     }
                     return false;
                 });

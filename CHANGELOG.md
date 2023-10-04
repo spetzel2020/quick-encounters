@@ -1,6 +1,8 @@
 # RELEASE NOTES
 ## 1.2
 - New feature: [#123](https://github.com/spetzel2020/quick-encounters/issues/123): New option to automatically add Player Tokens to the Combat Tracker
+### 1.2.1
+- Fixing [#139](https://github.com/spetzel2020/quick-encounters/issues/139)
 ## 1.1
 - New features: Add a default folder for new QEs: [#94](https://github.com/spetzel2020/quick-encounters/issues/94), Add Actor RollTables from Journal Entries: [#40](https://github.com/spetzel2020/quick-encounters/issues/40) 
 - Fixed [#117](https://github.com/spetzel2020/quick-encounters/issues/117): Missing i18n tags
