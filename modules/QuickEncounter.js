@@ -254,7 +254,7 @@
 3-Jul-2023      1.2.0a: Milestone 1.2
 8-Aug-2023      1.2.0b: Issue 123: Automatically add Player Tokens to Combat Tracker - add option    
 16-Aug-2023     1.2.0d: Removed "All" option because I don't know what it means (it would imply creating tokens for all players who weren't already in the scene) 
-3-Oct-2023      1.2.1c: Changed code for "Add Player Tokens option Logged In" - thanks "DrMcCoy"
+3-Oct-2023      1.2.1c: Fixed #139: Changed code for "Add Player Tokens option Logged In" - thanks "DrMcCoy"; filter for those tokens with Actor === user.character (their assigned primary character)
 */
 
 
