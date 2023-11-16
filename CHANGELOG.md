@@ -1,6 +1,8 @@
 # RELEASE NOTES
 ## 1.2
 - New feature: [#123](https://github.com/spetzel2020/quick-encounters/issues/123): New option to automatically add Player Tokens to the Combat Tracker
+### 1.2.2
+- Fixing [#137](https://github.com/spetzel2020/quick-encounters/issues/137) (support more generalized dice rolls)
 ### 1.2.1
 - Fixed [#139](https://github.com/spetzel2020/quick-encounters/issues/139) (filter for playerToken.actor === user.character)
 ## 1.1

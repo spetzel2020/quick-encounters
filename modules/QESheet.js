@@ -43,6 +43,7 @@ Reused as EncounterCompanionSheet
 2-Nov-2022      1.1.1d: Issue #40: Minimal implementation of RollTables - display the RollTable, add support for removing
 14-Nov-2022     1.1.1g: _updateObject(), _onChange(): Check for rollTable changes (e.g. changing number to die roll)
 29-May-2023     1.1.5b: Changed isFoundryV10Plus to isFoundryV10PlusPlus (to support checks for Foundry V11)  
+15-Nov-2023     1.2.2a: Fixed #137: Support more generalized dice rolls by changing dieRollReg check to Roll.validate() in _updateObject()
 */
 
 
@@ -234,7 +235,7 @@ export class QESheet extends FormApplication {
                     //Option 1: You cleared the field or spaced it out
                     if ((numActors === null) || (numActors === "")) {
                         this.object.rollTables[rowNum].numActors = 0;
-                    } else if (dieRollReg.test(numActors)) {
+                    } else if (Roll.validate(numActors)) {
                         //Option 2: This is a dice roll (not guaranteed because it could just contain a dieRoll)
                         this.object.rollTables[rowNum].numActors = numActors;
                     } else if (checkIntReg.test(numActors)) {
@@ -259,7 +260,7 @@ export class QESheet extends FormApplication {
                     //Option 1: You cleared the field or spaced it out
                     if ((numActors === null) || (numActors === "")) {
                         this.combatants[rowNum].numActors = 0;
-                    } else if (dieRollReg.test(numActors)) {
+                    } else if (Roll.validate(numActors)) {
                         //Option 2: This is a dice roll (not guaranteed because it could just contain a dieRoll)
                         this.combatants[rowNum].numActors = numActors;
                     } else if (checkIntReg.test(numActors)) {
