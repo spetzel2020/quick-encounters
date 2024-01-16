@@ -4,6 +4,7 @@
 # Quick Encounters
 ## 1.2
 * New feature: [#123](https://github.com/spetzel2020/quick-encounters/issues/123): New option to automatically add Player Tokens to the Combat Tracker
+* Support more generalized dice rolls see [#137](https://github.com/spetzel2020/quick-encounters/issues/137)
 * Compatible with Foundry v9 - v11
 ## 1.1
 * New features: Default folder for Quick Encounters (Issue #94), Add Actor RollTables from Journal Entries (Issue #40) - see new Settings
